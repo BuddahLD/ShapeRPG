@@ -38,7 +38,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
 
     // Continue game loop
     animationFrameRef.current = requestAnimationFrame(gameLoop);
-  }, [gameEngine, isSlowMotion]);
+  }, [gameEngine, isSlowMotion, player, currentLocation, enemies]);
 
   const renderBackground = (ctx: CanvasRenderingContext2D) => {
     const canvas = canvasRef.current!;
@@ -63,8 +63,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
       ctx.lineWidth = 1;
       
       const gridSize = 50;
-      const offsetX = (-player.x % gridSize);
-      const offsetY = (-player.y % gridSize);
+      const offsetX = (-player.x % gridSize) + gridSize;
+      const offsetY = (-player.y % gridSize) + gridSize;
       
       // Vertical lines
       for (let x = offsetX; x < canvas.width; x += gridSize) {
