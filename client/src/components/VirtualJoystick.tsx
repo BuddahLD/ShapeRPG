@@ -44,8 +44,16 @@ const VirtualJoystick: React.FC = () => {
   const handleStart = useCallback((clientX: number, clientY: number) => {
     if (isDrawingRune) return; // Disable joystick during rune drawing
     
+    // Get joystick center position
+    if (joystickRef.current) {
+      const rect = joystickRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      setTouchStart({ x: centerX, y: centerY });
+      console.log('JOYSTICK START - Center:', centerX.toFixed(1), centerY.toFixed(1), 'Touch:', clientX.toFixed(1), clientY.toFixed(1));
+    }
+    
     setIsDragging(true);
-    setTouchStart({ x: clientX, y: clientY });
   }, [isDrawingRune]);
 
   const handleMove = useCallback((clientX: number, clientY: number) => {
