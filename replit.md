@@ -19,6 +19,28 @@ Shapes RPG: Figureium is a minimalist 2D RPG featuring geometric characters wher
 
 Preferred communication style: Simple, everyday language.
 
+## Development Guidelines
+
+**Core Architecture Principles**:
+- **Separation of Concerns**: All core logic separated from UI components through service layer pattern
+- **SOLID Principles**: Follow single responsibility, open/closed, Liskov substitution, interface segregation, and dependency inversion
+- **KISS Principles**: Keep implementations simple and straightforward, avoid over-engineering
+- **Abstraction**: Use effective abstractions that hide complexity while maintaining flexibility
+- **Zero-Impact Development**: New functionality must have 0% impact on existing logic and UI until explicitly stated
+
+**Code Quality Standards**:
+- **Unit Testing**: All core logic must be comprehensively unit tested with high coverage
+- **Atomic Functions**: Use small, focused functions that are easy to test and reason about
+- **No Global Constants**: Avoid global state and constants, prefer dependency injection and configuration
+- **Senior Practices**: Apply enterprise-grade patterns, proper error handling, and maintainable code structure
+- **Type Safety**: Leverage TypeScript's type system for compile-time error prevention
+
+**Testing Strategy**:
+- Service layer functions must be pure and easily testable
+- Business logic separated from state management for independent testing
+- Comprehensive test coverage for critical systems (chunk loading, combat, spell casting)
+- Mock external dependencies and focus on unit-level testing
+
 # System Architecture
 
 ## Frontend Architecture
