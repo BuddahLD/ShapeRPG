@@ -54,6 +54,32 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
     
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Add grid pattern to show movement
+    if (player) {
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+      ctx.lineWidth = 1;
+      
+      const gridSize = 50;
+      const offsetX = (-player.x % gridSize);
+      const offsetY = (-player.y % gridSize);
+      
+      // Vertical lines
+      for (let x = offsetX; x < canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      
+      // Horizontal lines
+      for (let y = offsetY; y < canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    }
   };
 
   const renderPlayer = (ctx: CanvasRenderingContext2D) => {
@@ -83,11 +109,13 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
     ctx.fillStyle = "#00ff00";
     ctx.fillRect(centerX - healthBarWidth/2, centerY - size/2 - 10, healthBarWidth * healthPercentage, healthBarHeight);
 
-    // Debug: Show player's world coordinates
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "12px Arial";
-    ctx.fillText(`Pos: ${player.x.toFixed(0)}, ${player.y.toFixed(0)}`, 10, canvas.height - 20);
-    ctx.fillText(`Vel: ${player.vx.toFixed(1)}, ${player.vy.toFixed(1)}`, 10, canvas.height - 40);
+    // Show movement indicator
+    if (Math.abs(player.vx) > 0.1 || Math.abs(player.vy) > 0.1) {
+      ctx.fillStyle = "#ffff00";
+      ctx.beginPath();
+      ctx.arc(centerX, centerY - 50, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
   };
 
   const renderEnemies = (ctx: CanvasRenderingContext2D) => {
