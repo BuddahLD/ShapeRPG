@@ -106,26 +106,28 @@ const GameHUD: React.FC = () => {
       {/* Rune Button - Only in combat areas - Modern iOS design */}
       {currentLocation === "LOC_ARENA_1" && (
         <div className="absolute bottom-8 right-8 pointer-events-auto">
-          <button
-            onMouseDown={handleRuneButtonPress}
-            onTouchStart={handleRuneButtonPress}
-            className="w-18 h-18 backdrop-blur-md bg-primary-500/80 hover:bg-primary-600/90 rounded-2xl border border-white/30 flex items-center justify-center shadow-xl transition-all duration-300 active:scale-96 magic-glow"
-            style={{ touchAction: 'manipulation' }}
-          >
-            <svg 
-              width="28" 
-              height="28" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              className="text-white drop-shadow-sm"
+          <UIContainer className="w-18 h-18 flex items-center justify-center transition-all duration-300 active:scale-95 hover:bg-white/30">
+            <button
+              onMouseDown={handleRuneButtonPress}
+              onTouchStart={handleRuneButtonPress}
+              className="w-full h-full flex items-center justify-center rounded-xl"
+              style={{ touchAction: 'manipulation' }}
             >
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              <path d="M2 17l10 5 10-5"/>
-              <path d="M2 12l10 5 10-5"/>
-            </svg>
-          </button>
+              <svg 
+                width="28" 
+                height="28" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                className="text-stone-100 drop-shadow-sm"
+              >
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+              </svg>
+            </button>
+          </UIContainer>
         </div>
       )}
 
