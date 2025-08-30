@@ -44,23 +44,22 @@ const VirtualJoystick: React.FC = () => {
   const handleStart = useCallback((clientX: number, clientY: number) => {
     if (isDrawingRune) return; // Disable joystick during rune drawing
     
-    // Get joystick center position
-    if (joystickRef.current) {
-      const rect = joystickRef.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      setTouchStart({ x: centerX, y: centerY });
-      console.log('JOYSTICK START - Center:', centerX.toFixed(1), centerY.toFixed(1), 'Touch:', clientX.toFixed(1), clientY.toFixed(1));
-    }
-    
     setIsDragging(true);
+    setTouchStart({ x: clientX, y: clientY });
+    console.log('JOYSTICK START - Touch:', clientX.toFixed(1), clientY.toFixed(1));
   }, [isDrawingRune]);
 
   const handleMove = useCallback((clientX: number, clientY: number) => {
-    if (!isDragging || isDrawingRune) return;
+    if (!isDragging || isDrawingRune || !joystickRef.current) return;
 
-    const deltaX = clientX - touchStart.x;
-    const deltaY = clientY - touchStart.y;
+    // Get joystick center for proper relative calculations
+    const rect = joystickRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    // Calculate position relative to joystick center
+    const deltaX = clientX - centerX;
+    const deltaY = clientY - centerY;
 
     // Calculate constrained knob position once
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -75,6 +74,8 @@ const VirtualJoystick: React.FC = () => {
       console.log('EDGE CONSTRAINT APPLIED - Distance:', distance.toFixed(1), 'Max:', maxDistance);
     }
 
+    console.log('RAW DELTA:', deltaX.toFixed(1), deltaY.toFixed(1), 'DISTANCE:', distance.toFixed(1));
+
     // Update knob visual position
     if (knobRef.current) {
       knobRef.current.style.transform = `translate(${knobX}px, ${knobY}px)`;
@@ -82,7 +83,7 @@ const VirtualJoystick: React.FC = () => {
 
     // Use the constrained knob position for movement
     updateMovement(knobX, knobY);
-  }, [isDragging, isDrawingRune, touchStart, updateMovement]);
+  }, [isDragging, isDrawingRune, updateMovement]);
 
   const handleEnd = useCallback(() => {
     setIsDragging(false);
