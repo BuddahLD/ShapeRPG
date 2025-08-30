@@ -110,7 +110,7 @@ const GameHUD: React.FC = () => {
             <button
               onMouseDown={handleRuneButtonPress}
               onTouchStart={handleRuneButtonPress}
-              className="w-full h-full flex items-center justify-center rounded-full"
+              className="w-full h-full flex items-center justify-center rounded-full p-2"
               style={{ touchAction: 'manipulation' }}
             >
               <svg 
