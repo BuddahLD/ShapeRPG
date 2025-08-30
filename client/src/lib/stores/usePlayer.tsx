@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { gameData } from "../gameData/gameData";
+import { useGameState } from "./useGameState";
 
 interface PlayerStats {
   hp: number;
@@ -33,6 +34,7 @@ interface PlayerState {
   addGold: (amount: number) => void;
   learnSpell: (spellId: string) => void;
   checkCollision: (x: number, y: number) => boolean;
+  checkNearbyNPCs: (x: number, y: number) => void;
 }
 
 const MOVEMENT_SPEED = 2;
@@ -128,6 +130,9 @@ export const usePlayer = create<PlayerState>()(
             }
           };
         }
+        
+        // Check for nearby NPCs
+        get().checkNearbyNPCs(newX, newY);
         
         return {
           player: {
@@ -248,6 +253,28 @@ export const usePlayer = create<PlayerState>()(
       }
 
       return true; // No collision
+    },
+
+    checkNearbyNPCs: (x: number, y: number) => {
+      const npcs = [
+        { id: "weapon_shop", x: -80, y: -50 },
+        { id: "armor_shop", x: 80, y: -50 },
+        { id: "trainer", x: 0, y: -80 },
+      ];
+
+      const interactionDistance = 40; // Distance to interact with NPCs
+      let nearbyNPC = null;
+
+      for (const npc of npcs) {
+        const distance = Math.sqrt((x - npc.x) ** 2 + (y - npc.y) ** 2);
+        if (distance < interactionDistance) {
+          nearbyNPC = npc.id;
+          break;
+        }
+      }
+
+      // Update the game state with nearby NPC
+      useGameState.getState().setNearbyNPC(nearbyNPC);
     }
   }))
 );

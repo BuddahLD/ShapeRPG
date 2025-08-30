@@ -33,6 +33,7 @@ interface GameState {
   isSlowMotion: boolean;
   showShop: ShopType;
   enemies: Enemy[];
+  nearbyNPC: string | null;
   
   // Actions
   setGamePhase: (phase: GamePhase) => void;
@@ -40,6 +41,8 @@ interface GameState {
   setDrawingRune: (drawing: boolean) => void;
   setSlowMotion: (slow: boolean) => void;
   setShowShop: (shop: ShopType) => void;
+  setNearbyNPC: (npcId: string | null) => void;
+  interactWithNPC: () => void;
   
   // Enemy management
   spawnEnemies: () => void;
@@ -60,6 +63,7 @@ export const useGameState = create<GameState>()(
     isSlowMotion: false,
     showShop: null,
     enemies: [],
+    nearbyNPC: null,
     
     setGamePhase: (phase) => set({ gamePhase: phase }),
     
@@ -78,6 +82,25 @@ export const useGameState = create<GameState>()(
     setSlowMotion: (slow) => set({ isSlowMotion: slow }),
     
     setShowShop: (shop) => set({ showShop: shop }),
+    
+    setNearbyNPC: (npcId) => set({ nearbyNPC: npcId }),
+    
+    interactWithNPC: () => {
+      const { nearbyNPC } = get();
+      if (!nearbyNPC) return;
+      
+      switch (nearbyNPC) {
+        case 'weapon_shop':
+          set({ showShop: 'weapons' });
+          break;
+        case 'armor_shop':
+          set({ showShop: 'armor' });
+          break;
+        case 'trainer':
+          console.log('Trainer interface not yet implemented');
+          break;
+      }
+    },
     
     spawnEnemies: () => {
       const newEnemies: Enemy[] = [
