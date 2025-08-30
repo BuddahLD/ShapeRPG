@@ -45,37 +45,69 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
 
   const renderBackground = (ctx: CanvasRenderingContext2D) => {
     const canvas = canvasRef.current!;
+    if (!player) return;
     
-    // Use modern design system for zone backgrounds
-    const gradient = DesignSystem.createZoneGradient(ctx, currentLocation, canvas.width, canvas.height);
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
     
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Zone boundaries in world coordinates
+    const hubFieldsBoundary = 200;
+    const fieldsArenaBoundary = 600;
+    
+    // Calculate screen positions of zone boundaries
+    const hubFieldsScreenX = centerX + (hubFieldsBoundary - player.x);
+    const fieldsArenaScreenX = centerX + (fieldsArenaBoundary - player.x);
+    
+    // Draw territorial backgrounds based on world coordinates
+    
+    // Hub territory (violet) - left side
+    if (hubFieldsScreenX > 0) {
+      const gradient = DesignSystem.createZoneGradient(ctx, 'LOC_HUB_FIGUREIUM', Math.min(hubFieldsScreenX, canvas.width), canvas.height);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, Math.min(hubFieldsScreenX, canvas.width), canvas.height);
+    }
+    
+    // Peaceful Fields territory (green) - middle section
+    const fieldsStartX = Math.max(0, hubFieldsScreenX);
+    const fieldsEndX = Math.min(canvas.width, fieldsArenaScreenX);
+    if (fieldsEndX > fieldsStartX) {
+      const fieldsWidth = fieldsEndX - fieldsStartX;
+      const gradient = DesignSystem.createZoneGradient(ctx, 'LOC_PEACEFUL_FIELDS', fieldsWidth, canvas.height);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(fieldsStartX, 0, fieldsWidth, canvas.height);
+    }
+    
+    // Arena territory (brown-red) - right side
+    if (fieldsArenaScreenX < canvas.width) {
+      const arenaStartX = Math.max(0, fieldsArenaScreenX);
+      const arenaWidth = canvas.width - arenaStartX;
+      const gradient = DesignSystem.createZoneGradient(ctx, 'LOC_ARENA_1', arenaWidth, canvas.height);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(arenaStartX, 0, arenaWidth, canvas.height);
+    }
 
     // Add subtle grid pattern with modern styling
-    if (player) {
-      ctx.strokeStyle = `rgba(255, 255, 255, 0.08)`;
-      ctx.lineWidth = 0.5;
-      
-      const gridSize = 50;
-      const offsetX = (-player.x % gridSize) + gridSize;
-      const offsetY = (-player.y % gridSize) + gridSize;
-      
-      // Vertical lines
-      for (let x = offsetX; x < canvas.width; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-      
-      // Horizontal lines
-      for (let y = offsetY; y < canvas.height; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
+    ctx.strokeStyle = `rgba(255, 255, 255, 0.08)`;
+    ctx.lineWidth = 0.5;
+    
+    const gridSize = 50;
+    const offsetX = (-player.x % gridSize) + gridSize;
+    const offsetY = (-player.y % gridSize) + gridSize;
+    
+    // Vertical lines
+    for (let x = offsetX; x < canvas.width; x += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+    
+    // Horizontal lines
+    for (let y = offsetY; y < canvas.height; y += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
     }
   };
 
