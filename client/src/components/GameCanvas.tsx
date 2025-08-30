@@ -179,36 +179,24 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
     ctx.lineWidth = 3;
     ctx.lineJoin = 'round';
 
-    // Define walls that match collision system with openings
-    let walls: { x: number; y: number; width: number; height: number }[] = [];
-    
-    // Hub walls with left wall but open to east
-    if (player.x >= -200 && player.x <= 200) {
-      walls.push(
-        { x: -180, y: -130, width: 360, height: 20 }, // Top wall
-        { x: -180, y: 110, width: 360, height: 20 },  // Bottom wall
-        { x: -180, y: -130, width: 20, height: 260 }   // Left wall
-      );
-    }
-    
-    // Fields walls (open on both sides for transitions)
-    if (player.x >= 200 && player.x <= 600) {
-      walls.push(
-        { x: 200, y: -130, width: 400, height: 20 }, // Top wall
-        { x: 200, y: 110, width: 400, height: 20 }   // Bottom wall
-      );
-    }
-    
-    // Arena walls with right wall but open to west
-    if (player.x >= 600 && player.x <= 1000) {
-      walls.push(
-        { x: 620, y: -130, width: 360, height: 20 }, // Top wall
-        { x: 620, y: 110, width: 360, height: 20 },  // Bottom wall
-        { x: 980, y: -130, width: 20, height: 260 }  // Right wall
-      );
-    }
+    // Define all walls in world coordinates - render based on visibility, not player location
+    const allWalls: { x: number; y: number; width: number; height: number }[] = [
+      // Hub walls with left wall but open to east
+      { x: -180, y: -130, width: 360, height: 20 }, // Hub top wall
+      { x: -180, y: 110, width: 360, height: 20 },  // Hub bottom wall
+      { x: -180, y: -130, width: 20, height: 260 },  // Hub left wall
+      
+      // Fields walls (open on both sides for transitions)
+      { x: 200, y: -130, width: 400, height: 20 }, // Fields top wall
+      { x: 200, y: 110, width: 400, height: 20 },  // Fields bottom wall
+      
+      // Arena walls with right wall but open to west
+      { x: 620, y: -130, width: 360, height: 20 }, // Arena top wall
+      { x: 620, y: 110, width: 360, height: 20 },  // Arena bottom wall
+      { x: 980, y: -130, width: 20, height: 260 }   // Arena right wall
+    ];
 
-    walls.forEach(wall => {
+    allWalls.forEach(wall => {
       const screenX = centerX + (wall.x - player.x);
       const screenY = centerY + (wall.y - player.y);
       
@@ -225,16 +213,13 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
   };
 
   const renderNPCs = (ctx: CanvasRenderingContext2D) => {
-    if (currentLocation !== "LOC_HUB_FIGUREIUM" || !player) return;
+    if (!player) return;
 
     const canvas = canvasRef.current!;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
-    // Only show NPCs in the hub area
-    if (currentLocation !== "LOC_HUB_FIGUREIUM") return;
-    
-    // Define NPCs with modern color scheme
+    // Define NPCs with their world coordinates - render based on visibility
     const npcs = [
       { id: "weapon_shop", x: -80, y: -50, color: DesignSystem.COLORS.secondary[500], label: "⚔️" },
       { id: "armor_shop", x: 80, y: -50, color: DesignSystem.COLORS.success, label: "🛡️" },
@@ -245,7 +230,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
       const screenX = centerX + (npc.x - player.x);
       const screenY = centerY + (npc.y - player.y);
 
-      // Only render if on screen
+      // Only render if on screen (NPCs are always visible when their area is on screen)
       if (screenX > -30 && screenX < canvas.width + 30 && 
           screenY > -30 && screenY < canvas.height + 30) {
         
