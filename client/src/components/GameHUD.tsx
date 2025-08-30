@@ -105,7 +105,7 @@ const GameHUD: React.FC = () => {
 
       {/* Rune Button - Only in combat areas - Modern iOS design */}
       {currentLocation === "LOC_ARENA_1" && (
-        <div className="absolute bottom-8 right-8 pointer-events-auto">
+        <div className="absolute bottom-20 right-8 pointer-events-auto">
           <UIContainer className="w-18 h-18 flex items-center justify-center transition-all duration-300 active:scale-95 hover:bg-white/30">
             <button
               onMouseDown={handleRuneButtonPress}
