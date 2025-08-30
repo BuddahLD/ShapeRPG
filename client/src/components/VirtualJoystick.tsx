@@ -125,36 +125,34 @@ const VirtualJoystick: React.FC = () => {
   }
 
   return (
-    <div
-      ref={joystickRef}
-      className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-20"
-      style={{
-        width: joystickRadius * 2,
-        height: joystickRadius * 2,
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        touchAction: 'none'
-      }}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onMouseDown={handleMouseDown}
-    >
+    <div className="fixed bottom-20 left-8 z-20 pointer-events-auto">
       <div
-        ref={knobRef}
-        style={{
-          width: knobRadius * 2,
-          height: knobRadius * 2,
-          borderRadius: '50%',
-          background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7))',
-          border: '1px solid rgba(255, 255, 255, 0.8)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
-          transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          pointerEvents: 'none'
-        }}
-      />
+        className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg w-22 h-22 flex items-center justify-center transition-all duration-300 hover:bg-white/30"
+        style={{ touchAction: 'none' }}
+      >
+        <div
+          ref={joystickRef}
+          className="relative w-full h-full rounded-full flex items-center justify-center"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+        >
+          <div
+            ref={knobRef}
+            style={{
+              width: knobRadius * 2,
+              height: knobRadius * 2,
+              borderRadius: '50%',
+              background: 'linear-gradient(145deg, rgba(245, 245, 244, 0.9), rgba(245, 245, 244, 0.7))',
+              border: '1px solid rgba(245, 245, 244, 0.8)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(245, 245, 244, 0.8)',
+              transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              pointerEvents: 'none'
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };
