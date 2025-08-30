@@ -1,46 +1,14 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
-
-export type GamePhase = "hub" | "combat" | "ended";
-export type LocationId = "LOC_HUB_FIGUREIUM" | "LOC_PEACEFUL_FIELDS" | "LOC_ARENA_1";
-export type ShopType = "weapons" | "armor" | null;
-
-interface Enemy {
-  id: string;
-  type: string;
-  x: number;
-  y: number;
-  hp: number;
-  maxHp: number;
-  atk: number;
-  def: number;
-  size: number;
-  isAttacking: boolean;
-  counterWindow: number;
-  lastAttack: number;
-}
-
-interface SpellCastResult {
-  spell: any;
-  accuracy: number;
-  success: boolean;
-}
-
-interface WorldZone {
-  id: LocationId;
-  bounds: { minX: number; maxX: number; minY: number; maxY: number };
-  background: string;
-  hasEnemies: boolean;
-}
-
-interface WorldChunk {
-  x: number;
-  y: number;
-  loaded: boolean;
-  enemies: Enemy[];
-  npcs: any[];
-  walls: { x: number; y: number; width: number; height: number }[];
-}
+import { 
+  GamePhase, 
+  LocationId, 
+  ShopType, 
+  Enemy, 
+  SpellCastResult, 
+  WorldZone,
+  WorldChunk 
+} from "../types/gameTypes";
 
 interface GameState {
   gamePhase: GamePhase;
@@ -51,8 +19,6 @@ interface GameState {
   enemies: Enemy[];
   nearbyNPC: string | null;
   worldZones: WorldZone[];
-  loadedChunks: Map<string, WorldChunk>;
-  chunkSize: number;
   
   // Actions
   setGamePhase: (phase: GamePhase) => void;
@@ -70,12 +36,7 @@ interface GameState {
   clearEnemies: () => void;
   updateEnemy: (id: string, updates: Partial<Enemy>) => void;
   removeEnemy: (id: string) => void;
-  
-  // Chunk management
-  loadChunk: (chunkX: number, chunkY: number) => void;
-  unloadChunk: (chunkX: number, chunkY: number) => void;
-  getChunkKey: (chunkX: number, chunkY: number) => string;
-  updateLoadedChunks: (playerX: number, playerY: number) => void;
+  setEnemies: (enemies: Enemy[]) => void;
   
   // Combat
   castSpell: (result: SpellCastResult) => void;
@@ -291,6 +252,8 @@ export const useGameState = create<GameState>()(
         enemies: state.enemies.filter(enemy => enemy.id !== id)
       }));
     },
+    
+    setEnemies: (enemies) => set({ enemies }),
     
     castSpell: (result) => {
       const { enemies } = get();

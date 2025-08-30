@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { gameData } from "../gameData/gameData";
 import { useGameState } from "./useGameState";
+import { useWorldChunks } from "./useWorldChunks";
 
 interface PlayerStats {
   hp: number;
@@ -131,8 +132,13 @@ export const usePlayer = create<PlayerState>()(
           };
         }
         
-        // Check for zone transitions
+        // Check for zone transitions and update chunks
         useGameState.getState().checkZoneTransition(newX, newY);
+        useWorldChunks.getState().updateNearbyChunks(newX, newY);
+        
+        // Update enemies from loaded chunks
+        const visibleEnemies = useWorldChunks.getState().getAllEnemies();
+        useGameState.getState().setEnemies(visibleEnemies);
         
         // Check for nearby NPCs  
         get().checkNearbyNPCs(newX, newY);

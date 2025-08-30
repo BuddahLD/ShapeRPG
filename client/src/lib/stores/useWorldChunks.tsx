@@ -1,175 +1,185 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import { LocationId } from '../types/gameTypes';
+import { WorldChunk, Enemy, NPC, ChunkCoordinates } from '../types/gameTypes';
+import { WorldService } from '../services/WorldService';
 
-interface WorldChunk {
-  x: number;
-  y: number;
-  loaded: boolean;
-  enemies: any[];
-  npcs: any[];
-  walls: { x: number; y: number; width: number; height: number }[];
-}
+// Constants for configuration
+export const CHUNK_SIZE = 400;
+export const CHUNK_LOAD_DISTANCE = 2;
 
 interface ChunkState {
   loadedChunks: Map<string, WorldChunk>;
-  chunkSize: number;
   
-  // Actions
-  getChunkKey: (chunkX: number, chunkY: number) => string;
-  loadChunk: (chunkX: number, chunkY: number) => void;
-  unloadChunk: (chunkX: number, chunkY: number) => void;
-  updateLoadedChunks: (playerX: number, playerY: number) => void;
-  getVisibleEnemies: () => any[];
+  // Core actions
+  loadChunk: (coordinates: ChunkCoordinates) => WorldChunk | null;
+  unloadChunk: (coordinates: ChunkCoordinates) => boolean;
+  updateNearbyChunks: (playerX: number, playerY: number) => void;
+  getAllEnemies: () => Enemy[];
+  getAllNPCs: () => NPC[];
+  
+  // Utility functions
+  getChunkCoordinates: (worldX: number, worldY: number) => ChunkCoordinates;
+  getChunkKey: (coordinates: ChunkCoordinates) => string;
+  isChunkLoaded: (coordinates: ChunkCoordinates) => boolean;
 }
+
+// Chunk generation logic separated for testability
+export const generateChunkContent = (coordinates: ChunkCoordinates): { enemies: Enemy[], npcs: NPC[] } => {
+  const { x: chunkX, y: chunkY } = coordinates;
+  const worldX = chunkX * CHUNK_SIZE;
+  const centerX = worldX + CHUNK_SIZE / 2;
+  
+  const chunkKey = `${chunkX},${chunkY}`;
+  const enemies: Enemy[] = [];
+  const npcs: NPC[] = [];
+  
+  // Hub chunks (NPCs only in center chunk)
+  if (centerX >= -200 && centerX <= 200) {
+    if (chunkX === 0 && chunkY === 0) {
+      npcs.push(
+        { id: "weapon_shop", x: -80, y: -50, type: "shop" },
+        { id: "armor_shop", x: 80, y: -50, type: "shop" },
+        { id: "trainer", x: 0, y: -80, type: "trainer" }
+      );
+    }
+  }
+  // Fields chunks
+  else if (centerX >= 200 && centerX <= 600) {
+    if (Math.random() < 0.7) {
+      for (let i = 0; i < 2; i++) {
+        enemies.push({
+          id: `hex_${chunkKey}_${i}`,
+          type: "HEX_PEACEFUL",
+          x: worldX + Math.random() * CHUNK_SIZE,
+          y: chunkY * CHUNK_SIZE + Math.random() * CHUNK_SIZE,
+          hp: 20,
+          maxHp: 20,
+          atk: 2,
+          def: 1,
+          size: 15,
+          isAttacking: false,
+          counterWindow: 0,
+          lastAttack: 0
+        });
+      }
+    }
+  }
+  // Arena chunks
+  else if (centerX >= 600 && centerX <= 1000) {
+    if (Math.random() < 0.8) {
+      for (let i = 0; i < 3; i++) {
+        enemies.push({
+          id: `tri_${chunkKey}_${i}`,
+          type: "TRI_ARENA",
+          x: worldX + Math.random() * CHUNK_SIZE,
+          y: chunkY * CHUNK_SIZE + Math.random() * CHUNK_SIZE,
+          hp: 60,
+          maxHp: 60,
+          atk: 12,
+          def: 5,
+          size: 20,
+          isAttacking: false,
+          counterWindow: 0,
+          lastAttack: 0
+        });
+      }
+    }
+  }
+  
+  return { enemies, npcs };
+};
 
 export const useWorldChunks = create<ChunkState>()(
   subscribeWithSelector((set, get) => ({
     loadedChunks: new Map<string, WorldChunk>(),
-    chunkSize: 400, // Each chunk is 400x400 units
     
-    getChunkKey: (chunkX: number, chunkY: number) => {
-      return `${chunkX},${chunkY}`;
+    getChunkCoordinates: WorldService.getChunkCoordinates,
+    
+    getChunkKey: WorldService.getChunkKey,
+    
+    isChunkLoaded: (coordinates: ChunkCoordinates) => {
+      const key = get().getChunkKey(coordinates);
+      return get().loadedChunks.has(key);
     },
     
-    loadChunk: (chunkX: number, chunkY: number) => {
-      const chunkKey = get().getChunkKey(chunkX, chunkY);
-      const { loadedChunks, chunkSize } = get();
+    loadChunk: (coordinates: ChunkCoordinates) => {
+      const key = get().getChunkKey(coordinates);
+      const { loadedChunks } = get();
       
-      if (loadedChunks.has(chunkKey)) return;
+      if (loadedChunks.has(key)) {
+        return loadedChunks.get(key) || null;
+      }
       
-      const worldX = chunkX * chunkSize;
-      const worldY = chunkY * chunkSize;
+      // Generate chunk content
+      const { enemies, npcs } = generateChunkContent(coordinates);
       
-      // Create chunk data based on world position
       const newChunk: WorldChunk = {
-        x: chunkX,
-        y: chunkY,
+        x: coordinates.x,
+        y: coordinates.y,
         loaded: true,
-        enemies: [],
-        npcs: [],
+        enemies,
+        npcs,
         walls: []
       };
       
-      // Determine what zone this chunk belongs to
-      const centerX = worldX + chunkSize / 2;
-      
-      // Hub chunk
-      if (centerX >= -200 && centerX <= 200) {
-        if (chunkX === 0 && chunkY === 0) { // Center hub chunk
-          newChunk.npcs = [
-            { id: "weapon_shop", x: -80, y: -50, type: "shop" },
-            { id: "armor_shop", x: 80, y: -50, type: "shop" },
-            { id: "trainer", x: 0, y: -80, type: "trainer" }
-          ];
-        }
-      }
-      // Fields chunk
-      else if (centerX >= 200 && centerX <= 600) {
-        if (Math.random() < 0.7) { // 70% chance for enemies in fields
-          for (let i = 0; i < 2; i++) {
-            newChunk.enemies.push({
-              id: `hex_${chunkKey}_${i}`,
-              type: "HEX_PEACEFUL",
-              x: worldX + Math.random() * chunkSize,
-              y: worldY + Math.random() * chunkSize,
-              hp: 20,
-              maxHp: 20,
-              atk: 2,
-              def: 1,
-              size: 15,
-              isAttacking: false,
-              counterWindow: 0,
-              lastAttack: 0
-            });
-          }
-        }
-      }
-      // Arena chunk
-      else if (centerX >= 600 && centerX <= 1000) {
-        if (Math.random() < 0.8) { // 80% chance for enemies in arena
-          for (let i = 0; i < 3; i++) {
-            newChunk.enemies.push({
-              id: `tri_${chunkKey}_${i}`,
-              type: "TRI_ARENA",
-              x: worldX + Math.random() * chunkSize,
-              y: worldY + Math.random() * chunkSize,
-              hp: 60,
-              maxHp: 60,
-              atk: 12,
-              def: 5,
-              size: 20,
-              isAttacking: false,
-              counterWindow: 0,
-              lastAttack: 0
-            });
-          }
-        }
-      }
-      
       const newLoadedChunks = new Map(loadedChunks);
-      newLoadedChunks.set(chunkKey, newChunk);
+      newLoadedChunks.set(key, newChunk);
       
       set({ loadedChunks: newLoadedChunks });
+      return newChunk;
     },
     
-    unloadChunk: (chunkX: number, chunkY: number) => {
-      const chunkKey = get().getChunkKey(chunkX, chunkY);
+    unloadChunk: (coordinates: ChunkCoordinates) => {
+      const key = get().getChunkKey(coordinates);
       const { loadedChunks } = get();
       
-      if (loadedChunks.has(chunkKey)) {
+      if (loadedChunks.has(key)) {
         const newLoadedChunks = new Map(loadedChunks);
-        newLoadedChunks.delete(chunkKey);
+        newLoadedChunks.delete(key);
         set({ loadedChunks: newLoadedChunks });
+        return true;
       }
+      return false;
     },
     
-    updateLoadedChunks: (playerX: number, playerY: number) => {
-      const { chunkSize } = get();
-      const loadDistance = 2; // Load chunks within 2 chunk radius
-      
-      const playerChunkX = Math.floor(playerX / chunkSize);
-      const playerChunkY = Math.floor(playerY / chunkSize);
-      
-      // Load nearby chunks
-      for (let dx = -loadDistance; dx <= loadDistance; dx++) {
-        for (let dy = -loadDistance; dy <= loadDistance; dy++) {
-          const chunkX = playerChunkX + dx;
-          const chunkY = playerChunkY + dy;
-          get().loadChunk(chunkX, chunkY);
-        }
-      }
-      
-      // Unload distant chunks
+    updateNearbyChunks: (playerX: number, playerY: number) => {
       const { loadedChunks } = get();
-      const chunksToUnload: string[] = [];
       
-      loadedChunks.forEach((chunk, key) => {
-        const distance = Math.max(
-          Math.abs(chunk.x - playerChunkX),
-          Math.abs(chunk.y - playerChunkY)
-        );
-        
-        if (distance > loadDistance + 1) {
-          chunksToUnload.push(key);
+      // Load nearby chunks using service
+      const chunksToLoad = WorldService.getNearbyChunkCoordinates(playerX, playerY, CHUNK_LOAD_DISTANCE);
+      chunksToLoad.forEach(coords => {
+        if (!get().isChunkLoaded(coords)) {
+          get().loadChunk(coords);
         }
       });
       
-      chunksToUnload.forEach(key => {
-        const [chunkX, chunkY] = key.split(',').map(Number);
-        get().unloadChunk(chunkX, chunkY);
+      // Unload distant chunks using service
+      const chunksToUnload = WorldService.getChunksToUnload(loadedChunks, playerX, playerY, CHUNK_LOAD_DISTANCE);
+      chunksToUnload.forEach(coords => {
+        get().unloadChunk(coords);
       });
     },
     
-    getVisibleEnemies: () => {
+    getAllEnemies: () => {
       const { loadedChunks } = get();
-      const allEnemies: any[] = [];
+      const allEnemies: Enemy[] = [];
       
       loadedChunks.forEach(chunk => {
         allEnemies.push(...chunk.enemies);
       });
       
       return allEnemies;
+    },
+    
+    getAllNPCs: () => {
+      const { loadedChunks } = get();
+      const allNPCs: NPC[] = [];
+      
+      loadedChunks.forEach(chunk => {
+        allNPCs.push(...chunk.npcs);
+      });
+      
+      return allNPCs;
     }
   }))
 );
