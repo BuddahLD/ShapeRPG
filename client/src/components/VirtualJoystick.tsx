@@ -15,7 +15,7 @@ const VirtualJoystick: React.FC = () => {
   const { movePlayer } = usePlayer();
   const { isDrawingRune } = useGameState();
 
-  const joystickRadius = 50;
+  const joystickRadius = 65;
   const knobRadius = 20;
 
   // Continuous movement loop
