@@ -4,7 +4,7 @@ import { useGameState } from "../lib/stores/useGameState";
 
 // Design system component for UI containers
 const UIContainer: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
-  <div className={`backdrop-blur-md bg-white/20 rounded-xl border border-white/30 shadow-lg ${className}`}>
+  <div className={`backdrop-blur-md bg-white/20 border border-white/30 shadow-lg ${className}`}>
     {children}
   </div>
 );
