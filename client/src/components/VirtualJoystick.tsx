@@ -125,7 +125,7 @@ const VirtualJoystick: React.FC = () => {
   }
 
   return (
-    <div className="fixed bottom-20 left-8 z-20 pointer-events-auto">
+    <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-20 pointer-events-auto">
       <div
         className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg w-22 h-22 flex items-center justify-center transition-all duration-300 hover:bg-white/30"
         style={{ touchAction: 'none' }}
