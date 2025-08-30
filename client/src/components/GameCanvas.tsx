@@ -30,6 +30,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
 
     // Render game elements
     renderBackground(ctx);
+    renderWalls(ctx);
+    renderNPCs(ctx);
     renderPlayer(ctx);
     renderEnemies(ctx);
     renderEffects(ctx);
@@ -116,6 +118,88 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
       ctx.arc(centerX, centerY - 50, 5, 0, Math.PI * 2);
       ctx.fill();
     }
+  };
+
+  const renderWalls = (ctx: CanvasRenderingContext2D) => {
+    if (currentLocation !== "LOC_HUB_FIGUREIUM" || !player) return;
+
+    const canvas = canvasRef.current!;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    ctx.fillStyle = "#8B4513";
+    ctx.strokeStyle = "#654321";
+    ctx.lineWidth = 2;
+
+    // Define walls as world coordinates
+    const walls = [
+      { x: -200, y: -150, width: 400, height: 20 }, // Top wall
+      { x: -200, y: 130, width: 400, height: 20 },  // Bottom wall
+      { x: -200, y: -150, width: 20, height: 300 }, // Left wall
+      { x: 180, y: -150, width: 20, height: 300 },  // Right wall
+    ];
+
+    walls.forEach(wall => {
+      const screenX = centerX + (wall.x - player.x);
+      const screenY = centerY + (wall.y - player.y);
+      
+      ctx.fillRect(screenX, screenY, wall.width, wall.height);
+      ctx.strokeRect(screenX, screenY, wall.width, wall.height);
+    });
+  };
+
+  const renderNPCs = (ctx: CanvasRenderingContext2D) => {
+    if (currentLocation !== "LOC_HUB_FIGUREIUM" || !player) return;
+
+    const canvas = canvasRef.current!;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    // Define NPCs with fixed world positions
+    const npcs = [
+      { id: "weapon_shop", x: -80, y: -50, color: "#4169E1", label: "⚔️" },
+      { id: "armor_shop", x: 80, y: -50, color: "#32CD32", label: "🛡️" },
+      { id: "trainer", x: 0, y: -80, color: "#9932CC", label: "📚" },
+    ];
+
+    npcs.forEach(npc => {
+      const screenX = centerX + (npc.x - player.x);
+      const screenY = centerY + (npc.y - player.y);
+
+      // Only render if on screen
+      if (screenX > -30 && screenX < canvas.width + 30 && 
+          screenY > -30 && screenY < canvas.height + 30) {
+        
+        // Draw NPC as a colored circle
+        ctx.fillStyle = npc.color;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, 20, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Draw icon in center
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "16px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(npc.label, screenX, screenY);
+
+        // Draw label below
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "12px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        const labels = {
+          "weapon_shop": "Weapons",
+          "armor_shop": "Armor", 
+          "trainer": "Trainer"
+        };
+        ctx.fillText(labels[npc.id as keyof typeof labels], screenX, screenY + 25);
+      }
+    });
   };
 
   const renderEnemies = (ctx: CanvasRenderingContext2D) => {

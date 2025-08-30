@@ -32,6 +32,7 @@ interface PlayerState {
   addXP: (amount: number) => void;
   addGold: (amount: number) => void;
   learnSpell: (spellId: string) => void;
+  checkCollision: (x: number, y: number) => boolean;
 }
 
 const MOVEMENT_SPEED = 2;
@@ -69,6 +70,47 @@ export const usePlayer = create<PlayerState>()(
         const newX = state.player.x + dx * MOVEMENT_SPEED;
         const newY = state.player.y + dy * MOVEMENT_SPEED;
         
+        // Check collisions for hub location
+        const canMove = get().checkCollision ? get().checkCollision(newX, newY) : true;
+        
+        if (!canMove) {
+          // Try moving only in X direction
+          const canMoveX = get().checkCollision ? get().checkCollision(newX, state.player.y) : true;
+          if (canMoveX) {
+            return {
+              player: {
+                ...state.player,
+                x: newX,
+                y: state.player.y,
+                vx: dx * MOVEMENT_SPEED,
+                vy: 0
+              }
+            };
+          }
+          
+          // Try moving only in Y direction
+          const canMoveY = get().checkCollision ? get().checkCollision(state.player.x, newY) : true;
+          if (canMoveY) {
+            return {
+              player: {
+                ...state.player,
+                x: state.player.x,
+                y: newY,
+                vx: 0,
+                vy: dy * MOVEMENT_SPEED
+              }
+            };
+          }
+          
+          // Can't move in either direction
+          return {
+            player: {
+              ...state.player,
+              vx: 0,
+              vy: 0
+            }
+          };
+        }
         
         return {
           player: {
@@ -150,6 +192,45 @@ export const usePlayer = create<PlayerState>()(
         
         return {};
       });
+    },
+
+    checkCollision: (x, y) => {
+      const playerRadius = 15; // Player collision radius
+
+      // Hub walls
+      const walls = [
+        { x: -200, y: -150, width: 400, height: 20 }, // Top wall
+        { x: -200, y: 130, width: 400, height: 20 },  // Bottom wall
+        { x: -200, y: -150, width: 20, height: 300 }, // Left wall
+        { x: 180, y: -150, width: 20, height: 300 },  // Right wall
+      ];
+
+      // NPCs
+      const npcs = [
+        { x: -80, y: -50, radius: 25 }, // Weapon shop
+        { x: 80, y: -50, radius: 25 },  // Armor shop
+        { x: 0, y: -80, radius: 25 },   // Trainer
+      ];
+
+      // Check wall collisions
+      for (const wall of walls) {
+        if (x + playerRadius > wall.x && 
+            x - playerRadius < wall.x + wall.width && 
+            y + playerRadius > wall.y && 
+            y - playerRadius < wall.y + wall.height) {
+          return false; // Collision detected
+        }
+      }
+
+      // Check NPC collisions
+      for (const npc of npcs) {
+        const distance = Math.sqrt((x - npc.x) ** 2 + (y - npc.y) ** 2);
+        if (distance < playerRadius + npc.radius) {
+          return false; // Collision detected
+        }
+      }
+
+      return true; // No collision
     }
   }))
 );
