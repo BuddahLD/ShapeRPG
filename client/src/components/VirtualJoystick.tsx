@@ -18,18 +18,21 @@ const VirtualJoystick: React.FC = () => {
   const joystickRadius = 50;
   const knobRadius = 20;
 
-  const updateMovement = useCallback((deltaX: number, deltaY: number) => {
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+  const updateMovement = useCallback((knobX: number, knobY: number) => {
     const maxDistance = joystickRadius - knobRadius;
     
-    if (distance > maxDistance) {
-      deltaX = (deltaX / distance) * maxDistance;
-      deltaY = (deltaY / distance) * maxDistance;
+    // Use the already constrained knob position for movement calculation
+    const normalizedX = knobX / maxDistance;
+    const normalizedY = knobY / maxDistance;
+
+    // Add slight deadzone to prevent micro-movements
+    const deadzone = 0.1;
+    const magnitude = Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
+    
+    if (magnitude < deadzone) {
+      movePlayer(0, 0);
+      return;
     }
-
-    const normalizedX = deltaX / maxDistance;
-    const normalizedY = deltaY / maxDistance;
-
     
     movePlayer(normalizedX, normalizedY);
   }, [movePlayer, joystickRadius, knobRadius]);
@@ -47,23 +50,25 @@ const VirtualJoystick: React.FC = () => {
     const deltaX = clientX - touchStart.x;
     const deltaY = clientY - touchStart.y;
 
-    // Update knob position
+    // Calculate constrained knob position once
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const maxDistance = joystickRadius - knobRadius;
+    
+    let knobX = deltaX;
+    let knobY = deltaY;
+    
+    if (distance > maxDistance) {
+      knobX = (deltaX / distance) * maxDistance;
+      knobY = (deltaY / distance) * maxDistance;
+    }
+
+    // Update knob visual position
     if (knobRef.current) {
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      const maxDistance = joystickRadius - knobRadius;
-      
-      let knobX = deltaX;
-      let knobY = deltaY;
-      
-      if (distance > maxDistance) {
-        knobX = (deltaX / distance) * maxDistance;
-        knobY = (deltaY / distance) * maxDistance;
-      }
-      
       knobRef.current.style.transform = `translate(${knobX}px, ${knobY}px)`;
     }
 
-    updateMovement(deltaX, deltaY);
+    // Use the constrained knob position for movement
+    updateMovement(knobX, knobY);
   }, [isDragging, isDrawingRune, touchStart, updateMovement]);
 
   const handleEnd = useCallback(() => {
