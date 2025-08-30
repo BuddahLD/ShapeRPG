@@ -15,6 +15,8 @@ Shapes RPG: Figureium is a minimalist 2D RPG featuring geometric characters wher
 
 **Enhanced Movement**: Virtual joystick now supports seamless movement across the entire world map with zone-aware collision detection.
 
+**Modern Design System (August 2025)**: Implemented iOS-inspired minimalist design with cartoon-like contours inspired by Prince of Persia 2008. Features sophisticated pastel color palette, glassmorphism UI elements, floating animations, and modern visual effects replacing primitive solid colors.
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -40,6 +42,16 @@ Preferred communication style: Simple, everyday language.
 - Business logic separated from state management for independent testing
 - Comprehensive test coverage for critical systems (chunk loading, combat, spell casting)
 - Mock external dependencies and focus on unit-level testing
+
+**Design System Standards**:
+- **iOS-Inspired Minimalism**: Clean, modern interface following 2025 design trends with glassmorphism effects
+- **Cartoon Contours**: Prince of Persia 2008-style outline rendering for all game objects with rounded edges
+- **Pastel Color Palette**: Sophisticated color schemes avoiding primitive solid colors, using authentic gradients
+- **Modern Typography**: SF Pro Display/Text font families with proper weight hierarchy
+- **Consistent Spacing**: 8px grid system for all UI elements and spacing decisions
+- **Smooth Animations**: Cubic-bezier easing functions for natural iOS-like motion and transitions
+
+**Automatic Updates Rule**: All approved design changes and architectural improvements are automatically incorporated into project documentation and development guidelines without requiring additional requests.
 
 # System Architecture
 

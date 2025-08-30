@@ -24,10 +24,30 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd', 
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0ea5e9',
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e'
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
+          50: '#fef7f0',
+          100: '#fdeee0',
+          200: '#fad8c1',
+          300: '#f7ba96', 
+          400: '#f39069',
+          500: '#ed6b47',
+          600: '#dc4a26',
+          700: '#b8391c',
+          800: '#94301b',
+          900: '#7a2b1a'
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -40,6 +60,27 @@ export default {
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+        },
+        // Game-specific zone colors
+        game: {
+          hub: {
+            primary: '#a78bfa',
+            secondary: '#c4b5fd',
+            accent: '#ddd6fe',
+            background: '#faf5ff'
+          },
+          fields: {
+            primary: '#34d399', 
+            secondary: '#6ee7b7',
+            accent: '#a7f3d0',
+            background: '#f0fdf4'
+          },
+          arena: {
+            primary: '#fb7185',
+            secondary: '#fda4af', 
+            accent: '#fecdd3',
+            background: '#fff1f2'
+          }
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

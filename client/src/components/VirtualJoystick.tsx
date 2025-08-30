@@ -132,12 +132,14 @@ const VirtualJoystick: React.FC = () => {
         width: joystickRadius * 2,
         height: joystickRadius * 2,
         borderRadius: '50%',
-        backgroundColor: 'rgba(255, 255, 255, 0.3)',
-        border: '2px solid rgba(255, 255, 255, 0.6)',
+        background: 'rgba(255, 255, 255, 0.25)',
+        backdropFilter: 'blur(16px) saturate(180%)',
+        border: '1px solid rgba(255, 255, 255, 0.4)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        touchAction: 'none'
+        touchAction: 'none',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
       }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -150,9 +152,10 @@ const VirtualJoystick: React.FC = () => {
           width: knobRadius * 2,
           height: knobRadius * 2,
           borderRadius: '50%',
-          backgroundColor: 'rgba(255, 255, 255, 0.8)',
-          border: '2px solid rgba(255, 255, 255, 1)',
-          transition: isDragging ? 'none' : 'transform 0.2s ease',
+          background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7))',
+          border: '1px solid rgba(255, 255, 255, 0.8)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
+          transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           pointerEvents: 'none'
         }}
       />
