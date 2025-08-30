@@ -70,46 +70,52 @@ export const usePlayer = create<PlayerState>()(
         const newX = state.player.x + dx * MOVEMENT_SPEED;
         const newY = state.player.y + dy * MOVEMENT_SPEED;
         
-        // Check collisions for hub location
-        const canMove = get().checkCollision ? get().checkCollision(newX, newY) : true;
-        
-        if (!canMove) {
-          // Try moving only in X direction
-          const canMoveX = get().checkCollision ? get().checkCollision(newX, state.player.y) : true;
-          if (canMoveX) {
+        // Check collisions for hub location only
+        if (get().checkCollision) {
+          const canMove = get().checkCollision(newX, newY);
+          console.log(`Collision check: (${newX.toFixed(1)}, ${newY.toFixed(1)}) = ${canMove}`);
+          
+          if (!canMove) {
+            // Try moving only in X direction
+            const canMoveX = get().checkCollision(newX, state.player.y);
+            if (canMoveX) {
+              console.log(`Moving only in X direction`);
+              return {
+                player: {
+                  ...state.player,
+                  x: newX,
+                  y: state.player.y,
+                  vx: dx * MOVEMENT_SPEED,
+                  vy: 0
+                }
+              };
+            }
+            
+            // Try moving only in Y direction
+            const canMoveY = get().checkCollision(state.player.x, newY);
+            if (canMoveY) {
+              console.log(`Moving only in Y direction`);
+              return {
+                player: {
+                  ...state.player,
+                  x: state.player.x,
+                  y: newY,
+                  vx: 0,
+                  vy: dy * MOVEMENT_SPEED
+                }
+              };
+            }
+            
+            console.log(`Movement blocked completely`);
+            // Can't move in either direction
             return {
               player: {
                 ...state.player,
-                x: newX,
-                y: state.player.y,
-                vx: dx * MOVEMENT_SPEED,
+                vx: 0,
                 vy: 0
               }
             };
           }
-          
-          // Try moving only in Y direction
-          const canMoveY = get().checkCollision ? get().checkCollision(state.player.x, newY) : true;
-          if (canMoveY) {
-            return {
-              player: {
-                ...state.player,
-                x: state.player.x,
-                y: newY,
-                vx: 0,
-                vy: dy * MOVEMENT_SPEED
-              }
-            };
-          }
-          
-          // Can't move in either direction
-          return {
-            player: {
-              ...state.player,
-              vx: 0,
-              vy: 0
-            }
-          };
         }
         
         return {
@@ -197,7 +203,7 @@ export const usePlayer = create<PlayerState>()(
     checkCollision: (x, y) => {
       const playerRadius = 15; // Player collision radius
 
-      // Hub walls
+      // Hub walls - make sure player starts in a safe area
       const walls = [
         { x: -200, y: -150, width: 400, height: 20 }, // Top wall
         { x: -200, y: 130, width: 400, height: 20 },  // Bottom wall
@@ -218,6 +224,7 @@ export const usePlayer = create<PlayerState>()(
             x - playerRadius < wall.x + wall.width && 
             y + playerRadius > wall.y && 
             y - playerRadius < wall.y + wall.height) {
+          console.log(`Wall collision at (${x.toFixed(1)}, ${y.toFixed(1)})`);
           return false; // Collision detected
         }
       }
@@ -226,6 +233,7 @@ export const usePlayer = create<PlayerState>()(
       for (const npc of npcs) {
         const distance = Math.sqrt((x - npc.x) ** 2 + (y - npc.y) ** 2);
         if (distance < playerRadius + npc.radius) {
+          console.log(`NPC collision at (${x.toFixed(1)}, ${y.toFixed(1)}) with distance ${distance.toFixed(1)}`);
           return false; // Collision detected
         }
       }
