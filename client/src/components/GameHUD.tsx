@@ -118,8 +118,8 @@ const GameHUD: React.FC = () => {
                 console.log('RUNE PADDING:', computed.padding);
               }
             }}
-            className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg w-22 h-22 flex items-center justify-center transition-all duration-300 hover:bg-white/30"
-            style={{ touchAction: 'none', boxSizing: 'border-box' }}
+            className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg flex items-center justify-center transition-all duration-300 hover:bg-white/30"
+            style={{ touchAction: 'none', boxSizing: 'border-box', width: '42px', height: '42px', minWidth: '42px', minHeight: '42px' }}
           >
             <div
               className="relative w-full h-full rounded-full flex items-center justify-center"
