@@ -127,17 +127,6 @@ const VirtualJoystick: React.FC = () => {
   return (
     <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-20 pointer-events-auto">
       <div
-        ref={(el) => {
-          if (el) {
-            const rect = el.getBoundingClientRect();
-            const computed = window.getComputedStyle(el);
-            console.log('JOYSTICK DIAMETER:', rect.width, 'x', rect.height);
-            console.log('JOYSTICK COMPUTED WIDTH:', computed.width, 'HEIGHT:', computed.height);
-            console.log('JOYSTICK BOX-SIZING:', computed.boxSizing);
-            console.log('JOYSTICK BORDER:', computed.borderWidth);
-            console.log('JOYSTICK PADDING:', computed.padding);
-          }
-        }}
         className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg w-22 h-22 flex items-center justify-center transition-all duration-300 hover:bg-white/30"
         style={{ touchAction: 'none', boxSizing: 'border-box' }}
       >

@@ -4,7 +4,7 @@ import { useGameState } from "../lib/stores/useGameState";
 
 // Design system component for UI containers
 const UIContainer: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
-  <div className={`backdrop-blur-md bg-white/20 border border-white/30 shadow-lg ${className}`}>
+  <div className={`backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-lg ${className}`}>
     {children}
   </div>
 );
@@ -107,17 +107,6 @@ const GameHUD: React.FC = () => {
       {currentLocation === "LOC_ARENA_1" && (
         <div className="fixed bottom-20 right-8 transform -translate-x-0 z-20 pointer-events-auto">
           <div
-            ref={(el) => {
-              if (el) {
-                const rect = el.getBoundingClientRect();
-                const computed = window.getComputedStyle(el);
-                console.log('RUNE BUTTON DIAMETER:', rect.width, 'x', rect.height);
-                console.log('RUNE COMPUTED WIDTH:', computed.width, 'HEIGHT:', computed.height);
-                console.log('RUNE BOX-SIZING:', computed.boxSizing);
-                console.log('RUNE BORDER:', computed.borderWidth);
-                console.log('RUNE PADDING:', computed.padding);
-              }
-            }}
             className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg flex items-center justify-center transition-all duration-300 hover:bg-white/30"
             style={{ touchAction: 'none', boxSizing: 'border-box', width: '42px', height: '42px', minWidth: '42px', minHeight: '42px' }}
           >
