@@ -106,7 +106,7 @@ const GameHUD: React.FC = () => {
       {/* Rune Button - Only in combat areas - Modern iOS design */}
       {currentLocation === "LOC_ARENA_1" && (
         <div className="absolute bottom-20 right-8 pointer-events-auto">
-          <div className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg w-22 h-22 flex items-center justify-center transition-all duration-300 active:scale-95 hover:bg-white/30">
+          <div className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg w-22 h-22 flex items-center justify-center transition-all duration-300 hover:bg-white/30">
             <button
               onMouseDown={handleRuneButtonPress}
               onTouchStart={handleRuneButtonPress}
