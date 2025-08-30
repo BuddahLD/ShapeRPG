@@ -36,7 +36,7 @@ const GameHUD: React.FC = () => {
   return (
     <div className="absolute inset-0 pointer-events-none z-10">
       {/* Top Bar - HP and Mana - Using design system container */}
-      <div className="absolute top-6 left-6 pointer-events-auto space-y-3">
+      <div className="absolute top-6 left-6 pointer-events-auto">
         <UIContainer className="p-2 space-y-2">
           <div className="flex items-center space-x-2">
             <span className="text-red-500 text-xs font-semibold">HP</span>
@@ -60,17 +60,21 @@ const GameHUD: React.FC = () => {
             <span className="text-neutral-700 text-xs">{player.stats.mana}</span>
           </div>
         </UIContainer>
-        
-        {/* Location Indicator - Using design system container, positioned relative to HP/MP */}
-        {showLocationIndicator && (
-          <UIContainer className="p-2 transition-all duration-1000 ease-in-out">
-            <span className="text-neutral-700 text-xs font-semibold">
-              {currentLocation === "LOC_HUB_FIGUREIUM" ? "Figureium Hub" : 
-               currentLocation === "LOC_PEACEFUL_FIELDS" ? "Peaceful Fields" : "Arena #1"}
-            </span>
-          </UIContainer>
-        )}
       </div>
+      
+      {/* Location Indicator - Horizontally centered, lighter text */}
+      {showLocationIndicator && (
+        <div className="absolute top-6 left-1/2 transform -translate-x-1/2 pointer-events-auto">
+          <UIContainer className="px-4 py-2 transition-all duration-1000 ease-in-out">
+            <div className="flex justify-center">
+              <span className="text-neutral-100 text-xs font-medium">
+                {currentLocation === "LOC_HUB_FIGUREIUM" ? "Figureium Hub" : 
+                 currentLocation === "LOC_PEACEFUL_FIELDS" ? "Peaceful Fields" : "Arena #1"}
+              </span>
+            </div>
+          </UIContainer>
+        </div>
+      )}
 
       {/* Bottom Bar - XP and Level - Using design system container */}
       <div className="absolute bottom-24 left-6 right-6 pointer-events-auto">

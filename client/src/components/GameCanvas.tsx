@@ -348,40 +348,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
     
     ctx.setLineDash([]);
     
-    // Modern zone name overlay
-    ctx.save();
-    
-    let zoneName = "";
-    let zoneColor = DesignSystem.COLORS.neutral[50];
-    
-    if (currentLocation === "LOC_HUB_FIGUREIUM") {
-      zoneName = "Figureium Hub";
-      zoneColor = DesignSystem.COLORS.zones.hub.primary;
-    } else if (currentLocation === "LOC_PEACEFUL_FIELDS") {
-      zoneName = "Peaceful Fields";
-      zoneColor = DesignSystem.COLORS.zones.fields.primary;
-    } else if (currentLocation === "LOC_ARENA_1") {
-      zoneName = "Combat Arena";
-      zoneColor = DesignSystem.COLORS.zones.arena.primary;
-    }
-    
-    if (zoneName) {
-      // Text with subtle glow
-      ctx.shadowColor = zoneColor;
-      ctx.shadowBlur = 8;
-      ctx.fillStyle = DesignSystem.COLORS.neutral[50];
-      ctx.font = `bold 18px ${DesignSystem.TYPOGRAPHY.fonts.display}`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-      
-      // Draw text outline for readability
-      ctx.strokeStyle = DesignSystem.COLORS.neutral[800];
-      ctx.lineWidth = 3;
-      ctx.strokeText(zoneName, canvas.width / 2, 24);
-      ctx.fillText(zoneName, canvas.width / 2, 24);
-    }
-    
-    ctx.restore();
+    // Zone name now handled by HUD component
   };
 
   const renderEffects = (ctx: CanvasRenderingContext2D) => {
