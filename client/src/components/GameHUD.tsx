@@ -105,12 +105,17 @@ const GameHUD: React.FC = () => {
 
       {/* Rune Button - Only in combat areas - Modern iOS design */}
       {currentLocation === "LOC_ARENA_1" && (
-        <div className="fixed bottom-20 right-8 transform translate-x-0 z-20 pointer-events-auto">
+        <div className="fixed bottom-20 right-8 transform -translate-x-0 z-20 pointer-events-auto">
           <div
             ref={(el) => {
               if (el) {
                 const rect = el.getBoundingClientRect();
+                const computed = window.getComputedStyle(el);
                 console.log('RUNE BUTTON DIAMETER:', rect.width, 'x', rect.height);
+                console.log('RUNE COMPUTED WIDTH:', computed.width, 'HEIGHT:', computed.height);
+                console.log('RUNE BOX-SIZING:', computed.boxSizing);
+                console.log('RUNE BORDER:', computed.borderWidth);
+                console.log('RUNE PADDING:', computed.padding);
               }
             }}
             className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg w-22 h-22 flex items-center justify-center transition-all duration-300 hover:bg-white/30"
