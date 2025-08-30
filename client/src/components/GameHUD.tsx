@@ -5,12 +5,12 @@ import { useGameState } from "../lib/stores/useGameState";
 const GameHUD: React.FC = () => {
   const { player } = usePlayer();
   const { currentLocation, setDrawingRune } = useGameState();
-  const [showLocationIndicator, setShowLocationIndicator] = useState(false);
+  const [showLocationIndicator, setShowLocationIndicator] = useState(true); // Show on start
   const [previousLocation, setPreviousLocation] = useState<string | null>(null);
 
-  // Handle location change fade effect
+  // Handle location change fade effect and initial display
   useEffect(() => {
-    if (currentLocation !== previousLocation && previousLocation !== null) {
+    if (currentLocation !== previousLocation) {
       setShowLocationIndicator(true);
       const timer = setTimeout(() => {
         setShowLocationIndicator(false);
@@ -108,11 +108,11 @@ const GameHUD: React.FC = () => {
         </div>
       )}
 
-      {/* Location Indicator - Fade in/out when entering new zones */}
+      {/* Location Indicator - Same style as HP/MP, positioned below */}
       {showLocationIndicator && (
-        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 pointer-events-auto animate-pulse">
-          <div className="backdrop-blur-md bg-white/30 rounded-full px-4 py-1 border border-white/50 shadow-lg transition-all duration-1000 ease-in-out">
-            <span className="text-neutral-800 text-sm font-semibold">
+        <div className="absolute top-28 left-6 pointer-events-auto">
+          <div className="backdrop-blur-md bg-white/20 rounded-xl p-2 border border-white/30 shadow-lg transition-all duration-1000 ease-in-out">
+            <span className="text-neutral-700 text-xs font-semibold">
               {currentLocation === "LOC_HUB_FIGUREIUM" ? "Figureium Hub" : 
                currentLocation === "LOC_PEACEFUL_FIELDS" ? "Peaceful Fields" : "Arena #1"}
             </span>
