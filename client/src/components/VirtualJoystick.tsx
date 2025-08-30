@@ -11,57 +11,66 @@ const VirtualJoystick: React.FC = () => {
   const joystickRef = useRef<HTMLDivElement>(null);
   const knobRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [touchStart, setTouchStart] = useState<TouchPoint>({ x: 0, y: 0 });
+  const [currentPosition, setCurrentPosition] = useState<TouchPoint>({ x: 0, y: 0 });
   const { movePlayer } = usePlayer();
   const { isDrawingRune } = useGameState();
 
   const joystickRadius = 50;
   const knobRadius = 20;
 
-  const updateMovement = useCallback((knobX: number, knobY: number) => {
-    const maxDistance = joystickRadius - knobRadius;
-    
-    // Use the already constrained knob position for movement calculation
-    const normalizedX = knobX / maxDistance;
-    const normalizedY = knobY / maxDistance;
+  // Continuous movement loop
+  useEffect(() => {
+    if (!isDragging) return;
 
-    // Add slight deadzone to prevent micro-movements
-    const deadzone = 0.1;
-    const magnitude = Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
-    
-    console.log('JOY POSITION:', knobX.toFixed(1), knobY.toFixed(1), 'NORMALIZED:', normalizedX.toFixed(2), normalizedY.toFixed(2), 'MAG:', magnitude.toFixed(2));
-    
-    if (magnitude < deadzone) {
-      console.log('DEADZONE - STOPPING');
-      movePlayer(0, 0);
-      return;
-    }
-    
-    console.log('MOVING PLAYER:', normalizedX.toFixed(2), normalizedY.toFixed(2));
-    movePlayer(normalizedX, normalizedY);
-  }, [movePlayer, joystickRadius, knobRadius]);
+    const gameLoop = () => {
+      const maxDistance = joystickRadius - knobRadius;
+      const normalizedX = currentPosition.x / maxDistance;
+      const normalizedY = currentPosition.y / maxDistance;
+
+      const deadzone = 0.1;
+      const magnitude = Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
+      
+      console.log('CONTINUOUS MOVEMENT - POS:', currentPosition.x.toFixed(1), currentPosition.y.toFixed(1), 'NORM:', normalizedX.toFixed(2), normalizedY.toFixed(2), 'MAG:', magnitude.toFixed(2));
+      
+      if (magnitude < deadzone) {
+        console.log('DEADZONE - STOPPING');
+        movePlayer(0, 0);
+      } else {
+        console.log('CONTINUOUS MOVE:', normalizedX.toFixed(2), normalizedY.toFixed(2));
+        movePlayer(normalizedX, normalizedY);
+      }
+    };
+
+    // Run movement loop at 60fps
+    const interval = setInterval(gameLoop, 16);
+    return () => clearInterval(interval);
+  }, [isDragging, currentPosition, movePlayer, joystickRadius, knobRadius]);
 
   const handleStart = useCallback((clientX: number, clientY: number) => {
-    if (isDrawingRune) return; // Disable joystick during rune drawing
+    if (isDrawingRune || !joystickRef.current) return;
     
+    const rect = joystickRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    const deltaX = clientX - centerX;
+    const deltaY = clientY - centerY;
+    
+    console.log('JOYSTICK START - Center:', centerX.toFixed(1), centerY.toFixed(1), 'Touch:', clientX.toFixed(1), clientY.toFixed(1), 'Initial Delta:', deltaX.toFixed(1), deltaY.toFixed(1));
+    
+    setCurrentPosition({ x: deltaX, y: deltaY });
     setIsDragging(true);
-    setTouchStart({ x: clientX, y: clientY });
-    console.log('JOYSTICK START - Touch:', clientX.toFixed(1), clientY.toFixed(1));
   }, [isDrawingRune]);
 
   const handleMove = useCallback((clientX: number, clientY: number) => {
     if (!isDragging || isDrawingRune || !joystickRef.current) return;
 
-    // Get joystick center for proper relative calculations
     const rect = joystickRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
 
-    // Calculate position relative to joystick center
     const deltaX = clientX - centerX;
     const deltaY = clientY - centerY;
-
-    // Calculate constrained knob position once
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     const maxDistance = joystickRadius - knobRadius;
     
@@ -71,28 +80,30 @@ const VirtualJoystick: React.FC = () => {
     if (distance > maxDistance) {
       knobX = (deltaX / distance) * maxDistance;
       knobY = (deltaY / distance) * maxDistance;
-      console.log('EDGE CONSTRAINT APPLIED - Distance:', distance.toFixed(1), 'Max:', maxDistance);
     }
 
-    console.log('RAW DELTA:', deltaX.toFixed(1), deltaY.toFixed(1), 'DISTANCE:', distance.toFixed(1));
+    console.log('RAW DELTA:', deltaX.toFixed(1), deltaY.toFixed(1), 'CONSTRAINED:', knobX.toFixed(1), knobY.toFixed(1), 'DISTANCE:', distance.toFixed(1));
+
+    // Update current position for continuous movement
+    setCurrentPosition({ x: knobX, y: knobY });
 
     // Update knob visual position
     if (knobRef.current) {
       knobRef.current.style.transform = `translate(${knobX}px, ${knobY}px)`;
     }
-
-    // Use the constrained knob position for movement
-    updateMovement(knobX, knobY);
-  }, [isDragging, isDrawingRune, updateMovement]);
+  }, [isDragging, isDrawingRune]);
 
   const handleEnd = useCallback(() => {
     setIsDragging(false);
-    movePlayer(0, 0); // Stop movement
+    setCurrentPosition({ x: 0, y: 0 });
+    movePlayer(0, 0);
     
     // Reset knob position
     if (knobRef.current) {
       knobRef.current.style.transform = 'translate(0px, 0px)';
     }
+    
+    console.log('JOYSTICK END - Movement stopped');
   }, [movePlayer]);
 
   // Touch events
