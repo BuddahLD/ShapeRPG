@@ -113,7 +113,7 @@ const GameHUD: React.FC = () => {
                 console.log('RUNE BUTTON DIAMETER:', rect.width, 'x', rect.height);
               }
             }}
-            className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg w-22 h-22 flex items-center justify-center transition-all duration-300 hover:bg-white/30"
+            className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg w-24 h-24 flex items-center justify-center transition-all duration-300 hover:bg-white/30"
             style={{ touchAction: 'none' }}
           >
             <div
