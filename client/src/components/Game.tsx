@@ -1,0 +1,63 @@
+import React, { useEffect, useRef } from "react";
+import GameCanvas from "./GameCanvas";
+import GameHUD from "./GameHUD";
+import VirtualJoystick from "./VirtualJoystick";
+import RuneDrawing from "./RuneDrawing";
+import Hub from "./Hub";
+import Arena from "./Arena";
+import Shop from "./Shop";
+import { useGameState } from "../lib/stores/useGameState";
+import { usePlayer } from "../lib/stores/usePlayer";
+import { GameEngine } from "../lib/gameEngine/GameEngine";
+
+const Game: React.FC = () => {
+  const gameEngineRef = useRef<GameEngine | null>(null);
+  const { currentLocation, isDrawingRune } = useGameState();
+  const { initializePlayer } = usePlayer();
+
+  useEffect(() => {
+    // Initialize game engine
+    gameEngineRef.current = new GameEngine();
+    
+    // Initialize player with starting stats
+    initializePlayer();
+    
+    return () => {
+      if (gameEngineRef.current) {
+        gameEngineRef.current.destroy();
+      }
+    };
+  }, [initializePlayer]);
+
+  const renderLocationContent = () => {
+    switch (currentLocation) {
+      case "LOC_HUB_FIGUREIUM":
+        return <Hub />;
+      case "LOC_ARENA_1":
+        return <Arena />;
+      default:
+        return <Hub />;
+    }
+  };
+
+  return (
+    <div className="relative w-full h-full">
+      {/* Game Canvas */}
+      <GameCanvas gameEngine={gameEngineRef.current} />
+      
+      {/* Location-specific content */}
+      {renderLocationContent()}
+      
+      {/* Game HUD */}
+      <GameHUD />
+      
+      {/* Virtual Joystick */}
+      <VirtualJoystick />
+      
+      {/* Rune Drawing Overlay */}
+      {isDrawingRune && <RuneDrawing />}
+    </div>
+  );
+};
+
+export default Game;
