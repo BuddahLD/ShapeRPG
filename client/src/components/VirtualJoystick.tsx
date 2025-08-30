@@ -30,6 +30,11 @@ const VirtualJoystick: React.FC = () => {
     const normalizedX = deltaX / maxDistance;
     const normalizedY = deltaY / maxDistance;
 
+    // Add debug logging
+    if (Math.abs(normalizedX) > 0.1 || Math.abs(normalizedY) > 0.1) {
+      console.log(`Joystick movement: X=${normalizedX.toFixed(2)}, Y=${normalizedY.toFixed(2)}`);
+    }
+
     movePlayer(normalizedX, normalizedY);
   }, [movePlayer, joystickRadius, knobRadius]);
 

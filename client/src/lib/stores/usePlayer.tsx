@@ -69,6 +69,11 @@ export const usePlayer = create<PlayerState>()(
         const newX = state.player.x + dx * MOVEMENT_SPEED;
         const newY = state.player.y + dy * MOVEMENT_SPEED;
         
+        // Add debug logging for significant movement
+        if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
+          console.log(`Player moving: dx=${dx.toFixed(2)}, dy=${dy.toFixed(2)}, newX=${newX.toFixed(1)}, newY=${newY.toFixed(1)}`);
+        }
+        
         return {
           player: {
             ...state.player,

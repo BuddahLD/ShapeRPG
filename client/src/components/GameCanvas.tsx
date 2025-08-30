@@ -82,6 +82,12 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
     
     ctx.fillStyle = "#00ff00";
     ctx.fillRect(centerX - healthBarWidth/2, centerY - size/2 - 10, healthBarWidth * healthPercentage, healthBarHeight);
+
+    // Debug: Show player's world coordinates
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "12px Arial";
+    ctx.fillText(`Pos: ${player.x.toFixed(0)}, ${player.y.toFixed(0)}`, 10, canvas.height - 20);
+    ctx.fillText(`Vel: ${player.vx.toFixed(1)}, ${player.vy.toFixed(1)}`, 10, canvas.height - 40);
   };
 
   const renderEnemies = (ctx: CanvasRenderingContext2D) => {
