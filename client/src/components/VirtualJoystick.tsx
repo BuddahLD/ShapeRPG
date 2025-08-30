@@ -132,14 +132,10 @@ const VirtualJoystick: React.FC = () => {
         width: joystickRadius * 2,
         height: joystickRadius * 2,
         borderRadius: '50%',
-        background: 'rgba(255, 255, 255, 0.25)',
-        backdropFilter: 'blur(16px) saturate(180%)',
-        border: '1px solid rgba(255, 255, 255, 0.4)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        touchAction: 'none',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)'
+        touchAction: 'none'
       }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}

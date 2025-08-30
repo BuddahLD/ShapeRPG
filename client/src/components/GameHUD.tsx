@@ -1,10 +1,24 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { usePlayer } from "../lib/stores/usePlayer";
 import { useGameState } from "../lib/stores/useGameState";
 
 const GameHUD: React.FC = () => {
   const { player } = usePlayer();
   const { currentLocation, setDrawingRune } = useGameState();
+  const [showLocationIndicator, setShowLocationIndicator] = useState(false);
+  const [previousLocation, setPreviousLocation] = useState<string | null>(null);
+
+  // Handle location change fade effect
+  useEffect(() => {
+    if (currentLocation !== previousLocation && previousLocation !== null) {
+      setShowLocationIndicator(true);
+      const timer = setTimeout(() => {
+        setShowLocationIndicator(false);
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+    setPreviousLocation(currentLocation);
+  }, [currentLocation, previousLocation]);
 
   if (!player) return null;
 
@@ -14,31 +28,29 @@ const GameHUD: React.FC = () => {
 
   return (
     <div className="absolute inset-0 pointer-events-none z-10">
-      {/* Top Bar - HP and Mana - Modern glassmorphism design */}
-      <div className="absolute top-6 left-6 right-6 flex justify-between pointer-events-auto gap-4">
-        <div className="backdrop-blur-md bg-white/20 rounded-2xl p-3 border border-white/30 shadow-lg">
-          <div className="flex items-center space-x-3">
-            <span className="text-red-500 text-sm font-semibold">HP</span>
-            <div className="w-28 h-2 bg-white/30 rounded-full overflow-hidden">
+      {/* Top Bar - HP and Mana - Compact column design */}
+      <div className="absolute top-6 left-6 pointer-events-auto">
+        <div className="backdrop-blur-md bg-white/20 rounded-xl p-2 border border-white/30 shadow-lg space-y-2">
+          <div className="flex items-center space-x-2">
+            <span className="text-red-500 text-xs font-semibold">HP</span>
+            <div className="w-16 h-1.5 bg-white/30 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-red-400 to-red-500 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${(player.stats.hp / 100) * 100}%` }}
               />
             </div>
-            <span className="text-neutral-700 text-sm font-medium">{player.stats.hp}/100</span>
+            <span className="text-neutral-700 text-xs">{player.stats.hp}</span>
           </div>
-        </div>
-        
-        <div className="backdrop-blur-md bg-white/20 rounded-2xl p-3 border border-white/30 shadow-lg">
-          <div className="flex items-center space-x-3">
-            <span className="text-primary-500 text-sm font-semibold">MP</span>
-            <div className="w-28 h-2 bg-white/30 rounded-full overflow-hidden">
+          
+          <div className="flex items-center space-x-2">
+            <span className="text-primary-500 text-xs font-semibold">MP</span>
+            <div className="w-16 h-1.5 bg-white/30 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-primary-400 to-primary-500 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${(player.stats.mana / 50) * 100}%` }}
               />
             </div>
-            <span className="text-neutral-700 text-sm font-medium">{player.stats.mana}/50</span>
+            <span className="text-neutral-700 text-xs">{player.stats.mana}</span>
           </div>
         </div>
       </div>
@@ -96,15 +108,17 @@ const GameHUD: React.FC = () => {
         </div>
       )}
 
-      {/* Location Indicator - Modern design */}
-      <div className="absolute top-6 left-1/2 transform -translate-x-1/2 pointer-events-auto">
-        <div className="backdrop-blur-md bg-white/25 rounded-full px-6 py-2 border border-white/40 shadow-lg">
-          <span className="text-neutral-800 text-sm font-semibold">
-            {currentLocation === "LOC_HUB_FIGUREIUM" ? "Figureium Hub" : 
-             currentLocation === "LOC_PEACEFUL_FIELDS" ? "Peaceful Fields" : "Arena #1"}
-          </span>
+      {/* Location Indicator - Fade in/out when entering new zones */}
+      {showLocationIndicator && (
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 pointer-events-auto animate-pulse">
+          <div className="backdrop-blur-md bg-white/30 rounded-full px-4 py-1 border border-white/50 shadow-lg transition-all duration-1000 ease-in-out">
+            <span className="text-neutral-800 text-sm font-semibold">
+              {currentLocation === "LOC_HUB_FIGUREIUM" ? "Figureium Hub" : 
+               currentLocation === "LOC_PEACEFUL_FIELDS" ? "Peaceful Fields" : "Arena #1"}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
