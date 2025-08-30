@@ -39,25 +39,25 @@ const GameHUD: React.FC = () => {
       <div className="absolute top-6 left-6 pointer-events-auto">
         <UIContainer className="p-2 space-y-2">
           <div className="flex items-center space-x-2">
-            <span className="text-red-500 text-xs font-semibold">HP</span>
+            <span className="text-stone-100 text-xs font-semibold">HP</span>
             <div className="w-16 h-1.5 bg-white/30 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-red-400 to-red-500 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${(player.stats.hp / 100) * 100}%` }}
               />
             </div>
-            <span className="text-neutral-700 text-xs">{player.stats.hp}</span>
+            <span className="text-stone-100 text-xs">{player.stats.hp}</span>
           </div>
           
           <div className="flex items-center space-x-2">
-            <span className="text-primary-500 text-xs font-semibold">MP</span>
+            <span className="text-stone-100 text-xs font-semibold">MP</span>
             <div className="w-16 h-1.5 bg-white/30 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-primary-400 to-primary-500 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${(player.stats.mana / 50) * 100}%` }}
               />
             </div>
-            <span className="text-neutral-700 text-xs">{player.stats.mana}</span>
+            <span className="text-stone-100 text-xs">{player.stats.mana}</span>
           </div>
         </UIContainer>
       </div>
@@ -81,7 +81,7 @@ const GameHUD: React.FC = () => {
         <UIContainer className="px-4 py-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <span className="text-secondary-600 text-xs font-semibold">LVL {player.level}</span>
+              <span className="text-stone-100 text-xs font-semibold">LVL {player.level}</span>
               <div className="w-28 h-1.5 bg-white/30 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-secondary-400 to-secondary-500 rounded-full transition-all duration-500 ease-out"
@@ -92,10 +92,10 @@ const GameHUD: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="text-secondary-600 text-xs font-medium">
+              <div className="text-stone-100 text-xs font-medium">
                 Gold: {player.gold}
               </div>
-              <div className="text-neutral-700 text-xs font-medium">
+              <div className="text-stone-100 text-xs font-medium">
                 XP: {player.xp}/{100 * Math.pow(player.level, 2)}
               </div>
             </div>
