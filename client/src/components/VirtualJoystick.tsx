@@ -29,11 +29,15 @@ const VirtualJoystick: React.FC = () => {
     const deadzone = 0.1;
     const magnitude = Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
     
+    console.log('JOY POSITION:', knobX.toFixed(1), knobY.toFixed(1), 'NORMALIZED:', normalizedX.toFixed(2), normalizedY.toFixed(2), 'MAG:', magnitude.toFixed(2));
+    
     if (magnitude < deadzone) {
+      console.log('DEADZONE - STOPPING');
       movePlayer(0, 0);
       return;
     }
     
+    console.log('MOVING PLAYER:', normalizedX.toFixed(2), normalizedY.toFixed(2));
     movePlayer(normalizedX, normalizedY);
   }, [movePlayer, joystickRadius, knobRadius]);
 
@@ -60,6 +64,7 @@ const VirtualJoystick: React.FC = () => {
     if (distance > maxDistance) {
       knobX = (deltaX / distance) * maxDistance;
       knobY = (deltaY / distance) * maxDistance;
+      console.log('EDGE CONSTRAINT APPLIED - Distance:', distance.toFixed(1), 'Max:', maxDistance);
     }
 
     // Update knob visual position
