@@ -106,25 +106,27 @@ const GameHUD: React.FC = () => {
       {/* Rune Button - Only in combat areas - Modern iOS design */}
       {currentLocation === "LOC_ARENA_1" && (
         <div className="absolute bottom-20 right-8 pointer-events-auto">
-          <UIContainer className="w-18 h-18 flex items-center justify-center transition-all duration-300 active:scale-95 hover:bg-white/30">
+          <UIContainer className="w-22 h-22 flex items-center justify-center transition-all duration-300 active:scale-95 hover:bg-white/30 rounded-full">
             <button
               onMouseDown={handleRuneButtonPress}
               onTouchStart={handleRuneButtonPress}
-              className="w-full h-full flex items-center justify-center rounded-xl"
+              className="w-full h-full flex items-center justify-center rounded-full p-2"
               style={{ touchAction: 'manipulation' }}
             >
               <svg 
-                width="28" 
-                height="28" 
+                width="32" 
+                height="32" 
                 viewBox="0 0 24 24" 
                 fill="none" 
                 stroke="currentColor" 
-                strokeWidth="2.5" 
+                strokeWidth="2" 
                 className="text-stone-100 drop-shadow-sm"
               >
-                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                <path d="M2 17l10 5 10-5"/>
-                <path d="M2 12l10 5 10-5"/>
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6m0 6v6"/>
+                <path d="m21 12-6-3-6 3-6-3"/>
+                <path d="M12 8L8 4l4-4 4 4-4 4"/>
+                <path d="M12 16l4 4-4 4-4-4 4-4"/>
               </svg>
             </button>
           </UIContainer>
