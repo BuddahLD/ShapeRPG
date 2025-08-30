@@ -134,7 +134,7 @@ const VirtualJoystick: React.FC = () => {
           }
         }}
         className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg w-22 h-22 flex items-center justify-center transition-all duration-300 hover:bg-white/30"
-        style={{ touchAction: 'none' }}
+        style={{ touchAction: 'none', boxSizing: 'border-box' }}
       >
         <div
           ref={joystickRef}

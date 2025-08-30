@@ -105,8 +105,8 @@ const GameHUD: React.FC = () => {
 
       {/* Rune Button - Only in combat areas - Modern iOS design */}
       {currentLocation === "LOC_ARENA_1" && (
-        <div className="absolute bottom-20 right-8 pointer-events-auto">
-          <div 
+        <div className="fixed bottom-20 right-8 transform translate-x-0 z-20 pointer-events-auto">
+          <div
             ref={(el) => {
               if (el) {
                 const rect = el.getBoundingClientRect();
@@ -116,11 +116,11 @@ const GameHUD: React.FC = () => {
             className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg w-22 h-22 flex items-center justify-center transition-all duration-300 hover:bg-white/30"
             style={{ touchAction: 'none' }}
           >
-            <button
+            <div
+              className="relative w-full h-full rounded-full flex items-center justify-center"
               onMouseDown={handleRuneButtonPress}
               onTouchStart={handleRuneButtonPress}
-              className="w-full h-full flex items-center justify-center rounded-full p-2"
-              style={{ touchAction: 'manipulation' }}
+              style={{ cursor: 'pointer' }}
             >
               <svg 
                 width="32" 
@@ -130,6 +130,7 @@ const GameHUD: React.FC = () => {
                 stroke="currentColor" 
                 strokeWidth="2" 
                 className="text-stone-100 drop-shadow-sm"
+                style={{ pointerEvents: 'none' }}
               >
                 <circle cx="12" cy="12" r="3"/>
                 <path d="M12 1v6m0 6v6"/>
@@ -137,7 +138,7 @@ const GameHUD: React.FC = () => {
                 <path d="M12 8L8 4l4-4 4 4-4 4"/>
                 <path d="M12 16l4 4-4 4-4-4 4-4"/>
               </svg>
-            </button>
+            </div>
           </div>
         </div>
       )}
