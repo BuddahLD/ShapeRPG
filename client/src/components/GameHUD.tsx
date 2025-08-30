@@ -64,7 +64,7 @@ const GameHUD: React.FC = () => {
       
       {/* Location Indicator - Horizontally centered, lighter text */}
       {showLocationIndicator && (
-        <div className="absolute top-6 left-1/2 transform -translate-x-1/2 pointer-events-auto">
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 pointer-events-auto">
           <UIContainer className="px-4 py-2 transition-all duration-1000 ease-in-out">
             <div className="flex justify-center">
               <span className="text-neutral-100 text-xs font-medium">

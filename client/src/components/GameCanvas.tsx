@@ -123,47 +123,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
     const floatOffset = VisualEffects.createFloatingAnimation(Date.now(), 2);
     
     VisualEffects.drawPlayer(ctx, centerX, centerY + floatOffset, size);
-
-    // Modern health bar above player
-    const healthBarWidth = 40;
-    const healthBarHeight = 6;
-    const healthPercentage = player.stats.hp / 100;
-    
-    VisualEffects.drawHealthBar(
-      ctx,
-      centerX,
-      centerY - size/2 - 15,
-      healthBarWidth,
-      healthBarHeight,
-      healthPercentage
-    );
-
-
-    // Modern movement indicator with glow
-    if (Math.abs(player.vx) > 0.1 || Math.abs(player.vy) > 0.1) {
-      ctx.save();
-      
-      // Apply glow effect
-      VisualEffects.applyMagicalGlow(ctx, 'magic');
-      
-      ctx.fillStyle = DesignSystem.COLORS.primary[300];
-      ctx.beginPath();
-      ctx.arc(centerX, centerY - 50, 6, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Pulsing ring effect
-      const pulseTime = Date.now() * 0.005;
-      const pulseRadius = 12 + Math.sin(pulseTime) * 3;
-      
-      ctx.strokeStyle = DesignSystem.COLORS.primary[400];
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(centerX, centerY - 50, pulseRadius, 0, Math.PI * 2);
-      ctx.stroke();
-      
-      DesignSystem.resetCanvasStyle(ctx);
-      ctx.restore();
-    }
   };
 
   const renderWalls = (ctx: CanvasRenderingContext2D) => {
@@ -179,20 +138,18 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
     ctx.lineWidth = 3;
     ctx.lineJoin = 'round';
 
-    // Define all walls in world coordinates - render based on visibility, not player location
+    // Define continuous walls across the entire world
     const allWalls: { x: number; y: number; width: number; height: number }[] = [
-      // Hub walls with left wall but open to east
-      { x: -180, y: -130, width: 360, height: 20 }, // Hub top wall
-      { x: -180, y: 110, width: 360, height: 20 },  // Hub bottom wall
+      // Continuous top wall across all zones
+      { x: -180, y: -130, width: 1160, height: 20 }, // Top wall from hub to arena
+      
+      // Continuous bottom wall across all zones
+      { x: -180, y: 110, width: 1160, height: 20 },  // Bottom wall from hub to arena
+      
+      // Left boundary wall (hub)
       { x: -180, y: -130, width: 20, height: 260 },  // Hub left wall
       
-      // Fields walls (open on both sides for transitions)
-      { x: 200, y: -130, width: 400, height: 20 }, // Fields top wall
-      { x: 200, y: 110, width: 400, height: 20 },  // Fields bottom wall
-      
-      // Arena walls with right wall but open to west
-      { x: 620, y: -130, width: 360, height: 20 }, // Arena top wall
-      { x: 620, y: 110, width: 360, height: 20 },  // Arena bottom wall
+      // Right boundary wall (arena)
       { x: 980, y: -130, width: 20, height: 260 }   // Arena right wall
     ];
 
