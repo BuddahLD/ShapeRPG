@@ -51,21 +51,12 @@ const Hub: React.FC = () => {
         </div>
       )}
 
-      {/* Arena Entrance - Keep this since it's a location transition */}
-      <div className="absolute bottom-1/4 left-1/2 transform -translate-x-1/2 translate-y-1/2 pointer-events-auto">
-        <button
-          onClick={handleEnterArena}
-          className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200 active:scale-95 text-lg font-bold"
-        >
-          ⚔️ Enter Arena
-        </button>
-      </div>
 
       {/* Hub Instructions */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 pointer-events-auto">
         <div className="bg-black bg-opacity-70 rounded-lg px-4 py-2">
           <p className="text-white text-sm text-center">
-            Walk up to NPCs to interact with them, or enter the Arena to fight!
+            Walk to NPCs to interact. Go east to explore fields, then arena!
           </p>
         </div>
       </div>

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
 export type GamePhase = "hub" | "combat" | "ended";
-export type LocationId = "LOC_HUB_FIGUREIUM" | "LOC_ARENA_1";
+export type LocationId = "LOC_HUB_FIGUREIUM" | "LOC_PEACEFUL_FIELDS" | "LOC_ARENA_1";
 export type ShopType = "weapons" | "armor" | null;
 
 interface Enemy {
@@ -26,6 +26,13 @@ interface SpellCastResult {
   success: boolean;
 }
 
+interface WorldZone {
+  id: LocationId;
+  bounds: { minX: number; maxX: number; minY: number; maxY: number };
+  background: string;
+  hasEnemies: boolean;
+}
+
 interface GameState {
   gamePhase: GamePhase;
   currentLocation: LocationId;
@@ -34,10 +41,12 @@ interface GameState {
   showShop: ShopType;
   enemies: Enemy[];
   nearbyNPC: string | null;
+  worldZones: WorldZone[];
   
   // Actions
   setGamePhase: (phase: GamePhase) => void;
   setCurrentLocation: (location: LocationId) => void;
+  checkZoneTransition: (x: number, y: number) => LocationId | null;
   setDrawingRune: (drawing: boolean) => void;
   setSlowMotion: (slow: boolean) => void;
   setShowShop: (shop: ShopType) => void;
@@ -46,6 +55,7 @@ interface GameState {
   
   // Enemy management
   spawnEnemies: () => void;
+  spawnEnemiesForZone: (zoneId: LocationId) => void;
   clearEnemies: () => void;
   updateEnemy: (id: string, updates: Partial<Enemy>) => void;
   removeEnemy: (id: string) => void;
@@ -59,6 +69,26 @@ export const useGameState = create<GameState>()(
   subscribeWithSelector((set, get) => ({
     gamePhase: "hub",
     currentLocation: "LOC_HUB_FIGUREIUM",
+    worldZones: [
+      {
+        id: "LOC_HUB_FIGUREIUM",
+        bounds: { minX: -200, maxX: 200, minY: -150, maxY: 150 },
+        background: "#2a5298",
+        hasEnemies: false
+      },
+      {
+        id: "LOC_PEACEFUL_FIELDS",
+        bounds: { minX: 200, maxX: 600, minY: -150, maxY: 150 },
+        background: "#4a7c59",
+        hasEnemies: true
+      },
+      {
+        id: "LOC_ARENA_1",
+        bounds: { minX: 600, maxX: 1000, minY: -150, maxY: 150 },
+        background: "#8b4513",
+        hasEnemies: true
+      }
+    ],
     isDrawingRune: false,
     isSlowMotion: false,
     showShop: null,
@@ -100,6 +130,96 @@ export const useGameState = create<GameState>()(
           console.log('Trainer interface not yet implemented');
           break;
       }
+    },
+
+    checkZoneTransition: (x, y) => {
+      const { worldZones, currentLocation } = get();
+      
+      for (const zone of worldZones) {
+        if (x >= zone.bounds.minX && x <= zone.bounds.maxX &&
+            y >= zone.bounds.minY && y <= zone.bounds.maxY) {
+          
+          if (zone.id !== currentLocation) {
+            // Zone transition detected
+            set({ 
+              currentLocation: zone.id,
+              gamePhase: zone.id === "LOC_HUB_FIGUREIUM" ? "hub" : "combat"
+            });
+            
+            // Spawn enemies if entering a combat zone
+            if (zone.hasEnemies && zone.id !== "LOC_HUB_FIGUREIUM") {
+              get().spawnEnemiesForZone(zone.id);
+            } else {
+              get().clearEnemies();
+            }
+            
+            return zone.id;
+          }
+          return zone.id;
+        }
+      }
+      
+      return null; // Outside all zones
+    },
+
+    spawnEnemiesForZone: (zoneId: LocationId) => {
+      let newEnemies: Enemy[] = [];
+      
+      switch (zoneId) {
+        case "LOC_PEACEFUL_FIELDS":
+          newEnemies = [
+            {
+              id: "hex1",
+              type: "HEX_PEACEFUL",
+              x: 350, // In the fields area
+              y: -50,
+              hp: 20,
+              maxHp: 20,
+              atk: 2,
+              def: 1,
+              size: 15,
+              isAttacking: false,
+              counterWindow: 0,
+              lastAttack: 0
+            },
+            {
+              id: "hex2",
+              type: "HEX_PEACEFUL",
+              x: 400,
+              y: 30,
+              hp: 20,
+              maxHp: 20,
+              atk: 2,
+              def: 1,
+              size: 15,
+              isAttacking: false,
+              counterWindow: 0,
+              lastAttack: 0
+            }
+          ];
+          break;
+          
+        case "LOC_ARENA_1":
+          newEnemies = [
+            {
+              id: "arena_enemy1",
+              type: "TRI_MEDIUM",
+              x: 750,
+              y: -30,
+              hp: 60,
+              maxHp: 60,
+              atk: 8,
+              def: 3,
+              size: 25,
+              isAttacking: false,
+              counterWindow: 0,
+              lastAttack: 0
+            }
+          ];
+          break;
+      }
+      
+      set({ enemies: newEnemies });
     },
     
     spawnEnemies: () => {

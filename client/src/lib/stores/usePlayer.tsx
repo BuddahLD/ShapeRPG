@@ -131,7 +131,10 @@ export const usePlayer = create<PlayerState>()(
           };
         }
         
-        // Check for nearby NPCs
+        // Check for zone transitions
+        useGameState.getState().checkZoneTransition(newX, newY);
+        
+        // Check for nearby NPCs  
         get().checkNearbyNPCs(newX, newY);
         
         return {
@@ -218,37 +221,76 @@ export const usePlayer = create<PlayerState>()(
 
     checkCollision: (x, y) => {
       const playerRadius = 15;
+      const currentZone = useGameState.getState().currentLocation;
 
-      // Hub walls - more conservative boundaries
-      const walls = [
-        { x: -180, y: -130, width: 360, height: 20 }, // Top wall
-        { x: -180, y: 110, width: 360, height: 20 },  // Bottom wall  
-        { x: -180, y: -130, width: 20, height: 260 }, // Left wall
-        { x: 160, y: -130, width: 20, height: 260 },  // Right wall
-      ];
+      // Hub area walls and NPCs
+      if (currentZone === "LOC_HUB_FIGUREIUM") {
+        // Hub walls (only top, bottom for seamless transition)
+        const walls = [
+          { x: -180, y: -130, width: 360, height: 20 }, // Top wall
+          { x: -180, y: 110, width: 360, height: 20 },  // Bottom wall
+        ];
 
-      // NPCs with smaller collision radius
-      const npcs = [
-        { x: -80, y: -50, radius: 22 }, // Weapon shop
-        { x: 80, y: -50, radius: 22 },  // Armor shop
-        { x: 0, y: -80, radius: 22 },   // Trainer
-      ];
+        // NPCs
+        const npcs = [
+          { x: -80, y: -50, radius: 22 }, // Weapon shop
+          { x: 80, y: -50, radius: 22 },  // Armor shop
+          { x: 0, y: -80, radius: 22 },   // Trainer
+        ];
 
-      // Check wall collisions
-      for (const wall of walls) {
-        if (x + playerRadius > wall.x && 
-            x - playerRadius < wall.x + wall.width && 
-            y + playerRadius > wall.y && 
-            y - playerRadius < wall.y + wall.height) {
-          return false;
+        // Check wall collisions
+        for (const wall of walls) {
+          if (x + playerRadius > wall.x && 
+              x - playerRadius < wall.x + wall.width && 
+              y + playerRadius > wall.y && 
+              y - playerRadius < wall.y + wall.height) {
+            return false;
+          }
+        }
+
+        // Check NPC collisions
+        for (const npc of npcs) {
+          const distance = Math.sqrt((x - npc.x) ** 2 + (y - npc.y) ** 2);
+          if (distance < playerRadius + npc.radius) {
+            return false;
+          }
         }
       }
 
-      // Check NPC collisions
-      for (const npc of npcs) {
-        const distance = Math.sqrt((x - npc.x) ** 2 + (y - npc.y) ** 2);
-        if (distance < playerRadius + npc.radius) {
-          return false;
+      // Fields area - no walls, open movement
+      else if (currentZone === "LOC_PEACEFUL_FIELDS") {
+        // Only boundary walls at top/bottom
+        const walls = [
+          { x: 200, y: -130, width: 400, height: 20 }, // Top wall
+          { x: 200, y: 110, width: 400, height: 20 },  // Bottom wall
+        ];
+
+        for (const wall of walls) {
+          if (x + playerRadius > wall.x && 
+              x - playerRadius < wall.x + wall.width && 
+              y + playerRadius > wall.y && 
+              y - playerRadius < wall.y + wall.height) {
+            return false;
+          }
+        }
+      }
+
+      // Arena area
+      else if (currentZone === "LOC_ARENA_1") {
+        // Arena walls
+        const walls = [
+          { x: 620, y: -130, width: 360, height: 20 }, // Top wall
+          { x: 620, y: 110, width: 360, height: 20 },  // Bottom wall
+          { x: 980, y: -130, width: 20, height: 260 }, // Right wall
+        ];
+
+        for (const wall of walls) {
+          if (x + playerRadius > wall.x && 
+              x - playerRadius < wall.x + wall.width && 
+              y + playerRadius > wall.y && 
+              y - playerRadius < wall.y + wall.height) {
+            return false;
+          }
         }
       }
 
@@ -256,13 +298,19 @@ export const usePlayer = create<PlayerState>()(
     },
 
     checkNearbyNPCs: (x: number, y: number) => {
+      // Only check NPCs in the hub
+      if (useGameState.getState().currentLocation !== "LOC_HUB_FIGUREIUM") {
+        useGameState.getState().setNearbyNPC(null);
+        return;
+      }
+      
       const npcs = [
         { id: "weapon_shop", x: -80, y: -50 },
         { id: "armor_shop", x: 80, y: -50 },
         { id: "trainer", x: 0, y: -80 },
       ];
 
-      const interactionDistance = 40; // Distance to interact with NPCs
+      const interactionDistance = 40;
       let nearbyNPC = null;
 
       for (const npc of npcs) {
@@ -273,7 +321,6 @@ export const usePlayer = create<PlayerState>()(
         }
       }
 
-      // Update the game state with nearby NPC
       useGameState.getState().setNearbyNPC(nearbyNPC);
     }
   }))

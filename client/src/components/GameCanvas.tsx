@@ -34,6 +34,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
     renderNPCs(ctx);
     renderPlayer(ctx);
     renderEnemies(ctx);
+    renderZoneIndicators(ctx);
     renderEffects(ctx);
 
     // Continue game loop
@@ -43,15 +44,28 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
   const renderBackground = (ctx: CanvasRenderingContext2D) => {
     const canvas = canvasRef.current!;
     
-    // Simple gradient background based on location
+    // Zone-based background that changes as you move through the world
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
     
     if (currentLocation === "LOC_HUB_FIGUREIUM") {
+      // Blue hub colors
+      gradient.addColorStop(0, "#1a1a2e");
+      gradient.addColorStop(0.5, "#16213e");
+      gradient.addColorStop(1, "#0f3460");
+    } else if (currentLocation === "LOC_PEACEFUL_FIELDS") {
+      // Green field colors
+      gradient.addColorStop(0, "#2d5016");
+      gradient.addColorStop(0.5, "#4a7c59");
+      gradient.addColorStop(1, "#1a3d0a");
+    } else if (currentLocation === "LOC_ARENA_1") {
+      // Brown arena colors
+      gradient.addColorStop(0, "#5d2e0a");
+      gradient.addColorStop(0.5, "#8b4513");
+      gradient.addColorStop(1, "#3d1a06");
+    } else {
+      // Default colors
       gradient.addColorStop(0, "#4a90e2");
       gradient.addColorStop(1, "#7b68ee");
-    } else {
-      gradient.addColorStop(0, "#8b0000");
-      gradient.addColorStop(1, "#ff4500");
     }
     
     ctx.fillStyle = gradient;
@@ -163,7 +177,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
-    // Define NPCs with fixed world positions
+    // Only show NPCs in the hub area
+    if (currentLocation !== "LOC_HUB_FIGUREIUM") return;
+    
+    // Define NPCs with fixed world positions (only in hub)
     const npcs = [
       { id: "weapon_shop", x: -80, y: -50, color: "#4169E1", label: "⚔️" },
       { id: "armor_shop", x: 80, y: -50, color: "#32CD32", label: "🛡️" },
@@ -229,20 +246,40 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
       if (screenX > -50 && screenX < canvas.width + 50 && 
           screenY > -50 && screenY < canvas.height + 50) {
         
-        // Draw triangle enemy
-        ctx.fillStyle = "#ff4444";
-        ctx.strokeStyle = "#aa0000";
-        ctx.lineWidth = 2;
-        
         const size = enemy.size || 20;
         
-        ctx.beginPath();
-        ctx.moveTo(screenX, screenY - size);
-        ctx.lineTo(screenX - size, screenY + size);
-        ctx.lineTo(screenX + size, screenY + size);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
+        // Draw different shapes based on enemy type
+        if (enemy.type === "HEX_PEACEFUL") {
+          // Draw hexagon for peaceful field enemies
+          ctx.fillStyle = "#ff8844";
+          ctx.strokeStyle = "#cc5500";
+          ctx.lineWidth = 2;
+          
+          ctx.beginPath();
+          for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2;
+            const x = screenX + Math.cos(angle) * size;
+            const y = screenY + Math.sin(angle) * size;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          // Draw triangle for arena enemies
+          ctx.fillStyle = "#ff4444";
+          ctx.strokeStyle = "#aa0000";
+          ctx.lineWidth = 2;
+          
+          ctx.beginPath();
+          ctx.moveTo(screenX, screenY - size);
+          ctx.lineTo(screenX - size, screenY + size);
+          ctx.lineTo(screenX + size, screenY + size);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
 
         // Health bar
         const healthBarWidth = 30;
@@ -268,6 +305,58 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
         }
       }
     });
+  };
+
+  const renderZoneIndicators = (ctx: CanvasRenderingContext2D) => {
+    if (!player) return;
+    
+    const canvas = canvasRef.current!;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    
+    // Zone transition lines
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([10, 10]);
+    
+    // Hub → Fields transition at x=200
+    const hubFieldsLine = centerX + (200 - player.x);
+    if (hubFieldsLine > -50 && hubFieldsLine < canvas.width + 50) {
+      ctx.beginPath();
+      ctx.moveTo(hubFieldsLine, 0);
+      ctx.lineTo(hubFieldsLine, canvas.height);
+      ctx.stroke();
+    }
+    
+    // Fields → Arena transition at x=600
+    const fieldsArenaLine = centerX + (600 - player.x);
+    if (fieldsArenaLine > -50 && fieldsArenaLine < canvas.width + 50) {
+      ctx.beginPath();
+      ctx.moveTo(fieldsArenaLine, 0);
+      ctx.lineTo(fieldsArenaLine, canvas.height);
+      ctx.stroke();
+    }
+    
+    ctx.setLineDash([]);
+    
+    // Zone name overlay
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.font = "20px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    
+    let zoneName = "";
+    if (currentLocation === "LOC_HUB_FIGUREIUM") {
+      zoneName = "Figureium Hub";
+    } else if (currentLocation === "LOC_PEACEFUL_FIELDS") {
+      zoneName = "Peaceful Fields";
+    } else if (currentLocation === "LOC_ARENA_1") {
+      zoneName = "Combat Arena";
+    }
+    
+    if (zoneName) {
+      ctx.fillText(zoneName, canvas.width / 2, 20);
+    }
   };
 
   const renderEffects = (ctx: CanvasRenderingContext2D) => {
