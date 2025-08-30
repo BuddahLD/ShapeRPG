@@ -33,6 +33,15 @@ interface WorldZone {
   hasEnemies: boolean;
 }
 
+interface WorldChunk {
+  x: number;
+  y: number;
+  loaded: boolean;
+  enemies: Enemy[];
+  npcs: any[];
+  walls: { x: number; y: number; width: number; height: number }[];
+}
+
 interface GameState {
   gamePhase: GamePhase;
   currentLocation: LocationId;
@@ -42,6 +51,8 @@ interface GameState {
   enemies: Enemy[];
   nearbyNPC: string | null;
   worldZones: WorldZone[];
+  loadedChunks: Map<string, WorldChunk>;
+  chunkSize: number;
   
   // Actions
   setGamePhase: (phase: GamePhase) => void;
@@ -60,6 +71,12 @@ interface GameState {
   updateEnemy: (id: string, updates: Partial<Enemy>) => void;
   removeEnemy: (id: string) => void;
   
+  // Chunk management
+  loadChunk: (chunkX: number, chunkY: number) => void;
+  unloadChunk: (chunkX: number, chunkY: number) => void;
+  getChunkKey: (chunkX: number, chunkY: number) => string;
+  updateLoadedChunks: (playerX: number, playerY: number) => void;
+  
   // Combat
   castSpell: (result: SpellCastResult) => void;
   performCounterattack: (enemyId: string) => void;
@@ -69,6 +86,8 @@ export const useGameState = create<GameState>()(
   subscribeWithSelector((set, get) => ({
     gamePhase: "hub",
     currentLocation: "LOC_HUB_FIGUREIUM",
+    loadedChunks: new Map<string, WorldChunk>(),
+    chunkSize: 400, // Each chunk is 400x400 units
     worldZones: [
       {
         id: "LOC_HUB_FIGUREIUM",
