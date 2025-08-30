@@ -2,6 +2,13 @@ import React, { useState, useEffect } from "react";
 import { usePlayer } from "../lib/stores/usePlayer";
 import { useGameState } from "../lib/stores/useGameState";
 
+// Design system component for UI containers
+const UIContainer: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
+  <div className={`backdrop-blur-md bg-white/20 rounded-xl border border-white/30 shadow-lg ${className}`}>
+    {children}
+  </div>
+);
+
 const GameHUD: React.FC = () => {
   const { player } = usePlayer();
   const { currentLocation, setDrawingRune } = useGameState();
@@ -28,9 +35,9 @@ const GameHUD: React.FC = () => {
 
   return (
     <div className="absolute inset-0 pointer-events-none z-10">
-      {/* Top Bar - HP and Mana - Compact column design */}
-      <div className="absolute top-6 left-6 pointer-events-auto">
-        <div className="backdrop-blur-md bg-white/20 rounded-xl p-2 border border-white/30 shadow-lg space-y-2">
+      {/* Top Bar - HP and Mana - Using design system container */}
+      <div className="absolute top-6 left-6 pointer-events-auto space-y-3">
+        <UIContainer className="p-2 space-y-2">
           <div className="flex items-center space-x-2">
             <span className="text-red-500 text-xs font-semibold">HP</span>
             <div className="w-16 h-1.5 bg-white/30 rounded-full overflow-hidden">
@@ -52,12 +59,22 @@ const GameHUD: React.FC = () => {
             </div>
             <span className="text-neutral-700 text-xs">{player.stats.mana}</span>
           </div>
-        </div>
+        </UIContainer>
+        
+        {/* Location Indicator - Using design system container, positioned relative to HP/MP */}
+        {showLocationIndicator && (
+          <UIContainer className="p-2 transition-all duration-1000 ease-in-out">
+            <span className="text-neutral-700 text-xs font-semibold">
+              {currentLocation === "LOC_HUB_FIGUREIUM" ? "Figureium Hub" : 
+               currentLocation === "LOC_PEACEFUL_FIELDS" ? "Peaceful Fields" : "Arena #1"}
+            </span>
+          </UIContainer>
+        )}
       </div>
 
-      {/* Bottom Bar - XP and Level - Modern design */}
+      {/* Bottom Bar - XP and Level - Using design system container */}
       <div className="absolute bottom-24 left-6 right-6 pointer-events-auto">
-        <div className="backdrop-blur-md bg-white/20 rounded-2xl p-4 border border-white/30 shadow-lg">
+        <UIContainer className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <span className="text-secondary-600 text-sm font-semibold">LVL {player.level}</span>
@@ -79,7 +96,7 @@ const GameHUD: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </UIContainer>
       </div>
 
       {/* Rune Button - Only in combat areas - Modern iOS design */}
@@ -108,17 +125,6 @@ const GameHUD: React.FC = () => {
         </div>
       )}
 
-      {/* Location Indicator - Same style as HP/MP, positioned below */}
-      {showLocationIndicator && (
-        <div className="absolute top-28 left-6 pointer-events-auto">
-          <div className="backdrop-blur-md bg-white/20 rounded-xl p-2 border border-white/30 shadow-lg transition-all duration-1000 ease-in-out">
-            <span className="text-neutral-700 text-xs font-semibold">
-              {currentLocation === "LOC_HUB_FIGUREIUM" ? "Figureium Hub" : 
-               currentLocation === "LOC_PEACEFUL_FIELDS" ? "Peaceful Fields" : "Arena #1"}
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
