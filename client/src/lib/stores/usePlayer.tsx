@@ -225,10 +225,11 @@ export const usePlayer = create<PlayerState>()(
 
       // Hub area walls and NPCs
       if (currentZone === "LOC_HUB_FIGUREIUM") {
-        // Hub walls (only top, bottom for seamless transition)
+        // Hub walls with opening to the east
         const walls = [
           { x: -180, y: -130, width: 360, height: 20 }, // Top wall
           { x: -180, y: 110, width: 360, height: 20 },  // Bottom wall
+          { x: -180, y: -130, width: 20, height: 260 },  // Left wall (block west exit)
         ];
 
         // NPCs
@@ -257,9 +258,9 @@ export const usePlayer = create<PlayerState>()(
         }
       }
 
-      // Fields area - no walls, open movement
+      // Fields area - open for east-west movement
       else if (currentZone === "LOC_PEACEFUL_FIELDS") {
-        // Only boundary walls at top/bottom
+        // Only boundary walls at top/bottom (no side walls for seamless transitions)
         const walls = [
           { x: 200, y: -130, width: 400, height: 20 }, // Top wall
           { x: 200, y: 110, width: 400, height: 20 },  // Bottom wall
@@ -277,11 +278,11 @@ export const usePlayer = create<PlayerState>()(
 
       // Arena area
       else if (currentZone === "LOC_ARENA_1") {
-        // Arena walls
+        // Arena walls with opening to the west
         const walls = [
           { x: 620, y: -130, width: 360, height: 20 }, // Top wall
           { x: 620, y: 110, width: 360, height: 20 },  // Bottom wall
-          { x: 980, y: -130, width: 20, height: 260 }, // Right wall
+          { x: 980, y: -130, width: 20, height: 260 }, // Right wall (block east exit)
         ];
 
         for (const wall of walls) {

@@ -52,14 +52,6 @@ const Hub: React.FC = () => {
       )}
 
 
-      {/* Hub Instructions */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 pointer-events-auto">
-        <div className="bg-black bg-opacity-70 rounded-lg px-4 py-2">
-          <p className="text-white text-sm text-center">
-            Walk to NPCs to interact. Go east to explore fields, then arena!
-          </p>
-        </div>
-      </div>
     </div>
   );
 };

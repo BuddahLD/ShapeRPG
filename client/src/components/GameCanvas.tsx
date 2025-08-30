@@ -143,7 +143,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
   };
 
   const renderWalls = (ctx: CanvasRenderingContext2D) => {
-    if (currentLocation !== "LOC_HUB_FIGUREIUM" || !player) return;
+    if (!player) return;
 
     const canvas = canvasRef.current!;
     const centerX = canvas.width / 2;
@@ -153,20 +153,45 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
     ctx.strokeStyle = "#654321";
     ctx.lineWidth = 2;
 
-    // Define walls as world coordinates
-    const walls = [
-      { x: -200, y: -150, width: 400, height: 20 }, // Top wall
-      { x: -200, y: 130, width: 400, height: 20 },  // Bottom wall
-      { x: -200, y: -150, width: 20, height: 300 }, // Left wall
-      { x: 180, y: -150, width: 20, height: 300 },  // Right wall
-    ];
+    // Define walls that match collision system with openings
+    let walls: { x: number; y: number; width: number; height: number }[] = [];
+    
+    // Hub walls with left wall but open to east
+    if (player.x >= -200 && player.x <= 200) {
+      walls.push(
+        { x: -180, y: -130, width: 360, height: 20 }, // Top wall
+        { x: -180, y: 110, width: 360, height: 20 },  // Bottom wall
+        { x: -180, y: -130, width: 20, height: 260 }   // Left wall
+      );
+    }
+    
+    // Fields walls (open on both sides for transitions)
+    if (player.x >= 200 && player.x <= 600) {
+      walls.push(
+        { x: 200, y: -130, width: 400, height: 20 }, // Top wall
+        { x: 200, y: 110, width: 400, height: 20 }   // Bottom wall
+      );
+    }
+    
+    // Arena walls with right wall but open to west
+    if (player.x >= 600 && player.x <= 1000) {
+      walls.push(
+        { x: 620, y: -130, width: 360, height: 20 }, // Top wall
+        { x: 620, y: 110, width: 360, height: 20 },  // Bottom wall
+        { x: 980, y: -130, width: 20, height: 260 }  // Right wall
+      );
+    }
 
     walls.forEach(wall => {
       const screenX = centerX + (wall.x - player.x);
       const screenY = centerY + (wall.y - player.y);
       
-      ctx.fillRect(screenX, screenY, wall.width, wall.height);
-      ctx.strokeRect(screenX, screenY, wall.width, wall.height);
+      // Only render if visible on screen
+      if (screenX > -wall.width && screenX < canvas.width && 
+          screenY > -wall.height && screenY < canvas.height) {
+        ctx.fillRect(screenX, screenY, wall.width, wall.height);
+        ctx.strokeRect(screenX, screenY, wall.width, wall.height);
+      }
     });
   };
 
