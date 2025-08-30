@@ -64,25 +64,20 @@ export const usePlayer = create<PlayerState>()(
     },
     
     movePlayer: (dx, dy) => {
-      console.log(`movePlayer called with: dx=${dx.toFixed(3)}, dy=${dy.toFixed(3)}`);
       
       set(state => {
         if (!state.player) {
-          console.log('No player found in state');
           return {};
         }
         
-        console.log(`Current player position: (${state.player.x.toFixed(1)}, ${state.player.y.toFixed(1)})`);
         
         const MOVEMENT_SPEED = 2;
         const newX = state.player.x + dx * MOVEMENT_SPEED;
         const newY = state.player.y + dy * MOVEMENT_SPEED;
         
-        console.log(`Attempting to move to: (${newX.toFixed(1)}, ${newY.toFixed(1)})`);
         
         // If no movement input, just update velocities to 0
         if (dx === 0 && dy === 0) {
-          console.log('No movement - stopping player');
           return {
             player: {
               ...state.player,
@@ -134,7 +129,6 @@ export const usePlayer = create<PlayerState>()(
           };
         }
         
-        console.log(`Movement successful! Moving to: (${newX.toFixed(1)}, ${newY.toFixed(1)})`);
         return {
           player: {
             ...state.player,

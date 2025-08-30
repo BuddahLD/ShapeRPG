@@ -111,12 +111,29 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
     ctx.fillStyle = "#00ff00";
     ctx.fillRect(centerX - healthBarWidth/2, centerY - size/2 - 10, healthBarWidth * healthPercentage, healthBarHeight);
 
+    // Debug: Show player world position
+    ctx.fillStyle = "white";
+    ctx.font = "16px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(`Position: (${player.x.toFixed(0)}, ${player.y.toFixed(0)})`, centerX, centerY + 60);
+    
+    // Show velocity
+    ctx.fillText(`Speed: (${player.vx.toFixed(1)}, ${player.vy.toFixed(1)})`, centerX, centerY + 80);
+
     // Show movement indicator
     if (Math.abs(player.vx) > 0.1 || Math.abs(player.vy) > 0.1) {
       ctx.fillStyle = "#ffff00";
       ctx.beginPath();
-      ctx.arc(centerX, centerY - 50, 5, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY - 50, 8, 0, Math.PI * 2);
       ctx.fill();
+      
+      // Pulsing effect
+      ctx.strokeStyle = "#ffff00";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY - 50, 15, 0, Math.PI * 2);
+      ctx.stroke();
     }
   };
 
