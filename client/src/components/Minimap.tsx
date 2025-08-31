@@ -52,7 +52,7 @@ const Minimap: React.FC = () => {
           style={{ width: mapWidth, height: mapHeight, overflow: 'hidden' }}
         >
           {/* Zone backgrounds */}
-          <div className="absolute inset-0">
+          <div className="absolute inset-0 rounded-lg overflow-hidden">
             {/* Hub zone */}
             <div 
               className="absolute top-0 h-full opacity-30"
