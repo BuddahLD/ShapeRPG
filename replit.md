@@ -13,19 +13,21 @@ Shapes RPG: Figureium is a minimalist 2D RPG featuring geometric characters wher
 
 **Chunk Loading System**: Implemented dynamic world loading where areas load/unload based on player proximity for smooth transitions without loading delays.
 
-**Enhanced Movement**: Virtual joystick now supports seamless movement across the entire world map with zone-aware collision detection.
+**Enhanced Movement**: Virtual joystick now supports seamless movement across the entire world map with zone-aware collision detection. Fixed continuous movement lag with proper coordinate calculations and 60fps movement loop for responsive character control.
 
 **Modern Design System (August 2025)**: Implemented iOS-inspired minimalist design with cartoon-like contours inspired by Prince of Persia 2008. Features sophisticated pastel color palette, glassmorphism UI elements, floating animations, and modern visual effects replacing primitive solid colors.
 
 **UI Component System (August 30, 2025)**: Created reusable UIContainer design system component providing consistent glassmorphism styling across all game UI elements (HP/MP bars, location indicators, XP bars). Ensures uniform visual identity and reduces code duplication.
 
-**Char Info System (August 30, 2025)**: Implemented comprehensive character information modal with tabbed interface (Stats, Spells, Inventory). Accessible via level bar tap (stats) or rune button (spells). Features concise iOS-inspired design with proper z-index layering and touch-friendly navigation.
+**Char Info System (August 30, 2025)**: Implemented comprehensive character information modal with tabbed interface (Inventory, Stats, Spells). Accessible via bottom bar tap (inventory) with fixed 500px height for consistent sizing across tabs. Features concise iOS-inspired design with proper z-index layering above all game elements and touch-friendly navigation. Rune button correctly triggers spell casting interface.
 
 **Enhanced Location System (August 30, 2025)**: Refined location indicator with horizontal centering, improved text readability using light colors, and proper positioning relative to HP/MP containers. Shows for 2.5 seconds on game start and zone transitions.
 
 **Territorial Background Rendering (August 30, 2025)**: Replaced single-zone background coloring with territorial system that renders multiple zone backgrounds simultaneously based on world coordinates. Players can now see Hub (violet), Peaceful Fields (green), and Arena (brown-red) territories at the same time, creating immersive visual world representation.
 
 **Streamlined Canvas Rendering (August 30, 2025)**: Removed redundant zone text rendering from canvas layer, centralizing all UI text in the HUD component for better separation of concerns and cleaner visual presentation.
+
+**Polished Touch Controls (August 31, 2025)**: Enhanced mobile interface with improved joystick behavior that automatically hides during modal interactions. Fixed z-index conflicts ensuring proper layer management. Made entire bottom status bar clickable for better accessibility. Refined rune button to correctly trigger spell casting mechanics as per game design.
 
 # User Preferences
 
