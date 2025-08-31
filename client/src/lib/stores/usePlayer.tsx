@@ -227,75 +227,36 @@ export const usePlayer = create<PlayerState>()(
 
     checkCollision: (x, y) => {
       const playerRadius = 15;
+      
+      // Invisible world boundaries (same as minimap bounds)
+      const worldBounds = {
+        minX: -160,
+        maxX: 2560, 
+        minY: -110,
+        maxY: 90
+      };
+      
+      // Check world boundary constraints
+      if (x - playerRadius < worldBounds.minX || 
+          x + playerRadius > worldBounds.maxX ||
+          y - playerRadius < worldBounds.minY || 
+          y + playerRadius > worldBounds.maxY) {
+        return false;
+      }
+
+      // Check NPC collisions only in hub
       const currentZone = useGameState.getState().currentLocation;
-
-      // Hub area walls and NPCs
       if (currentZone === "LOC_HUB_FIGUREIUM") {
-        // Hub walls with opening to the east
-        const walls = [
-          { x: -180, y: -130, width: 360, height: 20 }, // Top wall
-          { x: -180, y: 110, width: 360, height: 20 },  // Bottom wall
-          { x: -180, y: -130, width: 20, height: 260 },  // Left wall (block west exit)
-        ];
-
-        // NPCs
         const npcs = [
           { x: -80, y: -50, radius: 22 }, // Weapon shop
           { x: 80, y: -50, radius: 22 },  // Armor shop
           { x: 0, y: -80, radius: 22 },   // Trainer
         ];
 
-        // Check wall collisions
-        for (const wall of walls) {
-          if (x + playerRadius > wall.x && 
-              x - playerRadius < wall.x + wall.width && 
-              y + playerRadius > wall.y && 
-              y - playerRadius < wall.y + wall.height) {
-            return false;
-          }
-        }
-
         // Check NPC collisions
         for (const npc of npcs) {
           const distance = Math.sqrt((x - npc.x) ** 2 + (y - npc.y) ** 2);
           if (distance < playerRadius + npc.radius) {
-            return false;
-          }
-        }
-      }
-
-      // Fields area - open for east-west movement
-      else if (currentZone === "LOC_PEACEFUL_FIELDS") {
-        // Only boundary walls at top/bottom (no side walls for seamless transitions)
-        const walls = [
-          { x: 200, y: -130, width: 400, height: 20 }, // Top wall
-          { x: 200, y: 110, width: 400, height: 20 },  // Bottom wall
-        ];
-
-        for (const wall of walls) {
-          if (x + playerRadius > wall.x && 
-              x - playerRadius < wall.x + wall.width && 
-              y + playerRadius > wall.y && 
-              y - playerRadius < wall.y + wall.height) {
-            return false;
-          }
-        }
-      }
-
-      // Arena area
-      else if (currentZone === "LOC_ARENA_1") {
-        // Arena walls with opening to the west
-        const walls = [
-          { x: 620, y: -130, width: 360, height: 20 }, // Top wall
-          { x: 620, y: 110, width: 360, height: 20 },  // Bottom wall
-          { x: 980, y: -130, width: 20, height: 260 }, // Right wall (block east exit)
-        ];
-
-        for (const wall of walls) {
-          if (x + playerRadius > wall.x && 
-              x - playerRadius < wall.x + wall.width && 
-              y + playerRadius > wall.y && 
-              y - playerRadius < wall.y + wall.height) {
             return false;
           }
         }

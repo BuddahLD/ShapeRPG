@@ -32,7 +32,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
 
     // Render game elements
     renderBackground(ctx);
-    renderWalls(ctx);
+    handleBoundaryLimits();
     renderNPCs(ctx);
     renderPlayer(ctx);
     renderEnemies(ctx);
@@ -125,48 +125,20 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
     VisualEffects.drawPlayer(ctx, centerX, centerY, size);
   };
 
-  const renderWalls = (ctx: CanvasRenderingContext2D) => {
+  // Invisible boundary system - no visual walls but movement limits
+  const handleBoundaryLimits = () => {
     if (!player) return;
-
-    const canvas = canvasRef.current!;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-
-    // Use modern neutral colors for walls
-    ctx.fillStyle = DesignSystem.COLORS.neutral[600];
-    ctx.strokeStyle = DesignSystem.COLORS.neutral[800];
-    ctx.lineWidth = 3;
-    ctx.lineJoin = 'round';
-
-    // Define continuous walls across the entire world
-    const allWalls: { x: number; y: number; width: number; height: number }[] = [
-      // Continuous top wall across all zones (expanded to cover 5x larger arena)
-      { x: -180, y: -130, width: 2780, height: 20 }, // Top wall from hub to arena end
-      
-      // Continuous bottom wall across all zones (expanded to cover 5x larger arena)
-      { x: -180, y: 110, width: 2780, height: 20 },  // Bottom wall from hub to arena end
-      
-      // Left boundary wall (hub)
-      { x: -180, y: -130, width: 20, height: 260 },  // Hub left wall
-      
-      // Right boundary wall (arena end - expanded 5x)
-      { x: 2580, y: -130, width: 20, height: 260 }   // Arena right wall at new boundary
-    ];
-
-    allWalls.forEach(wall => {
-      const screenX = centerX + (wall.x - player.x);
-      const screenY = centerY + (wall.y - player.y);
-      
-      // Only render if visible on screen
-      if (screenX > -wall.width && screenX < canvas.width && 
-          screenY > -wall.height && screenY < canvas.height) {
-        // Draw walls with rounded corners for modern look
-        ctx.beginPath();
-        ctx.roundRect(screenX, screenY, wall.width, wall.height, 8);
-        ctx.fill();
-        ctx.stroke();
-      }
-    });
+    
+    // Define world boundaries (keep movement constraints without visual walls)
+    const worldBounds = {
+      minX: -160,
+      maxX: 2560, 
+      minY: -110,
+      maxY: 90
+    };
+    
+    // These boundaries are enforced in the player movement system
+    // No visual rendering needed - just natural zone transitions
   };
 
   const renderNPCs = (ctx: CanvasRenderingContext2D) => {
@@ -251,38 +223,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
           currentLocation
         );
 
-        // Modern enemy health bar
-        const healthBarWidth = 32;
-        const healthBarHeight = 4;
-        const healthPercentage = enemy.hp / enemy.maxHp;
-        
-        VisualEffects.drawHealthBar(
-          ctx,
-          screenX,
-          screenY + floatOffset - size - 18,
-          healthBarWidth,
-          healthBarHeight,
-          healthPercentage
-        );
-
-        // Modern counterattack indicator
-        if (enemy.isAttacking && enemy.counterWindow > 0) {
-          const radius = 28;
-          const progress = enemy.counterWindow / 1000;
-          
-          ctx.save();
-          VisualEffects.applyMagicalGlow(ctx, 'fire');
-          
-          ctx.strokeStyle = DesignSystem.COLORS.error;
-          ctx.lineWidth = 4;
-          ctx.lineCap = 'round';
-          ctx.beginPath();
-          ctx.arc(screenX, screenY + floatOffset, radius, 0, Math.PI * 2 * progress);
-          ctx.stroke();
-          
-          DesignSystem.resetCanvasStyle(ctx);
-          ctx.restore();
-        }
+        // Enemy info moved to minimap - no health bars or indicators on canvas
       }
     });
   };

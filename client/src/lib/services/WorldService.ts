@@ -31,13 +31,7 @@ const ZONE_CONFIGS: ZoneConfig[] = [
   {
     id: 'LOC_PEACEFUL_FIELDS',
     bounds: { minX: 200, maxX: 600 },
-    allowsEnemySpawning: true,
-    enemyTypes: [{
-      type: 'HEX_PEACEFUL' as EnemyType,
-      spawnRate: 0.7,
-      count: 2,
-      stats: { hp: 20, maxHp: 20, atk: 2, def: 1, size: 15 }
-    }]
+    allowsEnemySpawning: false
   },
   {
     id: 'LOC_ARENA_1',

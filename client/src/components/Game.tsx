@@ -3,6 +3,7 @@ import GameCanvas from "./GameCanvas";
 import GameHUD from "./GameHUD";
 import VirtualJoystick from "./VirtualJoystick";
 import RuneDrawing from "./RuneDrawing";
+import Minimap from "./Minimap";
 import Hub from "./Hub";
 import Arena from "./Arena";
 import Shop from "./Shop";
@@ -60,6 +61,9 @@ const Game: React.FC = () => {
       
       {/* Virtual Joystick */}
       <VirtualJoystick isModalOpen={showCharInfo} />
+      
+      {/* Minimap */}
+      <Minimap />
       
       {/* Rune Drawing Overlay */}
       {isDrawingRune && <RuneDrawing />}
