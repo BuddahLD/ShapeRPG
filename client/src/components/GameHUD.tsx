@@ -22,17 +22,13 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
   const { currentLocation, setDrawingRune } = useGameState();
   const [showLocationIndicator, setShowLocationIndicator] = useState(false);
   const [locationOpacity, setLocationOpacity] = useState(0);
-  const [shownLocations, setShownLocations] = useState<Set<string>>(new Set());
+  const [previousLocation, setPreviousLocation] = useState<string | null>(null);
 
-  // ATOMIC: Location popup with smooth animation - triggers once per location
+  // ATOMIC: Location popup with smooth animation - triggers on every location change
   useEffect(() => {
-    if (currentLocation && !shownLocations.has(currentLocation)) {
-      // Mark as shown immediately
-      setShownLocations(prev => {
-        const newSet = new Set(prev);
-        newSet.add(currentLocation);
-        return newSet;
-      });
+    if (currentLocation && currentLocation !== previousLocation) {
+      // Update previous location
+      setPreviousLocation(currentLocation);
       
       // Trigger animation
       setShowLocationIndicator(true);
@@ -58,7 +54,7 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
         clearTimeout(hideTimer);
       };
     }
-  }, [currentLocation]); // ATOMIC: Only depends on location changes
+  }, [currentLocation, previousLocation]); // ATOMIC: Only depends on location changes
 
   if (!player) return null;
 
@@ -110,7 +106,7 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
             top: '86px', 
             width: '56px',
             opacity: locationOpacity,
-            transform: `translateY(${locationOpacity === 1 ? '0' : '-8px'}) scale(${locationOpacity === 1 ? '1' : '0.95'})`,
+            transform: `scale(${locationOpacity === 1 ? '1' : '0.95'})`,
             transition: 'opacity 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
           }}
         >
