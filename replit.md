@@ -23,6 +23,8 @@ Shapes RPG: Figureium is a minimalist 2D RPG featuring geometric characters wher
 
 **Enhanced Location System (August 30, 2025)**: Refined location indicator with horizontal centering, improved text readability using light colors, and proper positioning relative to HP/MP containers. Shows for 2.5 seconds on game start and zone transitions.
 
+**Extensible UI Architecture (August 31, 2025)**: Enhanced all UI components with extensible prop interfaces that support additional properties without affecting existing logic. Components now accept HTML attributes, support variants (default/minimal/enhanced), positioning options, and custom styling while maintaining full backward compatibility. Follows Open/Closed Principle - open for extension, closed for modification.
+
 **Territorial Background Rendering (August 30, 2025)**: Replaced single-zone background coloring with territorial system that renders multiple zone backgrounds simultaneously based on world coordinates. Players can now see Hub (violet), Peaceful Fields (green), and Arena (brown-red) territories at the same time, creating immersive visual world representation.
 
 **Streamlined Canvas Rendering (August 30, 2025)**: Removed redundant zone text rendering from canvas layer, centralizing all UI text in the HUD component for better separation of concerns and cleaner visual presentation.

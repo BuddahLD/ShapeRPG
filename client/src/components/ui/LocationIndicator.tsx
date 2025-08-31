@@ -7,7 +7,21 @@ import { UIContainer } from "./UIContainer";
  * LocationIndicator - Single Responsibility: Show location change notifications
  * SOLID: Isolated animation and location detection logic
  */
-export const LocationIndicator: React.FC = () => {
+interface LocationIndicatorProps extends React.HTMLAttributes<HTMLDivElement> {
+  duration?: number;
+  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+  variant?: 'default' | 'minimal' | 'enhanced';
+  showAnimation?: boolean;
+}
+
+export const LocationIndicator: React.FC<LocationIndicatorProps> = ({
+  duration = 2500,
+  position = 'top-right',
+  variant = 'default', 
+  showAnimation = true,
+  className = "",
+  ...props
+}) => {
   const { currentLocation } = useGameState();
   const [showLocationIndicator, setShowLocationIndicator] = useState(false);
   const [previousLocation, setPreviousLocation] = useState<string | null>(null);
@@ -15,7 +29,7 @@ export const LocationIndicator: React.FC = () => {
   // ATOMIC: Animation Manager for location popup
   const { styles: popupStyles, startAnimation } = useAnimation({
     id: 'location-popup',
-    duration: 2500,
+    duration,
     phases: [
       {
         name: 'fadeIn',
@@ -44,13 +58,15 @@ export const LocationIndicator: React.FC = () => {
       setPreviousLocation(currentLocation);
       setShowLocationIndicator(true);
       
-      // Start the animation
-      startAnimation();
+      // Start the animation (if enabled)
+      if (showAnimation) {
+        startAnimation();
+      }
       
       // Hide after animation completes
       const hideTimer = setTimeout(() => {
         setShowLocationIndicator(false);
-      }, 2500);
+      }, duration);
       
       return () => clearTimeout(hideTimer);
     }
@@ -66,17 +82,28 @@ export const LocationIndicator: React.FC = () => {
     }
   };
 
+  const positionStyles = {
+    'top-right': 'top-20 right-6',
+    'top-left': 'top-20 left-6',
+    'bottom-right': 'bottom-20 right-6',
+    'bottom-left': 'bottom-20 left-6'
+  };
+
+  const animationStyles = showAnimation ? {
+    opacity: popupStyles.opacity || 0,
+    transform: popupStyles.transform as string || 'scale(0.95)',
+  } : { opacity: 1, transform: 'scale(1)' };
+
   return (
     <div 
-      className="absolute right-6 pointer-events-auto transition-all duration-200 ease-in-out" 
+      className={`absolute ${positionStyles[position]} pointer-events-auto transition-all duration-200 ease-in-out ${className}`} 
       style={{ 
-        top: '86px', 
         width: '56px',
-        opacity: popupStyles.opacity || 0,
-        transform: popupStyles.transform as string || 'scale(0.95)',
+        ...animationStyles,
       }}
+      {...props}
     >
-      <UIContainer className="px-2 py-1">
+      <UIContainer variant={variant} className="px-2 py-1">
         <div className="flex items-center justify-center">
           <span className="text-neutral-100 text-xs font-medium">
             {getLocationName(currentLocation || '')}

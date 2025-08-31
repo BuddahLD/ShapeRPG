@@ -28,7 +28,7 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
 
   return (
     <div className="absolute inset-0 pointer-events-none z-10">
-      {/* SOLID: Each component has single responsibility */}
+      {/* SOLID: Each component has single responsibility and is extensible */}
       <PlayerStatsDisplay />
       <LocationIndicator />
       <PlayerProgressBar onLevelBarClick={handleLevelBarClick} />

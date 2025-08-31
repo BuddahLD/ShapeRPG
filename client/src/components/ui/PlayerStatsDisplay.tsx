@@ -6,20 +6,40 @@ import { UIContainer } from "./UIContainer";
  * PlayerStatsDisplay - Single Responsibility: Display HP and MP bars
  * SOLID: Open for extension (new stat types), closed for modification
  */
-interface PlayerStatsDisplayProps {
-  className?: string;
+interface PlayerStatsDisplayProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: 'default' | 'compact' | 'detailed';
+  showLabels?: boolean;
+  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 }
 
-export const PlayerStatsDisplay: React.FC<PlayerStatsDisplayProps> = ({ className = "" }) => {
+export const PlayerStatsDisplay: React.FC<PlayerStatsDisplayProps> = ({ 
+  className = "", 
+  variant = 'default',
+  showLabels = true,
+  position = 'top-left',
+  ...props 
+}) => {
   const { player } = usePlayer();
 
   if (!player) return null;
 
+  const positionStyles = {
+    'top-left': 'top-6 left-6',
+    'top-right': 'top-6 right-6', 
+    'bottom-left': 'bottom-6 left-6',
+    'bottom-right': 'bottom-6 right-6'
+  };
+
+  const containerVariant = variant === 'compact' ? 'minimal' : 'default';
+
   return (
-    <div className={`absolute top-6 left-6 pointer-events-auto ${className}`}>
-      <UIContainer className="p-2 space-y-2">
+    <div 
+      className={`absolute ${positionStyles[position]} pointer-events-auto ${className}`}
+      {...props}
+    >
+      <UIContainer variant={containerVariant} className={variant === 'compact' ? 'p-1 space-y-1' : 'p-2 space-y-2'}>
         <div className="flex items-center space-x-2">
-          <span className="text-stone-100 text-xs font-semibold">HP</span>
+          {showLabels && <span className="text-stone-100 text-xs font-semibold">HP</span>}
           <div className="w-16 h-1.5 bg-white/30 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-to-r from-red-400 to-red-500 rounded-full transition-all duration-500 ease-out"
@@ -29,7 +49,7 @@ export const PlayerStatsDisplay: React.FC<PlayerStatsDisplayProps> = ({ classNam
         </div>
         
         <div className="flex items-center space-x-2">
-          <span className="text-stone-100 text-xs font-semibold">MP</span>
+          {showLabels && <span className="text-stone-100 text-xs font-semibold">MP</span>}
           <div className="w-16 h-1.5 bg-white/30 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-to-r from-primary-400 to-primary-500 rounded-full transition-all duration-500 ease-out"
