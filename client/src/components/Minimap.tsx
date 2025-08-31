@@ -10,9 +10,9 @@ const Minimap: React.FC = () => {
 
   const enemies = getAllEnemies();
   
-  // Minimap dimensions - smaller square container
-  const mapWidth = 72;
-  const mapHeight = 72;
+  // Minimap dimensions - square matching HP/MP container height
+  const mapWidth = 52;
+  const mapHeight = 52;
   
   // World bounds for minimap scaling
   const worldBounds = {

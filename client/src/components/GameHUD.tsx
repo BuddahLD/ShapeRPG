@@ -79,7 +79,7 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
       
       {/* Location Indicator - Below minimap with 6px padding, same width as minimap container */}
       {showLocationIndicator && (
-        <div className="absolute right-6 pointer-events-auto" style={{ top: '106px', width: '76px' }}>
+        <div className="absolute right-6 pointer-events-auto" style={{ top: '86px', width: '56px' }}>
           <UIContainer className="px-2 py-1 transition-all duration-1000 ease-in-out">
             <div className="flex items-center justify-center">
               <span className="text-neutral-100 text-xs font-medium">
