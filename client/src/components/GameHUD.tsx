@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { usePlayer } from "../lib/stores/usePlayer";
 import { useGameState } from "../lib/stores/useGameState";
 import StatsInventoryModal from "./StatsInventoryModal";
+import { useAnimation } from "../hooks/useAnimation";
 
 interface GameHUDProps {
   showCharInfo: boolean;
@@ -22,38 +23,46 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
   const { currentLocation, setDrawingRune } = useGameState();
   const [showLocationIndicator, setShowLocationIndicator] = useState(false);
   const [previousLocation, setPreviousLocation] = useState<string | null>(null);
-  const [animationPhase, setAnimationPhase] = useState<'hidden' | 'fadingIn' | 'visible' | 'fadingOut'>('hidden');
 
-  // ATOMIC: Location popup trigger - completely isolated logic
+  // ATOMIC: Animation manager for location popup
+  const { styles: popupStyles, isAnimating } = useAnimation({
+    id: 'location-popup',
+    trigger: () => currentLocation !== null && currentLocation !== previousLocation && showLocationIndicator,
+    duration: 2500,
+    phases: [
+      {
+        name: 'fadeIn',
+        startAt: 0,
+        endAt: 500,
+        styles: { opacity: 1, transform: 'scale(1)' }
+      },
+      {
+        name: 'visible',
+        startAt: 500,
+        endAt: 2000,
+        styles: { opacity: 1, transform: 'scale(1)' }
+      },
+      {
+        name: 'fadeOut',
+        startAt: 2000,
+        endAt: 2500,
+        styles: { opacity: 0, transform: 'scale(0.95)' }
+      }
+    ]
+  });
+
+  // ATOMIC: Location change detection - pure logic, no animation
   useEffect(() => {
     if (currentLocation && currentLocation !== previousLocation) {
       setPreviousLocation(currentLocation);
-      
-      // Start animation sequence
       setShowLocationIndicator(true);
-      setAnimationPhase('fadingIn');
       
-      // Fade in complete
-      const fadeInTimer = setTimeout(() => {
-        setAnimationPhase('visible');
-      }, 100);
-      
-      // Start fade out
-      const fadeOutTimer = setTimeout(() => {
-        setAnimationPhase('fadingOut');
-      }, 2000);
-      
-      // Hide completely
+      // Simple hide timer - animation manager handles the fade effects
       const hideTimer = setTimeout(() => {
         setShowLocationIndicator(false);
-        setAnimationPhase('hidden');
       }, 2500);
       
-      return () => {
-        clearTimeout(fadeInTimer);
-        clearTimeout(fadeOutTimer);
-        clearTimeout(hideTimer);
-      };
+      return () => clearTimeout(hideTimer);
     }
   }, [currentLocation, previousLocation]);
 
@@ -99,15 +108,14 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
         </UIContainer>
       </div>
       
-      {/* Location Indicator - Isolated animation system */}
+      {/* Location Indicator - Managed by Animation Manager */}
       {showLocationIndicator && (
         <div 
           className="absolute right-6 pointer-events-auto transition-all duration-500 ease-in-out" 
           style={{ 
             top: '86px', 
             width: '56px',
-            opacity: animationPhase === 'fadingIn' || animationPhase === 'visible' ? 1 : 0,
-            transform: `scale(${animationPhase === 'fadingIn' || animationPhase === 'visible' ? 1 : 0.95})`,
+            ...popupStyles // Animation Manager provides all animation styles
           }}
         >
           <UIContainer className="px-2 py-1">
