@@ -21,19 +21,42 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
   const { player } = usePlayer();
   const { currentLocation, setDrawingRune } = useGameState();
   const [showLocationIndicator, setShowLocationIndicator] = useState(false);
+  const [locationOpacity, setLocationOpacity] = useState(0);
   const [shownLocations, setShownLocations] = useState<Set<string>>(new Set());
 
-  // Show location popup if this location hasn't been shown yet
+  // Show location popup with smooth fade animation if this location hasn't been shown yet
   useEffect(() => {
     if (currentLocation && !shownLocations.has(currentLocation)) {
-      setShowLocationIndicator(true);
-      setShownLocations(prev => new Set([...prev, currentLocation]));
+      // Add location to shown set
+      setShownLocations(prev => {
+        const newSet = new Set(prev);
+        newSet.add(currentLocation);
+        return newSet;
+      });
       
-      const timer = setTimeout(() => {
+      // Start animation sequence
+      setShowLocationIndicator(true);
+      
+      // Fade in (immediate)
+      const fadeInTimer = setTimeout(() => {
+        setLocationOpacity(1);
+      }, 50);
+      
+      // Fade out after 2 seconds
+      const fadeOutTimer = setTimeout(() => {
+        setLocationOpacity(0);
+      }, 2000);
+      
+      // Hide completely after fade out completes
+      const hideTimer = setTimeout(() => {
         setShowLocationIndicator(false);
       }, 2500);
       
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(fadeInTimer);
+        clearTimeout(fadeOutTimer);
+        clearTimeout(hideTimer);
+      };
     }
   }, [currentLocation, shownLocations]);
 
@@ -79,10 +102,19 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
         </UIContainer>
       </div>
       
-      {/* Location Indicator - Below minimap with 6px padding, same width as minimap container */}
+      {/* Location Indicator - Below minimap with smooth fade animation */}
       {showLocationIndicator && (
-        <div className="absolute right-6 pointer-events-auto" style={{ top: '86px', width: '56px' }}>
-          <UIContainer className="px-2 py-1 transition-all duration-1000 ease-in-out">
+        <div 
+          className="absolute right-6 pointer-events-auto transition-all duration-500 ease-in-out transform" 
+          style={{ 
+            top: '86px', 
+            width: '56px',
+            opacity: locationOpacity,
+            transform: `translateY(${locationOpacity === 1 ? '0' : '-8px'}) scale(${locationOpacity === 1 ? '1' : '0.95'})`,
+            transition: 'opacity 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+          }}
+        >
+          <UIContainer className="px-2 py-1">
             <div className="flex items-center justify-center">
               <span className="text-neutral-100 text-xs font-medium">
                 {currentLocation === "LOC_HUB_FIGUREIUM" ? "Hub" : 
