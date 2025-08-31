@@ -21,17 +21,21 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
   const { player } = usePlayer();
   const { currentLocation, setDrawingRune } = useGameState();
   const [showLocationIndicator, setShowLocationIndicator] = useState(false); // Don't show on start
-  const [previousLocation, setPreviousLocation] = useState<string | null>(currentLocation);
+  const [previousLocation, setPreviousLocation] = useState<string | null>(null);
 
-  // Handle location change fade effect - only on actual transitions
+  // Handle location change fade effect - show on game start and transitions
   useEffect(() => {
-    if (currentLocation !== previousLocation && previousLocation !== null) {
+    // Show popup on first run (game start) or when transitioning between areas
+    if (previousLocation === null || currentLocation !== previousLocation) {
       setShowLocationIndicator(true);
       const timer = setTimeout(() => {
         setShowLocationIndicator(false);
       }, 2500);
+      
+      setPreviousLocation(currentLocation);
       return () => clearTimeout(timer);
     }
+    
     setPreviousLocation(currentLocation);
   }, [currentLocation, previousLocation]);
 
