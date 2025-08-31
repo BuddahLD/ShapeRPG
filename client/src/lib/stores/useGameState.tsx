@@ -9,6 +9,7 @@ import {
   WorldZone,
   WorldChunk 
 } from "../types/gameTypes";
+import { WorldAreaManager } from "../services/WorldAreaManager";
 
 interface GameState {
   gamePhase: GamePhase;
@@ -113,48 +114,29 @@ export const useGameState = create<GameState>()(
     },
 
     checkZoneTransition: (x, y) => {
-      const { worldZones, currentLocation } = get();
+      const { currentLocation } = get();
       
-      // Reduce logging frequency - only log occasionally
-      if (Math.floor(x) % 50 === 0) {
-        console.log("🔍 ZONES DEBUG:", {
-          position: { x, y },
-          currentLocation,
-          totalZones: worldZones.length,
-          zones: worldZones.map(z => ({
-            id: z.id,
-            bounds: z.bounds,
-            contains: x >= z.bounds.minX && x <= z.bounds.maxX && y >= z.bounds.minY && y <= z.bounds.maxY
-          }))
+      // Use WorldAreaManager for unified zone detection
+      const transitionResult = WorldAreaManager.checkTransition(x, y, currentLocation);
+      
+      if (transitionResult.transitionDetected && transitionResult.area) {
+        
+        set({ 
+          currentLocation: transitionResult.newLocation!,
+          gamePhase: transitionResult.area.gamePhase
         });
-      }
-      
-      for (const zone of worldZones) {
-        if (x >= zone.bounds.minX && x <= zone.bounds.maxX &&
-            y >= zone.bounds.minY && y <= zone.bounds.maxY) {
-          
-          if (zone.id !== currentLocation) {
-            // Zone transition detected
-            console.log("🚀 ZONE TRANSITION:", currentLocation, "→", zone.id);
-            set({ 
-              currentLocation: zone.id,
-              gamePhase: zone.id === "LOC_HUB_FIGUREIUM" ? "hub" : "combat"
-            });
-            
-            // Spawn enemies if entering a combat zone
-            if (zone.hasEnemies && zone.id !== "LOC_HUB_FIGUREIUM") {
-              get().spawnEnemiesForZone(zone.id);
-            } else {
-              get().clearEnemies();
-            }
-            
-            return zone.id;
-          }
-          return zone.id;
+        
+        // Spawn enemies if entering a combat zone
+        if (transitionResult.area.hasEnemies) {
+          get().spawnEnemiesForZone(transitionResult.newLocation!);
+        } else {
+          get().clearEnemies();
         }
+        
+        return transitionResult.newLocation;
       }
       
-      return null; // Outside all zones
+      return transitionResult.newLocation;
     },
 
     spawnEnemiesForZone: (zoneId: LocationId) => {

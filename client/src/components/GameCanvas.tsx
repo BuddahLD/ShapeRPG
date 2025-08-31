@@ -4,6 +4,7 @@ import { usePlayer } from "../lib/stores/usePlayer";
 import { GameEngine } from "../lib/gameEngine/GameEngine";
 import { DesignSystem } from "../lib/services/DesignSystem";
 import { VisualEffects } from "../lib/services/VisualEffects";
+import { WorldAreaManager } from "../lib/services/WorldAreaManager";
 
 interface GameCanvasProps {
   gameEngine: GameEngine | null;
@@ -48,44 +49,28 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
     if (!player) return;
     
     const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
     
-    // Zone boundaries in world coordinates
-    const hubFieldsBoundary = 200;
-    const fieldsArenaBoundary = 600;
-    const arenaEndBoundary = 2600;
+    // Get unified area boundaries from WorldAreaManager
+    const visualBoundaries = WorldAreaManager.getVisualBoundaries(player.x, player.y, centerX);
     
-    // Calculate screen positions of zone boundaries
-    const hubFieldsScreenX = centerX + (hubFieldsBoundary - player.x);
-    const fieldsArenaScreenX = centerX + (fieldsArenaBoundary - player.x);
-    
-    // Draw territorial backgrounds based on world coordinates
-    
-    // Hub territory (violet) - left side
-    if (hubFieldsScreenX > 0) {
-      const gradient = DesignSystem.createZoneGradient(ctx, 'LOC_HUB_FIGUREIUM', Math.min(hubFieldsScreenX, canvas.width), canvas.height);
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, Math.min(hubFieldsScreenX, canvas.width), canvas.height);
-    }
-    
-    // Peaceful Fields territory (green) - middle section
-    const fieldsStartX = Math.max(0, hubFieldsScreenX);
-    const fieldsEndX = Math.min(canvas.width, fieldsArenaScreenX);
-    if (fieldsEndX > fieldsStartX) {
-      const fieldsWidth = fieldsEndX - fieldsStartX;
-      const gradient = DesignSystem.createZoneGradient(ctx, 'LOC_PEACEFUL_FIELDS', fieldsWidth, canvas.height);
-      ctx.fillStyle = gradient;
-      ctx.fillRect(fieldsStartX, 0, fieldsWidth, canvas.height);
-    }
-    
-    // Arena territory (brown-red) - right side
-    if (fieldsArenaScreenX < canvas.width) {
-      const arenaStartX = Math.max(0, fieldsArenaScreenX);
-      const arenaWidth = canvas.width - arenaStartX;
-      const gradient = DesignSystem.createZoneGradient(ctx, 'LOC_ARENA_1', arenaWidth, canvas.height);
-      ctx.fillStyle = gradient;
-      ctx.fillRect(arenaStartX, 0, arenaWidth, canvas.height);
-    }
+    // Draw territorial backgrounds using unified boundaries
+    visualBoundaries.forEach(area => {
+      const screenStartX = area.screenStartX;
+      const screenEndX = area.screenEndX;
+      
+      // Calculate visible portion of this area
+      const visibleStartX = Math.max(0, screenStartX);
+      const visibleEndX = Math.min(canvas.width, screenEndX);
+      const visibleWidth = visibleEndX - visibleStartX;
+      
+      // Only render if area is visible on screen
+      if (visibleWidth > 0) {
+        const gradient = DesignSystem.createZoneGradient(ctx, area.areaId, visibleWidth, canvas.height);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(visibleStartX, 0, visibleWidth, canvas.height);
+      }
+    });
+
 
     // Add subtle grid pattern with modern styling
     ctx.strokeStyle = `rgba(255, 255, 255, 0.08)`;
