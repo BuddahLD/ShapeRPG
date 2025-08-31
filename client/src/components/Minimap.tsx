@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { usePlayer } from "../lib/stores/usePlayer";
 import { useWorldChunks } from "../lib/stores/useWorldChunks";
 
@@ -41,16 +41,8 @@ const Minimap: React.FC = () => {
     return "#6b7280"; // Default
   };
 
-  // Debug logging
-  useEffect(() => {
-    console.log("🗺️ MINIMAP DEBUG:");
-    console.log("- Container padding: 2px");
-    console.log("- Map dimensions:", mapWidth, "x", mapHeight);
-    console.log("- Total container:", mapWidth + 4, "x", mapHeight + 4);
-    console.log("- Container border-radius: rounded-xl (12px)");
-    console.log("- Inner view border-radius: rounded-lg (8px)");
-    console.log("- Expected radius diff:", "12px - 2px = 10px vs 8px");
-  }, [mapWidth, mapHeight]);
+  // Debug: log minimap info
+  console.log("🗺️ MINIMAP:", mapWidth + "x" + mapHeight, "in", (mapWidth + 4) + "x" + (mapHeight + 4), "container");
   
 
   return (
@@ -65,8 +57,8 @@ const Minimap: React.FC = () => {
             height: mapHeight, 
             overflow: 'hidden', 
             backgroundColor: 'transparent',
-            // Debug: add temporary visible background to see actual shape
-            boxShadow: 'inset 0 0 0 1px rgba(255, 0, 0, 0.5)'
+            // Debug: red outline to see shape
+            boxShadow: 'inset 0 0 0 1px red'
           }}
         >
           {/* Zone backgrounds */}
