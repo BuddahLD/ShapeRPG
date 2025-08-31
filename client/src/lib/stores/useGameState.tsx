@@ -115,12 +115,19 @@ export const useGameState = create<GameState>()(
     checkZoneTransition: (x, y) => {
       const { worldZones, currentLocation } = get();
       
+      console.log("🔍 CHECKING ZONES at position:", x, y, "current:", currentLocation);
+      
       for (const zone of worldZones) {
+        console.log("📍 Zone", zone.id, "bounds:", zone.bounds, "contains:", 
+          x >= zone.bounds.minX && x <= zone.bounds.maxX &&
+          y >= zone.bounds.minY && y <= zone.bounds.maxY);
+          
         if (x >= zone.bounds.minX && x <= zone.bounds.maxX &&
             y >= zone.bounds.minY && y <= zone.bounds.maxY) {
           
           if (zone.id !== currentLocation) {
             // Zone transition detected
+            console.log("🚀 ZONE TRANSITION:", currentLocation, "→", zone.id);
             set({ 
               currentLocation: zone.id,
               gamePhase: zone.id === "LOC_HUB_FIGUREIUM" ? "hub" : "combat"
