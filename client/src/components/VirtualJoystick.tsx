@@ -172,6 +172,8 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
           style={{
             width: knobRadius * 2,
             height: knobRadius * 2,
+            minWidth: knobRadius * 2,
+            minHeight: knobRadius * 2,
             background: 'radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
@@ -187,6 +189,8 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
           style={{
             width: knobRadius * 2,
             height: knobRadius * 2,
+            minWidth: knobRadius * 2,
+            minHeight: knobRadius * 2,
             background: 'radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)',
             border: '2px solid rgba(255, 255, 255, 0.8)',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9)',

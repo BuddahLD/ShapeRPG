@@ -66,8 +66,8 @@ export const LAYOUT_CONFIGS = {
   } as UILayoutConfig,
 
   actionButtons: {
-    position: { bottom: '140px', right: '2rem' },
-    dimensions: { width: '80px', height: '80px' },
+    position: { bottom: '180px', right: '2rem' },
+    dimensions: { width: '40px', height: '40px' },
     zIndex: 90,
     isVisible: true
   } as UILayoutConfig,
