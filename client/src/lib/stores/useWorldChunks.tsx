@@ -33,56 +33,41 @@ export const generateChunkContent = (coordinates: ChunkCoordinates): { enemies: 
   const enemies: Enemy[] = [];
   const npcs: NPC[] = [];
   
-  // Hub chunks (NPCs only in center chunk)
-  if (centerX >= -200 && centerX <= 200) {
-    if (chunkX === 0 && chunkY === 0) {
+  // Get zone configuration for this position
+  const zoneConfig = WorldService.getZoneConfigForPosition(centerX);
+  
+  if (zoneConfig) {
+    // Hub chunks (NPCs only in center chunk)
+    if (zoneConfig.id === 'LOC_HUB_FIGUREIUM' && chunkX === 0 && chunkY === 0) {
       npcs.push(
         { id: "weapon_shop", x: -80, y: -50, type: "shop" },
         { id: "armor_shop", x: 80, y: -50, type: "shop" },
         { id: "trainer", x: 0, y: -80, type: "trainer" }
       );
     }
-  }
-  // Fields chunks
-  else if (centerX >= 200 && centerX <= 600) {
-    if (Math.random() < 0.7) {
-      for (let i = 0; i < 2; i++) {
-        enemies.push({
-          id: `hex_${chunkKey}_${i}`,
-          type: "HEX_PEACEFUL",
-          x: worldX + Math.random() * CHUNK_SIZE,
-          y: chunkY * CHUNK_SIZE + Math.random() * CHUNK_SIZE,
-          hp: 20,
-          maxHp: 20,
-          atk: 2,
-          def: 1,
-          size: 15,
-          isAttacking: false,
-          counterWindow: 0,
-          lastAttack: 0
-        });
-      }
-    }
-  }
-  // Arena chunks
-  else if (centerX >= 600 && centerX <= 1000) {
-    if (Math.random() < 0.8) {
-      for (let i = 0; i < 3; i++) {
-        enemies.push({
-          id: `tri_${chunkKey}_${i}`,
-          type: "TRI_ARENA",
-          x: worldX + Math.random() * CHUNK_SIZE,
-          y: chunkY * CHUNK_SIZE + Math.random() * CHUNK_SIZE,
-          hp: 60,
-          maxHp: 60,
-          atk: 12,
-          def: 5,
-          size: 20,
-          isAttacking: false,
-          counterWindow: 0,
-          lastAttack: 0
-        });
-      }
+    
+    // Generate enemies based on zone configuration
+    if (zoneConfig.allowsEnemySpawning && zoneConfig.enemyTypes) {
+      zoneConfig.enemyTypes.forEach(enemyType => {
+        if (Math.random() < enemyType.spawnRate) {
+          for (let i = 0; i < enemyType.count; i++) {
+            enemies.push({
+              id: `${enemyType.type.toLowerCase()}_${chunkKey}_${i}`,
+              type: enemyType.type,
+              x: worldX + Math.random() * CHUNK_SIZE,
+              y: chunkY * CHUNK_SIZE + Math.random() * CHUNK_SIZE,
+              hp: enemyType.stats.hp,
+              maxHp: enemyType.stats.maxHp,
+              atk: enemyType.stats.atk,
+              def: enemyType.stats.def,
+              size: enemyType.stats.size,
+              isAttacking: false,
+              counterWindow: 0,
+              lastAttack: 0
+            });
+          }
+        }
+      });
     }
   }
   

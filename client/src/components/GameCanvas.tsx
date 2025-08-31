@@ -53,6 +53,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
     // Zone boundaries in world coordinates
     const hubFieldsBoundary = 200;
     const fieldsArenaBoundary = 600;
+    const arenaEndBoundary = 2600;
     
     // Calculate screen positions of zone boundaries
     const hubFieldsScreenX = centerX + (hubFieldsBoundary - player.x);
@@ -139,17 +140,17 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
 
     // Define continuous walls across the entire world
     const allWalls: { x: number; y: number; width: number; height: number }[] = [
-      // Continuous top wall across all zones
-      { x: -180, y: -130, width: 1160, height: 20 }, // Top wall from hub to arena
+      // Continuous top wall across all zones (expanded to cover 5x larger arena)
+      { x: -180, y: -130, width: 2780, height: 20 }, // Top wall from hub to arena end
       
-      // Continuous bottom wall across all zones
-      { x: -180, y: 110, width: 1160, height: 20 },  // Bottom wall from hub to arena
+      // Continuous bottom wall across all zones (expanded to cover 5x larger arena)
+      { x: -180, y: 110, width: 2780, height: 20 },  // Bottom wall from hub to arena end
       
       // Left boundary wall (hub)
       { x: -180, y: -130, width: 20, height: 260 },  // Hub left wall
       
-      // Right boundary wall (arena)
-      { x: 980, y: -130, width: 20, height: 260 }   // Arena right wall
+      // Right boundary wall (arena end - expanded 5x)
+      { x: 2580, y: -130, width: 20, height: 260 }   // Arena right wall at new boundary
     ];
 
     allWalls.forEach(wall => {

@@ -1,13 +1,62 @@
 // Modern service abstraction for world management
 // Following KISS principles - simple, focused, testable
 
-import { ChunkCoordinates, Enemy, NPC, WorldZone, LocationId } from '../types/gameTypes';
+import { ChunkCoordinates, Enemy, NPC, WorldZone, LocationId, EnemyType } from '../types/gameTypes';
+
+// Zone configuration for enemy spawning and properties
+export interface ZoneConfig {
+  id: LocationId;
+  bounds: { minX: number; maxX: number };
+  allowsEnemySpawning: boolean;
+  enemyTypes?: {
+    type: EnemyType;
+    spawnRate: number;
+    count: number;
+    stats: {
+      hp: number;
+      maxHp: number;
+      atk: number;
+      def: number;
+      size: number;
+    };
+  }[];
+}
+
+const ZONE_CONFIGS: ZoneConfig[] = [
+  {
+    id: 'LOC_HUB_FIGUREIUM',
+    bounds: { minX: -200, maxX: 200 },
+    allowsEnemySpawning: false
+  },
+  {
+    id: 'LOC_PEACEFUL_FIELDS',
+    bounds: { minX: 200, maxX: 600 },
+    allowsEnemySpawning: true,
+    enemyTypes: [{
+      type: 'HEX_PEACEFUL' as EnemyType,
+      spawnRate: 0.7,
+      count: 2,
+      stats: { hp: 20, maxHp: 20, atk: 2, def: 1, size: 15 }
+    }]
+  },
+  {
+    id: 'LOC_ARENA_1',
+    bounds: { minX: 600, maxX: 2600 },
+    allowsEnemySpawning: true,
+    enemyTypes: [{
+      type: 'TRI_ARENA' as EnemyType,
+      spawnRate: 0.8,
+      count: 3,
+      stats: { hp: 60, maxHp: 60, atk: 12, def: 5, size: 20 }
+    }]
+  }
+];
 
 export class WorldService {
   private static readonly CHUNK_SIZE = 400;
   private static readonly HUB_BOUNDS = { minX: -200, maxX: 200 };
   private static readonly FIELDS_BOUNDS = { minX: 200, maxX: 600 };
-  private static readonly ARENA_BOUNDS = { minX: 600, maxX: 1000 };
+  private static readonly ARENA_BOUNDS = { minX: 600, maxX: 2600 };
 
   // Pure function for chunk coordinate calculation
   static getChunkCoordinates(worldX: number, worldY: number): ChunkCoordinates {
@@ -22,16 +71,22 @@ export class WorldService {
     return `${coordinates.x},${coordinates.y}`;
   }
 
+  // Get zone configuration by ID
+  static getZoneConfig(zoneId: LocationId): ZoneConfig | undefined {
+    return ZONE_CONFIGS.find(config => config.id === zoneId);
+  }
+
+  // Get zone configuration for a position
+  static getZoneConfigForPosition(x: number): ZoneConfig | undefined {
+    return ZONE_CONFIGS.find(config => 
+      x >= config.bounds.minX && x <= config.bounds.maxX
+    );
+  }
+
   // Determine which zone a position belongs to
   static getZoneForPosition(x: number): LocationId {
-    if (x >= WorldService.HUB_BOUNDS.minX && x <= WorldService.HUB_BOUNDS.maxX) {
-      return 'LOC_HUB_FIGUREIUM';
-    } else if (x >= WorldService.FIELDS_BOUNDS.minX && x <= WorldService.FIELDS_BOUNDS.maxX) {
-      return 'LOC_PEACEFUL_FIELDS';
-    } else if (x >= WorldService.ARENA_BOUNDS.minX && x <= WorldService.ARENA_BOUNDS.maxX) {
-      return 'LOC_ARENA_1';
-    }
-    return 'LOC_HUB_FIGUREIUM'; // Default fallback
+    const config = WorldService.getZoneConfigForPosition(x);
+    return config?.id || 'LOC_HUB_FIGUREIUM'; // Default fallback
   }
 
   // Calculate chunks that should be loaded around a position
