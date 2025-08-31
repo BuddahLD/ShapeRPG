@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { usePlayer } from "../lib/stores/usePlayer";
 import { useGameState } from "../lib/stores/useGameState";
+import StatsInventoryModal from "./StatsInventoryModal";
 
 // Design system component for UI containers
 const UIContainer: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
@@ -14,6 +15,7 @@ const GameHUD: React.FC = () => {
   const { currentLocation, setDrawingRune } = useGameState();
   const [showLocationIndicator, setShowLocationIndicator] = useState(true); // Show on start
   const [previousLocation, setPreviousLocation] = useState<string | null>(null);
+  const [showStatsModal, setShowStatsModal] = useState(false);
 
   // Handle location change fade effect and initial display
   useEffect(() => {
@@ -31,6 +33,14 @@ const GameHUD: React.FC = () => {
 
   const handleRuneButtonPress = () => {
     setDrawingRune(true);
+  };
+
+  const handleLevelBarClick = () => {
+    setShowStatsModal(true);
+  };
+
+  const handleCloseStatsModal = () => {
+    setShowStatsModal(false);
   };
 
   return (
@@ -81,7 +91,12 @@ const GameHUD: React.FC = () => {
         <UIContainer className="px-4 py-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <span className="text-stone-100 text-xs font-semibold">LVL {player.level}</span>
+              <button 
+                onClick={handleLevelBarClick}
+                className="text-stone-100 text-xs font-semibold hover:text-white transition-colors cursor-pointer"
+              >
+                LVL {player.level}
+              </button>
               <div className="w-28 h-1.5 bg-white/30 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-secondary-400 to-secondary-500 rounded-full transition-all duration-500 ease-out"
@@ -135,6 +150,12 @@ const GameHUD: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Stats/Inventory Modal */}
+      <StatsInventoryModal 
+        isOpen={showStatsModal}
+        onClose={handleCloseStatsModal}
+      />
 
     </div>
   );
