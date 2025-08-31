@@ -15,6 +15,14 @@ Preferred communication style: Simple, everyday language.
 - **Abstraction**: Use effective abstractions that hide complexity while maintaining flexibility
 - **Zero-Impact Development**: New functionality must have 0% impact on existing logic and UI until explicitly stated
 
+**Critical Development Rules (August 31, 2025)**:
+- **Use Managers**: Implement managers, domain models, and UI models for proper separation
+- **Relative Positioning**: Use relative positioning for UI elements to support screen scaling while keeping fixed element sizes
+- **Mandatory Testing**: All managers/helpers/workers must be tested before implementation
+- **95% Requirement Clarity**: Only implement features/updates after 95% requirement clarity to avoid breaking existing functionality
+- **0% Impact Rule**: Ensure 0% impact on existing app logic or UI when making changes
+- **Rules First**: Always read and follow rules before implementing anything
+
 **Code Quality Standards**:
 - **Unit Testing**: All core logic must be comprehensively unit tested with high coverage
 - **Atomic Functions**: Use small, focused functions that are easy to test and reason about

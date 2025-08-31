@@ -1,5 +1,6 @@
 import React from "react";
-import { useGameState } from "../../lib/stores/useGameState";
+import { useGameState } from "../../presentation/hooks/useGameStateManager";
+import { useElementLayout } from "../../presentation/hooks/useUILayout";
 import { UIContainer } from "./UIContainer";
 
 /**
@@ -24,16 +25,10 @@ export const ActionBar: React.FC<ActionBarProps> = ({
   ...props 
 }) => {
   const { setDrawingRune } = useGameState();
+  const { styles } = useElementLayout('actionButtons');
 
   const handleRuneButtonPress = () => {
     setDrawingRune(true);
-  };
-
-  const positionStyles = {
-    'top-right': 'top-6 right-6',
-    'top-left': 'top-6 left-6',
-    'bottom-right': 'bottom-6 right-6',
-    'bottom-left': 'bottom-6 left-6'
   };
 
   const containerVariant = variant === 'compact' ? 'minimal' : variant === 'enhanced' ? 'enhanced' : 'default';
@@ -42,7 +37,8 @@ export const ActionBar: React.FC<ActionBarProps> = ({
 
   return (
     <div 
-      className={`absolute ${positionStyles[position]} pointer-events-auto ${className}`}
+      className={`pointer-events-auto ${className}`}
+      style={styles}
       {...props}
     >
       <UIContainer variant={containerVariant} className={variant === 'compact' ? 'p-1' : 'p-2'}>

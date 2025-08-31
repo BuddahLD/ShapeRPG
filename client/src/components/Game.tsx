@@ -7,13 +7,13 @@ import Minimap from "./Minimap";
 import Hub from "./Hub";
 import Arena from "./Arena";
 import Shop from "./Shop";
-import { useGameState } from "../lib/stores/useGameState";
-import { usePlayer } from "../lib/stores/usePlayer";
+import { useGameState } from "../presentation/hooks/useGameStateManager";
+import { usePlayer } from "../presentation/hooks/usePlayerManager";
 import { GameEngine } from "../lib/gameEngine/GameEngine";
 
 const Game: React.FC = () => {
   const gameEngineRef = useRef<GameEngine | null>(null);
-  const { currentLocation, isDrawingRune } = useGameState();
+  const { currentLocation, isDrawingRune, initializeGame } = useGameState();
   const { initializePlayer } = usePlayer();
   const [showCharInfo, setShowCharInfo] = useState(false);
   const [activeTab, setActiveTab] = useState<'stats' | 'spells' | 'inventory'>('inventory');
@@ -22,15 +22,18 @@ const Game: React.FC = () => {
     // Initialize game engine
     gameEngineRef.current = new GameEngine();
     
-    // Initialize player with starting stats
+    // Initialize player with starting stats (backward compatibility)
     initializePlayer();
+    
+    // Initialize game through clean architecture
+    initializeGame();
     
     return () => {
       if (gameEngineRef.current) {
         gameEngineRef.current.destroy();
       }
     };
-  }, [initializePlayer]);
+  }, [initializePlayer, initializeGame]);
 
   const renderLocationContent = () => {
     switch (currentLocation) {

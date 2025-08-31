@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useGameState } from "../../lib/stores/useGameState";
+import { useGameState } from "../../presentation/hooks/useGameStateManager";
+import { useElementLayout } from "../../presentation/hooks/useUILayout";
 import { useAnimation } from "../../hooks/useAnimation";
 import { UIContainer } from "./UIContainer";
 
@@ -23,6 +24,7 @@ export const LocationIndicator: React.FC<LocationIndicatorProps> = ({
   ...props
 }) => {
   const { currentLocation } = useGameState();
+  const { styles } = useElementLayout('locationIndicator');
   const [showLocationIndicator, setShowLocationIndicator] = useState(false);
   const [previousLocation, setPreviousLocation] = useState<string | null>(null);
 
@@ -82,13 +84,6 @@ export const LocationIndicator: React.FC<LocationIndicatorProps> = ({
     }
   };
 
-  const positionStyles = {
-    'top-right': 'top-20 right-6',
-    'top-left': 'top-20 left-6',
-    'bottom-right': 'bottom-20 right-6',
-    'bottom-left': 'bottom-20 left-6'
-  };
-
   const animationStyles = showAnimation ? {
     opacity: popupStyles.opacity || 0,
     transform: popupStyles.transform as string || 'scale(0.95)',
@@ -96,9 +91,9 @@ export const LocationIndicator: React.FC<LocationIndicatorProps> = ({
 
   return (
     <div 
-      className={`absolute ${positionStyles[position]} pointer-events-auto transition-all duration-200 ease-in-out ${className}`} 
+      className={`pointer-events-auto transition-all duration-200 ease-in-out ${className}`} 
       style={{ 
-        width: '56px',
+        ...styles,
         ...animationStyles,
       }}
       {...props}

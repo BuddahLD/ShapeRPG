@@ -1,5 +1,6 @@
 import React from "react";
-import { usePlayer } from "../../lib/stores/usePlayer";
+import { usePlayer } from "../../presentation/hooks/usePlayerManager";
+import { useElementLayout } from "../../presentation/hooks/useUILayout";
 import { UIContainer } from "./UIContainer";
 
 /**
@@ -23,16 +24,17 @@ export const PlayerProgressBar: React.FC<PlayerProgressBarProps> = ({
   className = "",
   ...props 
 }) => {
-  const { player } = usePlayer();
+  const { level, experience, gold, experienceProgress } = usePlayer();
+  const { styles } = useElementLayout('bottomBar');
 
-  if (!player) return null;
+  if (!level) return null;
 
-  const positionStyles = position === 'bottom' ? 'bottom-6' : 'top-6';
   const containerVariant = variant === 'compact' ? 'minimal' : 'default';
 
   return (
     <div 
-      className={`absolute ${positionStyles} left-6 right-6 pointer-events-auto ${className}`}
+      className={`pointer-events-auto ${className}`}
+      style={styles}
       {...props}
     >
       <div 
@@ -43,13 +45,13 @@ export const PlayerProgressBar: React.FC<PlayerProgressBarProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <span className="text-stone-100 text-xs font-semibold">
-                LVL {player.level}
+                LVL {level}
               </span>
               <div className="w-28 h-1.5 bg-white/30 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-secondary-400 to-secondary-500 rounded-full transition-all duration-500 ease-out"
                   style={{ 
-                    width: `${(player.xp / (100 * Math.pow(player.level, 2))) * 100}%` 
+                    width: `${experienceProgress * 100}%` 
                   }}
                 />
               </div>
@@ -57,12 +59,12 @@ export const PlayerProgressBar: React.FC<PlayerProgressBarProps> = ({
             <div className="flex items-center space-x-3">
               {showGold && (
                 <div className="text-stone-100 text-xs font-medium">
-                  Gold: {player.gold}
+                  Gold: {gold}
                 </div>
               )}
               {showXP && (
                 <div className="text-stone-100 text-xs font-medium">
-                  XP: {player.xp}/{100 * Math.pow(player.level, 2)}
+                  XP: {experience}/{100 * Math.pow(level, 2)}
                 </div>
               )}
             </div>

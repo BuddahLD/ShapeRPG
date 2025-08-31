@@ -1,5 +1,6 @@
 import React from "react";
-import { usePlayer } from "../../lib/stores/usePlayer";
+import { usePlayer } from "../../presentation/hooks/usePlayerManager";
+import { useElementLayout } from "../../presentation/hooks/useUILayout";
 import { UIContainer } from "./UIContainer";
 
 /**
@@ -19,22 +20,17 @@ export const PlayerStatsDisplay: React.FC<PlayerStatsDisplayProps> = ({
   position = 'top-left',
   ...props 
 }) => {
-  const { player } = usePlayer();
+  const { stats } = usePlayer();
+  const { styles } = useElementLayout('healthBar');
 
-  if (!player) return null;
-
-  const positionStyles = {
-    'top-left': 'top-6 left-6',
-    'top-right': 'top-6 right-6', 
-    'bottom-left': 'bottom-6 left-6',
-    'bottom-right': 'bottom-6 right-6'
-  };
+  if (!stats) return null;
 
   const containerVariant = variant === 'compact' ? 'minimal' : 'default';
 
   return (
     <div 
-      className={`absolute ${positionStyles[position]} pointer-events-auto ${className}`}
+      className={`pointer-events-auto ${className}`}
+      style={styles}
       {...props}
     >
       <UIContainer variant={containerVariant} className={variant === 'compact' ? 'p-1 space-y-1' : 'p-2 space-y-2'}>
@@ -43,7 +39,7 @@ export const PlayerStatsDisplay: React.FC<PlayerStatsDisplayProps> = ({
           <div className="w-16 h-1.5 bg-white/30 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-to-r from-red-400 to-red-500 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${(player.stats.hp / 100) * 100}%` }}
+              style={{ width: `${(stats.hp / stats.maxHp) * 100}%` }}
             />
           </div>
         </div>
@@ -53,7 +49,7 @@ export const PlayerStatsDisplay: React.FC<PlayerStatsDisplayProps> = ({
           <div className="w-16 h-1.5 bg-white/30 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-to-r from-primary-400 to-primary-500 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${(player.stats.mana / 50) * 100}%` }}
+              style={{ width: `${(stats.mana / stats.maxMana) * 100}%` }}
             />
           </div>
         </div>

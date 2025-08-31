@@ -37,6 +37,7 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
       {/* Character Info Modal */}
       {showCharInfo && (
         <StatsInventoryModal
+          isOpen={showCharInfo}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           onClose={handleCloseCharInfo}

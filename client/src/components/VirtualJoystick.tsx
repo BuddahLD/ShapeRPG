@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { usePlayer } from "../lib/stores/usePlayer";
-import { useGameState } from "../lib/stores/useGameState";
+import { usePlayer } from "../presentation/hooks/usePlayerManager";
+import { useGameState } from "../presentation/hooks/useGameStateManager";
+import { useElementLayout } from "../presentation/hooks/useUILayout";
 
 interface TouchPoint {
   x: number;
@@ -18,6 +19,7 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
   const [currentPosition, setCurrentPosition] = useState<TouchPoint>({ x: 0, y: 0 });
   const { movePlayer } = usePlayer();
   const { isDrawingRune } = useGameState();
+  const { styles } = useElementLayout('virtualJoystick');
 
   const joystickRadius = 65;
   const knobRadius = 20;
@@ -159,7 +161,7 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
   }
 
   return (
-    <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-20 pointer-events-auto">
+    <div className="pointer-events-auto" style={styles}>
       <div
         className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg w-22 h-22 flex items-center justify-center transition-all duration-300 hover:bg-white/30"
         style={{ touchAction: 'none', boxSizing: 'border-box' }}

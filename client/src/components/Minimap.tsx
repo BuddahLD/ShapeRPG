@@ -1,14 +1,14 @@
 import React from "react";
-import { usePlayer } from "../lib/stores/usePlayer";
-import { useWorldChunks } from "../lib/stores/useWorldChunks";
+import { usePlayer } from "../presentation/hooks/usePlayerManager";
+import { useElementLayout } from "../presentation/hooks/useUILayout";
 
 const Minimap: React.FC = () => {
-  const { player } = usePlayer();
-  const { getAllEnemies } = useWorldChunks();
+  const { position } = usePlayer();
+  const { styles } = useElementLayout('minimap');
 
-  if (!player) return null;
+  if (!position) return null;
 
-  const enemies = getAllEnemies();
+  const enemies: Array<{id: string, x: number, y: number}> = []; // Placeholder for enemies
   
   // Minimap dimensions - square matching HP/MP container height
   const mapWidth = 52;
@@ -31,7 +31,7 @@ const Minimap: React.FC = () => {
     y: ((y - worldBounds.minY) / worldHeight) * mapHeight
   });
   
-  const playerPos = worldToMinimap(player.x, player.y);
+  const playerPos = worldToMinimap(position.x, position.y);
   
   // Get zone colors
   const getZoneColor = (x: number) => {
@@ -44,7 +44,7 @@ const Minimap: React.FC = () => {
   
 
   return (
-    <div className="fixed top-6 right-6 z-30 pointer-events-auto">
+    <div className="pointer-events-auto" style={styles}>
       {/* Minimap Container */}
       <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl" style={{ padding: '2px' }}>
         {/* Minimap Display */}
