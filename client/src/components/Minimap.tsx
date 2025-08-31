@@ -51,12 +51,13 @@ const Minimap: React.FC = () => {
       <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl" style={{ padding: '2px' }}>
         {/* Minimap Display */}
         <div 
-          className="relative rounded-lg border border-white/20"
+          className="relative border border-white/20"
           style={{ 
             width: mapWidth, 
             height: mapHeight, 
             overflow: 'hidden', 
             backgroundColor: 'transparent',
+            borderRadius: '8px',  // Explicit CSS instead of rounded-lg
             // Debug: red outline to see shape
             boxShadow: 'inset 0 0 0 1px red'
           }}
