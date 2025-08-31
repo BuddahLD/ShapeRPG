@@ -63,7 +63,6 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
                 style={{ width: `${(player.stats.hp / 100) * 100}%` }}
               />
             </div>
-            <span className="text-stone-100 text-xs">{player.stats.hp}</span>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -74,24 +73,21 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
                 style={{ width: `${(player.stats.mana / 50) * 100}%` }}
               />
             </div>
-            <span className="text-stone-100 text-xs">{player.stats.mana}</span>
           </div>
         </UIContainer>
       </div>
       
-      {/* Location Indicator - Below minimap with 16px padding, same width */}
+      {/* Location Indicator - Below minimap with exactly 16px padding, same width as minimap container */}
       {showLocationIndicator && (
-        <div className="absolute top-44 right-6 pointer-events-auto" style={{ width: '80px' }}>
-          <div className="pt-4">
-            <UIContainer className="px-2 py-2 transition-all duration-1000 ease-in-out">
-              <div className="text-center">
-                <span className="text-neutral-100 text-xs font-medium">
-                  {currentLocation === "LOC_HUB_FIGUREIUM" ? "Hub" : 
-                   currentLocation === "LOC_PEACEFUL_FIELDS" ? "Fields" : "Arena"}
-                </span>
-              </div>
-            </UIContainer>
-          </div>
+        <div className="absolute right-6 pointer-events-auto" style={{ top: '124px', width: '104px' }}>
+          <UIContainer className="px-2 py-2 transition-all duration-1000 ease-in-out">
+            <div className="text-center">
+              <span className="text-neutral-100 text-xs font-medium">
+                {currentLocation === "LOC_HUB_FIGUREIUM" ? "Hub" : 
+                 currentLocation === "LOC_PEACEFUL_FIELDS" ? "Fields" : "Arena"}
+              </span>
+            </div>
+          </UIContainer>
         </div>
       )}
 
