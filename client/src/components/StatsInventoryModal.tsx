@@ -11,15 +11,69 @@ interface StatsInventoryModalProps {
 type TabType = 'stats' | 'spells' | 'inventory';
 
 const StatsInventoryModal: React.FC<StatsInventoryModalProps> = ({ isOpen, onClose, activeTab, setActiveTab }) => {
+  console.log('StatsInventoryModal: Component rendered with props:', { isOpen, activeTab });
+  
   const { player } = usePlayer();
+  console.log('StatsInventoryModal: usePlayer returned:', player);
 
-  if (!isOpen || !player) return null;
-
+  if (!isOpen) {
+    console.log('StatsInventoryModal: Returning null because isOpen = false');
+    return null;
+  }
+  
+  // Define handleBackdropClick before using it in fallback modal
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
+
+  if (!player) {
+    console.log('StatsInventoryModal: Player data missing, using fallback data');
+    // Use fallback data to prevent modal from disappearing
+    const fallbackPlayer = {
+      level: 1,
+      experience: 0,
+      gold: 100,
+      stats: {
+        hp: 100,
+        maxHp: 100,
+        mana: 50,
+        maxMana: 50,
+        attack: 10,
+        defense: 5,
+        castSpeed: 1.0
+      },
+      knownSpells: ['fire-bolt', 'ice-shard', 'shield-aura'],
+      inventory: []
+    };
+    
+    return (
+      <div 
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4 pointer-events-auto"
+        onClick={handleBackdropClick}
+        style={{ touchAction: 'none' }}
+      >
+        <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl max-w-sm w-full h-[500px] flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0">
+            <h2 className="text-stone-100 text-lg font-semibold">Character (Fallback)</h2>
+            <button
+              onClick={onClose}
+              className="text-stone-100 hover:text-white transition-colors"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="text-stone-300 text-center">Player data is loading...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const renderStatsTab = () => (
     <div className="space-y-3">
@@ -35,7 +89,7 @@ const StatsInventoryModal: React.FC<StatsInventoryModalProps> = ({ isOpen, onClo
         </div>
         <div className="bg-white/10 rounded-lg p-2 text-center">
           <div className="text-stone-300 text-xs">XP</div>
-          <div className="text-stone-100 text-sm font-semibold">{player.xp}/{100 * Math.pow(player.level, 2)}</div>
+                        <div className="text-stone-100 text-sm font-semibold">{player.experience}/{100 * Math.pow(player.level, 2)}</div>
         </div>
       </div>
       
@@ -45,7 +99,7 @@ const StatsInventoryModal: React.FC<StatsInventoryModalProps> = ({ isOpen, onClo
         <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
           <div 
             className="h-full bg-gradient-to-r from-secondary-400 to-secondary-500 rounded-full transition-all duration-500"
-            style={{ width: `${(player.xp / (100 * Math.pow(player.level, 2))) * 100}%` }}
+            style={{ width: `${(player.experience / (100 * Math.pow(player.level, 2))) * 100}%` }}
           />
         </div>
       </div>
@@ -76,12 +130,12 @@ const StatsInventoryModal: React.FC<StatsInventoryModalProps> = ({ isOpen, onClo
         
         <div className="bg-white/10 rounded-lg p-2 text-center">
           <div className="text-stone-300 text-xs">Attack</div>
-          <div className="text-stone-100 text-sm font-semibold">{player.stats.atk}</div>
+          <div className="text-stone-100 text-sm font-semibold">{player.stats.attack}</div>
         </div>
         
         <div className="bg-white/10 rounded-lg p-2 text-center">
           <div className="text-stone-300 text-xs">Defense</div>
-          <div className="text-stone-100 text-sm font-semibold">{player.stats.def}</div>
+          <div className="text-stone-100 text-sm font-semibold">{player.stats.defense}</div>
         </div>
       </div>
       
@@ -94,8 +148,8 @@ const StatsInventoryModal: React.FC<StatsInventoryModalProps> = ({ isOpen, onClo
 
   const renderSpellsTab = () => (
     <div className="space-y-2">
-      {player.spells.length > 0 ? (
-        player.spells.map((spellId, index) => (
+      {player.knownSpells.length > 0 ? (
+        player.knownSpells.map((spellId, index) => (
           <div key={index} className="bg-white/10 rounded-lg p-3 flex items-center">
             <div className="w-6 h-6 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center mr-3">
               <span className="text-white text-xs">✨</span>

@@ -14,9 +14,23 @@ import { GameEngine } from "../lib/gameEngine/GameEngine";
 const Game: React.FC = () => {
   const gameEngineRef = useRef<GameEngine | null>(null);
   const { currentLocation, isDrawingRune, initializeGame } = useGameState();
-  const { initializePlayer } = usePlayer();
+  const { initializePlayer, resetToHubSpawn } = usePlayer();
   const [showCharInfo, setShowCharInfo] = useState(false);
   const [activeTab, setActiveTab] = useState<'stats' | 'spells' | 'inventory'>('inventory');
+
+  // Debug logging for modal state
+  useEffect(() => {
+    console.log('Game component: showCharInfo changed to:', showCharInfo);
+    console.log('Game component: activeTab changed to:', activeTab);
+  }, [showCharInfo, activeTab]);
+
+  // Watch for location changes and reset player to hub spawn when returning
+  useEffect(() => {
+    if (currentLocation === "LOC_HUB_FIGUREIUM") {
+      console.log('Game component: Player returned to hub, resetting to spawn position');
+      resetToHubSpawn();
+    }
+  }, [currentLocation, resetToHubSpawn]);
 
   useEffect(() => {
     console.log('Game component: Initializing...');
@@ -32,6 +46,12 @@ const Game: React.FC = () => {
     // Initialize game through clean architecture
     initializeGame();
     console.log('Game component: Game initialized');
+    
+    // Force a re-render to ensure PlayerManager is properly initialized
+    setTimeout(() => {
+      console.log('Game component: Forcing re-render after initialization');
+      setShowCharInfo(false); // Reset to trigger re-render
+    }, 100);
     
     return () => {
       if (gameEngineRef.current) {

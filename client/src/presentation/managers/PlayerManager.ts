@@ -51,6 +51,7 @@ interface PlayerStore {
   learnSpell: (spellId: string) => void;
   updatePosition: (position: { x: number; y: number }) => void;
   movePlayer: (dx: number, dy: number) => void;
+  resetToHubSpawn: () => void;
   
   // Computed values
   experienceProgress: number;
@@ -61,10 +62,13 @@ export class PlayerManager {
   private store: any;
 
   constructor() {
+    console.log('PlayerManager: Constructor called');
     this.createStore();
+    console.log('PlayerManager: Store created');
   }
 
   private createStore() {
+    console.log('PlayerManager: Creating store...');
     this.store = create<PlayerStore>((set, get) => ({
       // Initial state matching existing patterns
       stats: {
@@ -81,7 +85,7 @@ export class PlayerManager {
       gold: 100,
       inventory: [],
       knownSpells: ['fire-bolt', 'ice-shard', 'shield-aura'],
-      position: { x: 0, y: 0 },
+      position: { x: 0, y: 0 }, // Spawn at center of hub, near all NPCs
 
       // Actions
       initializePlayer: () => {
@@ -100,7 +104,7 @@ export class PlayerManager {
           gold: 100,
           inventory: [],
           knownSpells: ['fire-bolt', 'ice-shard', 'shield-aura'],
-          position: { x: 0, y: 0 }
+          position: { x: 0, y: 0 } // Spawn at center of hub, near all NPCs
         });
       },
 
@@ -199,6 +203,12 @@ export class PlayerManager {
         });
       },
 
+      resetToHubSpawn: () => {
+        set({
+          position: { x: 0, y: 0 } // Reset to hub spawn position
+        });
+      },
+
       // Computed values
       get experienceProgress() {
         const state = get();
@@ -215,7 +225,15 @@ export class PlayerManager {
   }
 
   getStore() {
-    return this.store;
+    console.log('PlayerManager: getStore called, store exists:', !!this.store);
+    if (this.store) {
+      const state = this.store.getState();
+      console.log('PlayerManager: Store state:', state);
+      return this.store;
+    } else {
+      console.log('PlayerManager: Store is undefined!');
+      return null;
+    }
   }
 
   // Adapter methods to sync with domain models

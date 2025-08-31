@@ -18,6 +18,7 @@ interface GameHUDProps {
 
 const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, activeTab, setActiveTab }) => {
   const handleLevelBarClick = () => {
+    console.log('Level bar clicked! Setting showCharInfo to true');
     setShowCharInfo(true);
     setActiveTab('inventory');
   };
