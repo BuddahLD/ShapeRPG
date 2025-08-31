@@ -26,7 +26,16 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
 
   // Show location popup with smooth fade animation if this location hasn't been shown yet
   useEffect(() => {
+    console.log("🔍 POPUP CHECK:", { 
+      currentLocation, 
+      hasLocation: !!currentLocation, 
+      alreadyShown: shownLocations.has(currentLocation || ''),
+      shownCount: shownLocations.size 
+    });
+    
     if (currentLocation && !shownLocations.has(currentLocation)) {
+      console.log("✅ TRIGGERING POPUP ANIMATION FOR:", currentLocation);
+      
       // Add location to shown set
       setShownLocations(prev => {
         const newSet = new Set(prev);
@@ -39,16 +48,19 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
       
       // Fade in (immediate)
       const fadeInTimer = setTimeout(() => {
+        console.log("🎭 FADE IN");
         setLocationOpacity(1);
       }, 50);
       
       // Fade out after 2 seconds
       const fadeOutTimer = setTimeout(() => {
+        console.log("🌅 FADE OUT");
         setLocationOpacity(0);
       }, 2000);
       
       // Hide completely after fade out completes
       const hideTimer = setTimeout(() => {
+        console.log("🚫 HIDE POPUP");
         setShowLocationIndicator(false);
       }, 2500);
       
