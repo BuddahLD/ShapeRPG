@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import GameCanvas from "./GameCanvas";
 import GameHUD from "./GameHUD";
 import VirtualJoystick from "./VirtualJoystick";
@@ -14,6 +14,8 @@ const Game: React.FC = () => {
   const gameEngineRef = useRef<GameEngine | null>(null);
   const { currentLocation, isDrawingRune } = useGameState();
   const { initializePlayer } = usePlayer();
+  const [showCharInfo, setShowCharInfo] = useState(false);
+  const [activeTab, setActiveTab] = useState<'stats' | 'spells' | 'inventory'>('inventory');
 
   useEffect(() => {
     // Initialize game engine
@@ -49,10 +51,15 @@ const Game: React.FC = () => {
       {renderLocationContent()}
       
       {/* Game HUD */}
-      <GameHUD />
+      <GameHUD 
+        showCharInfo={showCharInfo}
+        setShowCharInfo={setShowCharInfo}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
       
       {/* Virtual Joystick */}
-      <VirtualJoystick />
+      <VirtualJoystick isModalOpen={showCharInfo} />
       
       {/* Rune Drawing Overlay */}
       {isDrawingRune && <RuneDrawing />}

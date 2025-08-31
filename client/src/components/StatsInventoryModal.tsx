@@ -150,9 +150,17 @@ const StatsInventoryModal: React.FC<StatsInventoryModalProps> = ({ isOpen, onClo
         {/* Tabs */}
         <div className="flex border-b border-white/20 flex-shrink-0">
           {[
+            { id: 'inventory' as TabType, label: 'Items', icon: '🎒' },
             { id: 'stats' as TabType, label: 'Stats', icon: '📊' },
-            { id: 'spells' as TabType, label: 'Spells', icon: '✨' },
-            { id: 'inventory' as TabType, label: 'Items', icon: '🎒' }
+            { id: 'spells' as TabType, label: 'Spells', icon: (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6m0 6v6"/>
+                <path d="m21 12-6-3-6 3-6-3"/>
+                <path d="M12 8L8 4l4-4 4 4-4 4"/>
+                <path d="M12 16l4 4-4 4-4-4 4-4"/>
+              </svg>
+            ) }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -164,7 +172,7 @@ const StatsInventoryModal: React.FC<StatsInventoryModalProps> = ({ isOpen, onClo
               }`}
             >
               <div className="flex flex-col items-center space-y-1">
-                <span>{tab.icon}</span>
+                <span className="text-stone-100">{tab.icon}</span>
                 <span>{tab.label}</span>
               </div>
             </button>

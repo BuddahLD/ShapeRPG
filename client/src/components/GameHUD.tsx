@@ -3,6 +3,13 @@ import { usePlayer } from "../lib/stores/usePlayer";
 import { useGameState } from "../lib/stores/useGameState";
 import StatsInventoryModal from "./StatsInventoryModal";
 
+interface GameHUDProps {
+  showCharInfo: boolean;
+  setShowCharInfo: (show: boolean) => void;
+  activeTab: 'stats' | 'spells' | 'inventory';
+  setActiveTab: (tab: 'stats' | 'spells' | 'inventory') => void;
+}
+
 // Design system component for UI containers
 const UIContainer: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
   <div className={`backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl ${className}`}>
@@ -10,13 +17,11 @@ const UIContainer: React.FC<{ children: React.ReactNode; className?: string }> =
   </div>
 );
 
-const GameHUD: React.FC = () => {
+const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, activeTab, setActiveTab }) => {
   const { player } = usePlayer();
   const { currentLocation, setDrawingRune } = useGameState();
   const [showLocationIndicator, setShowLocationIndicator] = useState(true); // Show on start
   const [previousLocation, setPreviousLocation] = useState<string | null>(null);
-  const [showStatsModal, setShowStatsModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'stats' | 'spells' | 'inventory'>('stats');
 
   // Handle location change fade effect and initial display
   useEffect(() => {
@@ -33,17 +38,17 @@ const GameHUD: React.FC = () => {
   if (!player) return null;
 
   const handleRuneButtonPress = () => {
-    setShowStatsModal(true);
+    setShowCharInfo(true);
     setActiveTab('spells');
   };
 
   const handleLevelBarClick = () => {
-    setShowStatsModal(true);
-    setActiveTab('stats');
+    setShowCharInfo(true);
+    setActiveTab('inventory');
   };
 
-  const handleCloseStatsModal = () => {
-    setShowStatsModal(false);
+  const handleCloseCharInfo = () => {
+    setShowCharInfo(false);
   };
 
   return (
@@ -156,8 +161,8 @@ const GameHUD: React.FC = () => {
 
       {/* Char Info Modal */}
       <StatsInventoryModal 
-        isOpen={showStatsModal}
-        onClose={handleCloseStatsModal}
+        isOpen={showCharInfo}
+        onClose={handleCloseCharInfo}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />

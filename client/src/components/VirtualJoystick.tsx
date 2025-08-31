@@ -7,7 +7,11 @@ interface TouchPoint {
   y: number;
 }
 
-const VirtualJoystick: React.FC = () => {
+interface VirtualJoystickProps {
+  isModalOpen?: boolean;
+}
+
+const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }) => {
   const joystickRef = useRef<HTMLDivElement>(null);
   const knobRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -150,8 +154,8 @@ const VirtualJoystick: React.FC = () => {
     }
   }, [isDragging]);
 
-  if (isDrawingRune) {
-    return null; // Hide joystick during rune drawing
+  if (isDrawingRune || isModalOpen) {
+    return null; // Hide joystick during rune drawing or when modal is open
   }
 
   return (
