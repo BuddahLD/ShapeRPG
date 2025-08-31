@@ -41,8 +41,6 @@ const Minimap: React.FC = () => {
     return "#6b7280"; // Default
   };
 
-  // Debug: log minimap info
-  console.log("🗺️ MINIMAP:", mapWidth + "x" + mapHeight, "in", (mapWidth + 4) + "x" + (mapHeight + 4), "container");
   
 
   return (
@@ -57,13 +55,11 @@ const Minimap: React.FC = () => {
             height: mapHeight, 
             overflow: 'hidden', 
             backgroundColor: 'transparent',
-            borderRadius: '8px',  // Explicit CSS instead of rounded-lg
-            // Debug: red outline to see shape
-            boxShadow: 'inset 0 0 0 1px red'
+            borderRadius: '8px'
           }}
         >
           {/* Zone backgrounds */}
-          <div className="absolute inset-0 rounded-lg overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: '8px' }}>
             {/* Hub zone */}
             <div 
               className="absolute top-0 h-full opacity-30"
