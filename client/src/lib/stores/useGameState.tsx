@@ -115,13 +115,21 @@ export const useGameState = create<GameState>()(
     checkZoneTransition: (x, y) => {
       const { worldZones, currentLocation } = get();
       
-      console.log("🔍 CHECKING ZONES at position:", x, y, "current:", currentLocation);
+      // Reduce logging frequency - only log occasionally
+      if (Math.floor(x) % 50 === 0) {
+        console.log("🔍 ZONES DEBUG:", {
+          position: { x, y },
+          currentLocation,
+          totalZones: worldZones.length,
+          zones: worldZones.map(z => ({
+            id: z.id,
+            bounds: z.bounds,
+            contains: x >= z.bounds.minX && x <= z.bounds.maxX && y >= z.bounds.minY && y <= z.bounds.maxY
+          }))
+        });
+      }
       
       for (const zone of worldZones) {
-        console.log("📍 Zone", zone.id, "bounds:", zone.bounds, "contains:", 
-          x >= zone.bounds.minX && x <= zone.bounds.maxX &&
-          y >= zone.bounds.minY && y <= zone.bounds.maxY);
-          
         if (x >= zone.bounds.minX && x <= zone.bounds.maxX &&
             y >= zone.bounds.minY && y <= zone.bounds.maxY) {
           
