@@ -20,12 +20,12 @@ const UIContainer: React.FC<{ children: React.ReactNode; className?: string }> =
 const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, activeTab, setActiveTab }) => {
   const { player } = usePlayer();
   const { currentLocation, setDrawingRune } = useGameState();
-  const [showLocationIndicator, setShowLocationIndicator] = useState(true); // Show on start
-  const [previousLocation, setPreviousLocation] = useState<string | null>(null);
+  const [showLocationIndicator, setShowLocationIndicator] = useState(false); // Don't show on start
+  const [previousLocation, setPreviousLocation] = useState<string | null>(currentLocation);
 
-  // Handle location change fade effect and initial display
+  // Handle location change fade effect - only on actual transitions
   useEffect(() => {
-    if (currentLocation !== previousLocation) {
+    if (currentLocation !== previousLocation && previousLocation !== null) {
       setShowLocationIndicator(true);
       const timer = setTimeout(() => {
         setShowLocationIndicator(false);
@@ -79,7 +79,7 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
       
       {/* Location Indicator - Below minimap with 6px padding, same width as minimap container */}
       {showLocationIndicator && (
-        <div className="absolute right-6 pointer-events-auto" style={{ top: '98px', width: '88px' }}>
+        <div className="absolute right-6 pointer-events-auto" style={{ top: '114px', width: '104px' }}>
           <UIContainer className="px-2 py-1 transition-all duration-1000 ease-in-out">
             <div className="flex items-center justify-center">
               <span className="text-neutral-100 text-xs font-medium">
