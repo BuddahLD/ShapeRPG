@@ -20,24 +20,22 @@ const UIContainer: React.FC<{ children: React.ReactNode; className?: string }> =
 const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, activeTab, setActiveTab }) => {
   const { player } = usePlayer();
   const { currentLocation, setDrawingRune } = useGameState();
-  const [showLocationIndicator, setShowLocationIndicator] = useState(false); // Don't show on start
-  const [previousLocation, setPreviousLocation] = useState<string | null>(null);
+  const [showLocationIndicator, setShowLocationIndicator] = useState(false);
+  const [shownLocations, setShownLocations] = useState<Set<string>>(new Set());
 
-  // Handle location change fade effect - show on game start and transitions
+  // Show location popup if this location hasn't been shown yet
   useEffect(() => {
-    // Show popup on first run (game start) or when transitioning between areas
-    if (previousLocation === null || currentLocation !== previousLocation) {
+    if (currentLocation && !shownLocations.has(currentLocation)) {
       setShowLocationIndicator(true);
+      setShownLocations(prev => new Set([...prev, currentLocation]));
+      
       const timer = setTimeout(() => {
         setShowLocationIndicator(false);
       }, 2500);
       
-      setPreviousLocation(currentLocation);
       return () => clearTimeout(timer);
     }
-    
-    setPreviousLocation(currentLocation);
-  }, [currentLocation, previousLocation]);
+  }, [currentLocation, shownLocations]);
 
   if (!player) return null;
 
