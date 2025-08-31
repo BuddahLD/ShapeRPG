@@ -19,18 +19,24 @@ const Game: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'stats' | 'spells' | 'inventory'>('inventory');
 
   useEffect(() => {
+    console.log('Game component: Initializing...');
+    
     // Initialize game engine
     gameEngineRef.current = new GameEngine();
+    console.log('Game component: GameEngine created');
     
     // Initialize player with starting stats (backward compatibility)
     initializePlayer();
+    console.log('Game component: Player initialized');
     
     // Initialize game through clean architecture
     initializeGame();
+    console.log('Game component: Game initialized');
     
     return () => {
       if (gameEngineRef.current) {
         gameEngineRef.current.destroy();
+        console.log('Game component: GameEngine destroyed');
       }
     };
   }, [initializePlayer, initializeGame]);

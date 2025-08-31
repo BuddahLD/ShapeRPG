@@ -1,100 +1,157 @@
+import { Enemy as DomainEnemy, EnemyStats, EnemyPosition } from "../../domain/entities/Enemy";
+
 export class Enemy {
-  public id: string;
-  public type: string;
-  public x: number;
-  public y: number;
-  public hp: number;
-  public maxHp: number;
-  public atk: number;
-  public def: number;
-  public size: number;
-  public isAttacking: boolean = false;
-  public counterWindow: number = 0;
-  public lastAttack: number = 0;
-  private attackCooldown: number = 2000; // 2 seconds
-  private attackWindowDuration: number = 1000; // 1 second counterattack window
+  private _id: string;
+  private _type: string;
+  private _position: EnemyPosition;
+  private _stats: EnemyStats;
+  private _isAttacking: boolean;
+  private _counterWindow: number;
+  private _lastAttackTime: number;
+  private readonly _attackCooldown: number;
+  private readonly _attackWindowDuration: number;
 
   constructor(
     id: string,
     type: string,
-    x: number,
-    y: number,
-    hp: number,
-    atk: number,
-    def: number,
-    size: number = 20
+    position: EnemyPosition = { x: 0, y: 0 },
+    stats: EnemyStats = {
+      hp: 30,
+      maxHp: 30,
+      attack: 3,
+      defense: 1,
+      size: 20
+    },
+    attackCooldown: number = 2000,
+    attackWindowDuration: number = 1000
   ) {
-    this.id = id;
-    this.type = type;
-    this.x = x;
-    this.y = y;
-    this.hp = hp;
-    this.maxHp = hp;
-    this.atk = atk;
-    this.def = def;
-    this.size = size;
+    this._id = id;
+    this._type = type;
+    this._position = position;
+    this._stats = stats;
+    this._isAttacking = false;
+    this._counterWindow = 0;
+    this._lastAttackTime = 0;
+    this._attackCooldown = attackCooldown;
+    this._attackWindowDuration = attackWindowDuration;
   }
 
-  public update(deltaTime: number): void {
-    const currentTime = Date.now();
-    
-    // Update counterattack window
-    if (this.counterWindow > 0) {
-      this.counterWindow = Math.max(0, this.counterWindow - deltaTime);
-      if (this.counterWindow === 0) {
-        this.isAttacking = false;
-      }
-    }
+  // Getters
+  get id(): string { return this._id; }
+  get type(): string { return this._type; }
+  get position(): EnemyPosition { return this._position; }
+  get stats(): EnemyStats { return this._stats; }
+  get isAttacking(): boolean { return this._isAttacking; }
+  get counterWindow(): number { return this._counterWindow; }
+  get lastAttackTime(): number { return this._lastAttackTime; }
+  get attackCooldown(): number { return this._attackCooldown; }
 
-    // AI behavior - attack periodically
-    if (!this.isAttacking && currentTime - this.lastAttack > this.attackCooldown) {
-      this.startAttack();
-    }
+  // Compatibility getters for old game engine
+  get x(): number { return this._position.x; }
+  get y(): number { return this._position.y; }
+  get hp(): number { return this._stats.hp; }
+  get maxHp(): number { return this._stats.maxHp; }
+  get atk(): number { return this._stats.attack; }
+  get def(): number { return this._stats.defense; }
+  get size(): number { return this._stats.size; }
 
-    // Simple movement towards player (assuming player is at 0,0)
-    if (!this.isAttacking) {
-      const dx = -this.x;
-      const dy = -this.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      
-      if (distance > 50) { // Stay at least 50 units away
-        const speed = 0.5;
-        this.x += (dx / distance) * speed;
-        this.y += (dy / distance) * speed;
-      }
-    }
+  // Domain Operations
+  moveTo(newPosition: EnemyPosition): Enemy {
+    const newEnemy = this.clone();
+    newEnemy._position = newPosition;
+    return newEnemy;
   }
 
-  public startAttack(): void {
-    this.isAttacking = true;
-    this.counterWindow = this.attackWindowDuration;
-    this.lastAttack = Date.now();
+  takeDamage(damage: number): number {
+    const actualDamage = Math.max(1, damage - this._stats.defense);
+    const newHp = Math.max(0, this._stats.hp - actualDamage);
     
-    console.log(`Enemy ${this.id} is attacking! Counterattack window opened.`);
-  }
+    this._stats = {
+      ...this._stats,
+      hp: newHp
+    };
 
-  public takeDamage(damage: number): number {
-    const actualDamage = Math.max(1, damage - this.def);
-    this.hp = Math.max(0, this.hp - actualDamage);
-    
-    if (this.hp === 0) {
-      console.log(`Enemy ${this.id} defeated!`);
-    }
-    
     return actualDamage;
   }
 
-  public isAlive(): boolean {
-    return this.hp > 0;
+  startAttack(currentTime: number): Enemy {
+    const newEnemy = this.clone();
+    newEnemy._isAttacking = true;
+    newEnemy._counterWindow = this._attackWindowDuration;
+    newEnemy._lastAttackTime = currentTime;
+    return newEnemy;
   }
 
-  public getDistanceToPlayer(playerX: number = 0, playerY: number = 0): number {
-    const dx = this.x - playerX;
-    const dy = this.y - playerY;
-    return Math.sqrt(dx * dx + dy * dy);
+  updateCounterWindow(deltaTime: number): Enemy {
+    if (this._counterWindow <= 0) {
+      return this;
+    }
+
+    const newCounterWindow = Math.max(0, this._counterWindow - deltaTime);
+    const newEnemy = this.clone();
+    newEnemy._counterWindow = newCounterWindow;
+    
+    if (newCounterWindow === 0) {
+      newEnemy._isAttacking = false;
+    }
+
+    return newEnemy;
   }
 
-  public canBeCounterattacked(): boolean {
-    return this.isAttacking && this.counterWindow > 0;
+  canAttack(currentTime: number): boolean {
+    return currentTime - this._lastAttackTime >= this._attackCooldown;
+  }
+
+  update(deltaTime: number): void {
+    // Update counter window
+    if (this._counterWindow > 0) {
+      this._counterWindow = Math.max(0, this._counterWindow - deltaTime);
+      if (this._counterWindow === 0) {
+        this._isAttacking = false;
+      }
+    }
+  }
+
+  // Domain Rules
+  isAlive(): boolean {
+    return this._stats.hp > 0;
+  }
+
+  canBeCounterattacked(): boolean {
+    return this._isAttacking && this._counterWindow > 0;
+  }
+
+  getExperienceValue(): number {
+    // Base XP based on enemy type
+    switch (this._type) {
+      case 'TRI_SMALL': return 10;
+      case 'TRI_MEDIUM': return 20;
+      case 'TRI_ELITE': return 50;
+      case 'HEX_PEACEFUL': return 5;
+      default: return 15;
+    }
+  }
+
+  getGoldValue(): number {
+    // Base gold based on enemy type
+    switch (this._type) {
+      case 'TRI_SMALL': return 5 + Math.floor(Math.random() * 6); // 5-10
+      case 'TRI_MEDIUM': return 10 + Math.floor(Math.random() * 11); // 10-20
+      case 'TRI_ELITE': return 20 + Math.floor(Math.random() * 21); // 20-40
+      case 'HEX_PEACEFUL': return 2 + Math.floor(Math.random() * 4); // 2-5
+      default: return 8 + Math.floor(Math.random() * 8); // 8-15
+    }
+  }
+
+  // Private helper methods
+  private clone(): Enemy {
+    return new Enemy(
+      this._id,
+      this._type,
+      this._position,
+      this._stats,
+      this._attackCooldown,
+      this._attackWindowDuration
+    );
   }
 }

@@ -38,7 +38,8 @@ export class VisualEffects {
   static drawPlayer(ctx: CanvasRenderingContext2D, x: number, y: number, size: number = 30) {
     const drawSquare = () => {
       ctx.beginPath();
-      ctx.roundRect(x - size/2, y - size/2, size, size, 6);
+      // Use regular rectangle instead of roundRect for better browser compatibility
+      ctx.rect(x - size/2, y - size/2, size, size);
     };
 
     this.drawShapeWithContour(

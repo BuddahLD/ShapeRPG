@@ -16,11 +16,26 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
   const { currentLocation, enemies, isSlowMotion } = useGameState();
   const { player } = usePlayer();
 
+  // Debug logging
+  console.log('GameCanvas render:', { 
+    gameEngine: !!gameEngine, 
+    currentLocation, 
+    enemies: enemies?.length, 
+    isSlowMotion, 
+    player: !!player 
+  });
+
   const gameLoop = useCallback(() => {
-    if (!canvasRef.current || !gameEngine) return;
+    if (!canvasRef.current || !gameEngine) {
+      console.log('GameCanvas: Missing canvas or gameEngine');
+      return;
+    }
 
     const ctx = canvasRef.current.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) {
+      console.log('GameCanvas: Could not get 2D context');
+      return;
+    }
 
     // Clear canvas
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
