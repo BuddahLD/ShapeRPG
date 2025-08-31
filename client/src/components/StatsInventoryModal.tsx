@@ -132,7 +132,7 @@ const StatsInventoryModal: React.FC<StatsInventoryModalProps> = ({ isOpen, onClo
       onClick={handleBackdropClick}
       style={{ touchAction: 'none' }}
     >
-      <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl max-w-sm w-full max-h-[70vh] flex flex-col">
+      <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl max-w-sm w-full h-[500px] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/20 flex-shrink-0">
           <h2 className="text-stone-100 text-lg font-semibold">Character</h2>

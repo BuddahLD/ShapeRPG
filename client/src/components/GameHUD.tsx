@@ -38,8 +38,7 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
   if (!player) return null;
 
   const handleRuneButtonPress = () => {
-    setShowCharInfo(true);
-    setActiveTab('spells');
+    setDrawingRune(true);
   };
 
   const handleLevelBarClick = () => {
