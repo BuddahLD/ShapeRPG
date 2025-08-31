@@ -10,9 +10,9 @@ const Minimap: React.FC = () => {
 
   const enemies = getAllEnemies();
   
-  // Minimap dimensions - maximized view with 2px container padding
+  // Minimap dimensions - square view with 2px container padding
   const mapWidth = 100;
-  const mapHeight = 76;
+  const mapHeight = 100;
   
   // World bounds for minimap scaling
   const worldBounds = {
@@ -48,8 +48,8 @@ const Minimap: React.FC = () => {
       <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl" style={{ padding: '2px' }}>
         {/* Minimap Display */}
         <div 
-          className="relative bg-black/30 rounded-lg border border-white/20 overflow-hidden"
-          style={{ width: mapWidth, height: mapHeight }}
+          className="relative bg-black/30 rounded-lg border border-white/20"
+          style={{ width: mapWidth, height: mapHeight, overflow: 'hidden' }}
         >
           {/* Zone backgrounds */}
           <div className="absolute inset-0">
