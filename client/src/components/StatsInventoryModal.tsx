@@ -4,13 +4,14 @@ import { usePlayer } from "../lib/stores/usePlayer";
 interface StatsInventoryModalProps {
   isOpen: boolean;
   onClose: () => void;
+  activeTab: 'stats' | 'spells' | 'inventory';
+  setActiveTab: (tab: 'stats' | 'spells' | 'inventory') => void;
 }
 
 type TabType = 'stats' | 'spells' | 'inventory';
 
-const StatsInventoryModal: React.FC<StatsInventoryModalProps> = ({ isOpen, onClose }) => {
+const StatsInventoryModal: React.FC<StatsInventoryModalProps> = ({ isOpen, onClose, activeTab, setActiveTab }) => {
   const { player } = usePlayer();
-  const [activeTab, setActiveTab] = useState<TabType>('stats');
 
   if (!isOpen || !player) return null;
 
@@ -127,8 +128,9 @@ const StatsInventoryModal: React.FC<StatsInventoryModalProps> = ({ isOpen, onClo
 
   return (
     <div 
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1000] flex items-center justify-center p-4 pointer-events-auto"
       onClick={handleBackdropClick}
+      style={{ touchAction: 'none' }}
     >
       <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl max-w-sm w-full max-h-[70vh] flex flex-col">
         {/* Header */}

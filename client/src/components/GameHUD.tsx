@@ -16,6 +16,7 @@ const GameHUD: React.FC = () => {
   const [showLocationIndicator, setShowLocationIndicator] = useState(true); // Show on start
   const [previousLocation, setPreviousLocation] = useState<string | null>(null);
   const [showStatsModal, setShowStatsModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<'stats' | 'spells' | 'inventory'>('stats');
 
   // Handle location change fade effect and initial display
   useEffect(() => {
@@ -32,11 +33,13 @@ const GameHUD: React.FC = () => {
   if (!player) return null;
 
   const handleRuneButtonPress = () => {
-    setDrawingRune(true);
+    setShowStatsModal(true);
+    setActiveTab('spells');
   };
 
   const handleLevelBarClick = () => {
     setShowStatsModal(true);
+    setActiveTab('stats');
   };
 
   const handleCloseStatsModal = () => {
@@ -151,10 +154,12 @@ const GameHUD: React.FC = () => {
         </div>
       )}
 
-      {/* Stats/Inventory Modal */}
+      {/* Char Info Modal */}
       <StatsInventoryModal 
         isOpen={showStatsModal}
         onClose={handleCloseStatsModal}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
       />
 
     </div>
