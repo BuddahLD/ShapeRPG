@@ -79,17 +79,19 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
         </UIContainer>
       </div>
       
-      {/* Location Indicator - Horizontally centered, lighter text */}
+      {/* Location Indicator - Below minimap with 16px padding, same width */}
       {showLocationIndicator && (
-        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 pointer-events-auto pt-4">
-          <UIContainer className="px-4 py-2 transition-all duration-1000 ease-in-out">
-            <div className="flex justify-center">
-              <span className="text-neutral-100 text-xs font-medium">
-                {currentLocation === "LOC_HUB_FIGUREIUM" ? "Figureium Hub" : 
-                 currentLocation === "LOC_PEACEFUL_FIELDS" ? "Peaceful Fields" : "Arena #1"}
-              </span>
-            </div>
-          </UIContainer>
+        <div className="absolute top-44 right-6 pointer-events-auto" style={{ width: '80px' }}>
+          <div className="pt-4">
+            <UIContainer className="px-2 py-2 transition-all duration-1000 ease-in-out">
+              <div className="text-center">
+                <span className="text-neutral-100 text-xs font-medium">
+                  {currentLocation === "LOC_HUB_FIGUREIUM" ? "Hub" : 
+                   currentLocation === "LOC_PEACEFUL_FIELDS" ? "Fields" : "Arena"}
+                </span>
+              </div>
+            </UIContainer>
+          </div>
         </div>
       )}
 

@@ -1,20 +1,18 @@
 import React from "react";
 import { usePlayer } from "../lib/stores/usePlayer";
-import { useGameState } from "../lib/stores/useGameState";
 import { useWorldChunks } from "../lib/stores/useWorldChunks";
 
 const Minimap: React.FC = () => {
   const { player } = usePlayer();
-  const { currentLocation } = useGameState();
   const { getAllEnemies } = useWorldChunks();
 
   if (!player) return null;
 
   const enemies = getAllEnemies();
   
-  // Minimap dimensions
-  const mapWidth = 160;
-  const mapHeight = 120;
+  // Minimap dimensions - made twice as small
+  const mapWidth = 80;
+  const mapHeight = 60;
   
   // World bounds for minimap scaling
   const worldBounds = {
@@ -43,11 +41,6 @@ const Minimap: React.FC = () => {
     return "#6b7280"; // Default
   };
   
-  // Count enemies in each zone
-  const enemyCount = {
-    arena: enemies.filter(e => e.x >= 600).length,
-    total: enemies.length
-  };
 
   return (
     <div className="fixed top-6 right-6 z-30 pointer-events-auto">
@@ -120,30 +113,7 @@ const Minimap: React.FC = () => {
           })}
         </div>
         
-        {/* Current Location */}
-        <div className="text-center">
-          <span className="text-stone-100 text-xs font-medium">
-            {currentLocation === "LOC_HUB_FIGUREIUM" ? "Hub" : 
-             currentLocation === "LOC_PEACEFUL_FIELDS" ? "Fields" : "Arena"}
-          </span>
-        </div>
       </div>
-      
-      {/* Enemy Info Panel */}
-      {enemyCount.total > 0 && (
-        <div className="mt-2 backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl p-2">
-          <div className="text-stone-100 text-xs space-y-1">
-            <div className="flex justify-between">
-              <span>Arena Enemies:</span>
-              <span className="text-red-400 font-semibold">{enemyCount.arena}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Total Enemies:</span>
-              <span className="text-orange-400 font-semibold">{enemyCount.total}</span>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
