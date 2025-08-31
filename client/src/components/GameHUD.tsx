@@ -22,22 +22,38 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
   const { currentLocation, setDrawingRune } = useGameState();
   const [showLocationIndicator, setShowLocationIndicator] = useState(false);
   const [previousLocation, setPreviousLocation] = useState<string | null>(null);
+  const [animationPhase, setAnimationPhase] = useState<'hidden' | 'fadingIn' | 'visible' | 'fadingOut'>('hidden');
 
-  // ATOMIC: Location popup - triggers on every location change
+  // ATOMIC: Location popup trigger - completely isolated logic
   useEffect(() => {
     if (currentLocation && currentLocation !== previousLocation) {
-      // Update previous location immediately
       setPreviousLocation(currentLocation);
       
-      // Show popup with animation
+      // Start animation sequence
       setShowLocationIndicator(true);
+      setAnimationPhase('fadingIn');
       
-      // Hide after 2.5 seconds
+      // Fade in complete
+      const fadeInTimer = setTimeout(() => {
+        setAnimationPhase('visible');
+      }, 100);
+      
+      // Start fade out
+      const fadeOutTimer = setTimeout(() => {
+        setAnimationPhase('fadingOut');
+      }, 2000);
+      
+      // Hide completely
       const hideTimer = setTimeout(() => {
         setShowLocationIndicator(false);
+        setAnimationPhase('hidden');
       }, 2500);
       
-      return () => clearTimeout(hideTimer);
+      return () => {
+        clearTimeout(fadeInTimer);
+        clearTimeout(fadeOutTimer);
+        clearTimeout(hideTimer);
+      };
     }
   }, [currentLocation, previousLocation]);
 
@@ -83,11 +99,16 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
         </UIContainer>
       </div>
       
-      {/* Location Indicator - Below minimap with smooth animation */}
+      {/* Location Indicator - Isolated animation system */}
       {showLocationIndicator && (
         <div 
-          className="absolute right-6 pointer-events-auto animate-in fade-in-0 zoom-in-95 duration-500 ease-out" 
-          style={{ top: '86px', width: '56px' }}
+          className="absolute right-6 pointer-events-auto transition-all duration-500 ease-in-out" 
+          style={{ 
+            top: '86px', 
+            width: '56px',
+            opacity: animationPhase === 'fadingIn' || animationPhase === 'visible' ? 1 : 0,
+            transform: `scale(${animationPhase === 'fadingIn' || animationPhase === 'visible' ? 1 : 0.95})`,
+          }}
         >
           <UIContainer className="px-2 py-1">
             <div className="flex items-center justify-center">
