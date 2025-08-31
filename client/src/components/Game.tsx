@@ -71,11 +71,12 @@ const Game: React.FC = () => {
       {/* Virtual Joystick */}
       <VirtualJoystick isModalOpen={showCharInfo} />
       
-      {/* Minimap */}
+      {/* Minimap - Top Right with Content Wrapping */}
       <MinimapContainer 
         wrapContent={true}
         maxWidth="200px"
-        showLegend={true}
+        showLegend={false}
+        showControls={false}
         className="bg-white/5 border-white/20"
       />
       

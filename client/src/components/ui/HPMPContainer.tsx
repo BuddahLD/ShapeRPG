@@ -1,5 +1,6 @@
 import React from "react";
 import { PlayerStatsDisplay } from "./PlayerStatsDisplay";
+import { useElementLayout } from "../../presentation/hooks/useUILayout";
 
 /**
  * HPMPContainer - Single Responsibility: Wrap HP/MP display with content-wrapping container
@@ -27,6 +28,8 @@ export const HPMPContainer: React.FC<HPMPContainerProps> = ({
   className = "",
   ...props
 }) => {
+  const { styles } = useElementLayout('hpmpContainer');
+  
   // Base HP/MP display component
   const baseHPMP = (
     <PlayerStatsDisplay
@@ -44,8 +47,9 @@ export const HPMPContainer: React.FC<HPMPContainerProps> = ({
   // Content-wrapping container with flexible dimensions
   return (
     <div
-      className={`flex flex-col ${className}`}
+      className={`flex flex-col pointer-events-auto ${className}`}
       style={{
+        ...styles,
         maxWidth,
         maxHeight,
         width: 'fit-content',

@@ -1,5 +1,6 @@
 import React from "react";
 import Minimap from "../Minimap";
+import { useElementLayout } from "../../presentation/hooks/useUILayout";
 
 /**
  * MinimapContainer - Single Responsibility: Wrap minimap with content-wrapping container
@@ -25,6 +26,8 @@ export const MinimapContainer: React.FC<MinimapContainerProps> = ({
   className = "",
   ...props
 }) => {
+  const { styles } = useElementLayout('minimap');
+  
   // Base minimap component
   const baseMinimap = <Minimap />;
 
@@ -36,8 +39,9 @@ export const MinimapContainer: React.FC<MinimapContainerProps> = ({
   // Content-wrapping container with flexible dimensions
   return (
     <div
-      className={`flex flex-col ${className}`}
+      className={`flex flex-col pointer-events-auto ${className}`}
       style={{
+        ...styles,
         maxWidth,
         maxHeight,
         width: 'fit-content',

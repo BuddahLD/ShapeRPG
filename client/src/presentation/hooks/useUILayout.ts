@@ -13,12 +13,18 @@ export function useUILayoutManager() {
 
   useEffect(() => {
     if (!managerRef.current) {
-      managerRef.current = new UILayoutManager();
+      managerRef.current = UILayoutManager.getInstance();
       layoutManagerInstance = managerRef.current;
     }
   }, []);
 
-  return managerRef.current;
+  // Return existing instance immediately if available
+  if (layoutManagerInstance) {
+    return layoutManagerInstance;
+  }
+
+  // Return static instance immediately
+  return UILayoutManager.getInstance();
 }
 
 // Hook for accessing layout store
@@ -33,8 +39,28 @@ export function useElementLayout(elementId: string) {
   const store = manager?.getStore();
   
   if (!store) {
+    // Return default positioning to prevent stacking
     return {
-      styles: {},
+      styles: {
+        position: 'absolute',
+        top: elementId === 'minimap' ? '1rem' : 
+             elementId === 'hpmpContainer' ? '1rem' : 
+             elementId === 'virtualJoystick' ? '140px' : 
+             elementId === 'actionButtons' ? '140px' : 
+             elementId === 'bottomBar' ? '2rem' : '0',
+        left: elementId === 'minimap' ? 'auto' : 
+              elementId === 'hpmpContainer' ? '1rem' : 
+              elementId === 'virtualJoystick' ? '50%' : 
+              elementId === 'actionButtons' ? 'auto' : 
+              elementId === 'bottomBar' ? '2rem' : '0',
+        right: elementId === 'minimap' ? '1rem' : 
+               elementId === 'hpmpContainer' ? 'auto' : 
+               elementId === 'virtualJoystick' ? 'auto' : 
+               elementId === 'actionButtons' ? '2rem' : 
+               elementId === 'bottomBar' ? '2rem' : 'auto',
+        transform: elementId === 'virtualJoystick' ? 'translateX(-50%)' : 'none',
+        zIndex: 100
+      },
       isVisible: true,
       updatePosition: () => {},
       setVisibility: () => {}
