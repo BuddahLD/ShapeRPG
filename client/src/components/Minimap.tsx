@@ -48,7 +48,7 @@ const Minimap: React.FC = () => {
       <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl" style={{ padding: '4px' }}>
         {/* Minimap Display */}
         <div 
-          className="relative bg-black/30 rounded-xl border border-white/20 overflow-hidden"
+          className="relative bg-black/30 rounded-lg border border-white/20 overflow-hidden"
           style={{ width: mapWidth, height: mapHeight }}
         >
           {/* Zone backgrounds */}
