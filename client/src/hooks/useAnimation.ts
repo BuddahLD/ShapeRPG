@@ -5,7 +5,13 @@ import { animationManager, AnimationTarget } from '../lib/services/AnimationMana
  * Hook for using the Animation Manager
  * Provides manual control over animations without complex trigger logic
  */
-export function useAnimation(target: AnimationTarget) {
+interface UseAnimationReturn {
+  styles: Record<string, string | number>;
+  isAnimating: boolean;
+  startAnimation: () => void;
+}
+
+export function useAnimation(target: AnimationTarget): UseAnimationReturn {
   const [styles, setStyles] = useState<Record<string, string | number>>({});
   const [isAnimating, setIsAnimating] = useState(false);
   const updateIntervalRef = useRef<number>();
