@@ -77,11 +77,11 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
         </UIContainer>
       </div>
       
-      {/* Location Indicator - Below minimap with exactly 16px padding, same width as minimap container */}
+      {/* Location Indicator - Below minimap with 6px padding, same width as minimap container */}
       {showLocationIndicator && (
-        <div className="absolute right-6 pointer-events-auto" style={{ top: '124px', width: '104px' }}>
-          <UIContainer className="px-2 py-2 transition-all duration-1000 ease-in-out">
-            <div className="text-center">
+        <div className="absolute right-6 pointer-events-auto" style={{ top: '98px', width: '88px' }}>
+          <UIContainer className="px-2 py-1 transition-all duration-1000 ease-in-out">
+            <div className="flex items-center justify-center">
               <span className="text-neutral-100 text-xs font-medium">
                 {currentLocation === "LOC_HUB_FIGUREIUM" ? "Hub" : 
                  currentLocation === "LOC_PEACEFUL_FIELDS" ? "Fields" : "Arena"}

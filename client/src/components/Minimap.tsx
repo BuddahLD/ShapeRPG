@@ -45,10 +45,10 @@ const Minimap: React.FC = () => {
   return (
     <div className="fixed top-6 right-6 z-30 pointer-events-auto">
       {/* Minimap Container */}
-      <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl p-3 space-y-2">
+      <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl p-1">
         {/* Minimap Display */}
         <div 
-          className="relative bg-black/30 rounded-lg border border-white/20 overflow-hidden"
+          className="relative bg-black/30 rounded-xl border border-white/20 overflow-hidden"
           style={{ width: mapWidth, height: mapHeight }}
         >
           {/* Zone backgrounds */}
