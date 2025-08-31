@@ -120,9 +120,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
 
     // Player with modern cartoon styling
     const size = 30;
-    const floatOffset = VisualEffects.createFloatingAnimation(Date.now(), 2);
     
-    VisualEffects.drawPlayer(ctx, centerX, centerY + floatOffset, size);
+    VisualEffects.drawPlayer(ctx, centerX, centerY, size);
   };
 
   const renderWalls = (ctx: CanvasRenderingContext2D) => {
@@ -191,11 +190,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
       if (screenX > -30 && screenX < canvas.width + 30 && 
           screenY > -30 && screenY < canvas.height + 30) {
         
-        // Add floating animation
-        const floatOffset = VisualEffects.createFloatingAnimation(Date.now() + npc.x * 100, 1.5);
-        
         // Draw NPC with modern cartoon styling
-        VisualEffects.drawNPC(ctx, screenX, screenY + floatOffset, npc.color, npc.label, 22);
+        VisualEffects.drawNPC(ctx, screenX, screenY, npc.color, npc.label, 22);
 
         // Draw modern label below
         ctx.save();
@@ -213,8 +209,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
         };
         
         const label = labels[npc.id as keyof typeof labels];
-        ctx.strokeText(label, screenX, screenY + floatOffset + 30);
-        ctx.fillText(label, screenX, screenY + floatOffset + 30);
+        ctx.strokeText(label, screenX, screenY + 30);
+        ctx.fillText(label, screenX, screenY + 30);
         ctx.restore();
       }
     });
