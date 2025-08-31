@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { usePlayer } from "../lib/stores/usePlayer";
 import { useGameState } from "../lib/stores/useGameState";
 import StatsInventoryModal from "./StatsInventoryModal";
-import { useAnimation } from "../hooks/useAnimation";
 
 interface GameHUDProps {
   showCharInfo: boolean;
@@ -24,40 +23,13 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
   const [showLocationIndicator, setShowLocationIndicator] = useState(false);
   const [previousLocation, setPreviousLocation] = useState<string | null>(null);
 
-  // ATOMIC: Animation manager for location popup
-  const { styles: popupStyles, isAnimating } = useAnimation({
-    id: 'location-popup',
-    trigger: () => currentLocation !== null && currentLocation !== previousLocation && showLocationIndicator,
-    duration: 2500,
-    phases: [
-      {
-        name: 'fadeIn',
-        startAt: 0,
-        endAt: 500,
-        styles: { opacity: 1, transform: 'scale(1)' }
-      },
-      {
-        name: 'visible',
-        startAt: 500,
-        endAt: 2000,
-        styles: { opacity: 1, transform: 'scale(1)' }
-      },
-      {
-        name: 'fadeOut',
-        startAt: 2000,
-        endAt: 2500,
-        styles: { opacity: 0, transform: 'scale(0.95)' }
-      }
-    ]
-  });
-
-  // ATOMIC: Location change detection - pure logic, no animation
+  // ATOMIC: Simple location popup with built-in fade animation
   useEffect(() => {
     if (currentLocation && currentLocation !== previousLocation) {
       setPreviousLocation(currentLocation);
       setShowLocationIndicator(true);
       
-      // Simple hide timer - animation manager handles the fade effects
+      // Hide after 2.5 seconds
       const hideTimer = setTimeout(() => {
         setShowLocationIndicator(false);
       }, 2500);
@@ -108,15 +80,11 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
         </UIContainer>
       </div>
       
-      {/* Location Indicator - Managed by Animation Manager */}
+      {/* Location Indicator - Simple fade animation */}
       {showLocationIndicator && (
         <div 
-          className="absolute right-6 pointer-events-auto transition-all duration-500 ease-in-out" 
-          style={{ 
-            top: '86px', 
-            width: '56px',
-            ...popupStyles // Animation Manager provides all animation styles
-          }}
+          className="absolute right-6 pointer-events-auto animate-in fade-in zoom-in-95 duration-500 animate-out fade-out zoom-out-95" 
+          style={{ top: '86px', width: '56px' }}
         >
           <UIContainer className="px-2 py-1">
             <div className="flex items-center justify-center">
