@@ -25,10 +25,7 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
 
   // Handle location change fade effect - only on actual transitions
   useEffect(() => {
-    console.log("🏠 LOCATION DEBUG:", { currentLocation, previousLocation, willShow: currentLocation !== previousLocation && previousLocation !== null });
-    
     if (currentLocation !== previousLocation && previousLocation !== null) {
-      console.log("✅ SHOWING LOCATION:", currentLocation);
       setShowLocationIndicator(true);
       const timer = setTimeout(() => {
         setShowLocationIndicator(false);

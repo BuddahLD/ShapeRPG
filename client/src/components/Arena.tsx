@@ -40,16 +40,6 @@ const Arena: React.FC = () => {
 
   return (
     <div className="absolute inset-0 z-5 pointer-events-none">
-      {/* Combat Status */}
-      {gamePhase === "combat" && enemies.length > 0 && (
-        <div className="absolute top-6 right-6 pointer-events-auto">
-          <div className="backdrop-blur-md bg-white/20 rounded-xl border border-white/30 shadow-lg px-3 py-2">
-            <p className="text-neutral-100 text-xs font-medium text-center">
-              Enemies: {enemies.filter(e => e.hp > 0).length}
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Victory State */}
       {gamePhase === "combat" && enemies.length > 0 && enemies.every(e => e.hp <= 0) && (
