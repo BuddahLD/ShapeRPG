@@ -1,35 +1,6 @@
 # Overview
 
-Shapes RPG: Figureium is a minimalist 2D RPG featuring geometric characters where the player controls a square hero who learns to cast spells by drawing runes using free-draw mechanics. The game combines real-time combat with gesture-based magic casting, counterattack timing windows, and a seamless world exploration system. Built as a full-stack web application with mobile-first design principles targeting iPhone touch controls.
-
-## Recent Updates (August 2025)
-
-**Seamless World System**: Replaced button-based navigation with natural walking exploration. Players can now walk continuously between connected zones: Hub → Peaceful Fields → Combat Arena.
-
-**Zone-Based Gameplay**: Three distinct areas with unique visual themes and enemy types:
-- **Figureium Hub**: Blue-themed safe zone with NPCs (weapon shop, armor shop, trainer)
-- **Peaceful Fields**: Green-themed transition area with hexagon enemies
-- **Combat Arena**: Brown-themed challenge area with triangle enemies
-
-**Chunk Loading System**: Implemented dynamic world loading where areas load/unload based on player proximity for smooth transitions without loading delays.
-
-**Enhanced Movement**: Virtual joystick now supports seamless movement across the entire world map with zone-aware collision detection. Fixed continuous movement lag with proper coordinate calculations and 60fps movement loop for responsive character control.
-
-**Modern Design System (August 2025)**: Implemented iOS-inspired minimalist design with cartoon-like contours inspired by Prince of Persia 2008. Features sophisticated pastel color palette, glassmorphism UI elements, floating animations, and modern visual effects replacing primitive solid colors.
-
-**UI Component System (August 30, 2025)**: Created reusable UIContainer design system component providing consistent glassmorphism styling across all game UI elements (HP/MP bars, location indicators, XP bars). Ensures uniform visual identity and reduces code duplication.
-
-**Char Info System (August 30, 2025)**: Implemented comprehensive character information modal with tabbed interface (Inventory, Stats, Spells). Accessible via bottom bar tap (inventory) with fixed 500px height for consistent sizing across tabs. Features concise iOS-inspired design with proper z-index layering above all game elements and touch-friendly navigation. Rune button correctly triggers spell casting interface.
-
-**Enhanced Location System (August 30, 2025)**: Refined location indicator with horizontal centering, improved text readability using light colors, and proper positioning relative to HP/MP containers. Shows for 2.5 seconds on game start and zone transitions.
-
-**Extensible UI Architecture (August 31, 2025)**: Enhanced all UI components with extensible prop interfaces that support additional properties without affecting existing logic. Components now accept HTML attributes, support variants (default/minimal/enhanced), positioning options, and custom styling while maintaining full backward compatibility. Follows Open/Closed Principle - open for extension, closed for modification.
-
-**Territorial Background Rendering (August 30, 2025)**: Replaced single-zone background coloring with territorial system that renders multiple zone backgrounds simultaneously based on world coordinates. Players can now see Hub (violet), Peaceful Fields (green), and Arena (brown-red) territories at the same time, creating immersive visual world representation.
-
-**Streamlined Canvas Rendering (August 30, 2025)**: Removed redundant zone text rendering from canvas layer, centralizing all UI text in the HUD component for better separation of concerns and cleaner visual presentation.
-
-**Polished Touch Controls (August 31, 2025)**: Enhanced mobile interface with improved joystick behavior that automatically hides during modal interactions. Fixed z-index conflicts ensuring proper layer management. Made entire bottom status bar clickable for better accessibility. Refined rune button to correctly trigger spell casting mechanics as per game design.
+Shapes RPG: Figureium is a minimalist 2D RPG where players control a square hero, casting spells by drawing runes. It features real-time combat, gesture-based magic, counterattack timing, and seamless world exploration. Developed as a full-stack web application with a mobile-first design, it targets iPhone touch controls and combines an iOS-inspired minimalist aesthetic with cartoon-like contours. The project aims to provide an immersive geometric adventure across distinct zones.
 
 # User Preferences
 
@@ -50,6 +21,20 @@ Preferred communication style: Simple, everyday language.
 - **No Global Constants**: Avoid global state and constants, prefer dependency injection and configuration
 - **Senior Practices**: Apply enterprise-grade patterns, proper error handling, and maintainable code structure
 - **Type Safety**: Leverage TypeScript's type system for compile-time error prevention
+
+**Clean Architecture Rules**:
+- **Layer Separation**: Code must be organized into four distinct layers with strict dependency rules
+  - Domain Layer (innermost): Pure business logic, entities, value objects, domain services
+  - Application Layer: Use cases, application services, orchestration logic
+  - Infrastructure Layer: External dependencies, repositories, adapters, frameworks
+  - Presentation Layer: UI components, state management, user interactions
+- **Dependency Direction**: Dependencies must flow inward only (Presentation → Application → Domain)
+- **No Layer Skipping**: Each layer may only depend on the layer directly inside it
+- **Interface Segregation**: Use interfaces to define contracts between layers (ports & adapters)
+- **Immutable Entities**: Domain entities should be immutable with business logic encapsulated
+- **Pure Use Cases**: Application use cases should orchestrate domain objects without business logic
+- **Repository Pattern**: Data persistence abstracted through repository interfaces
+- **Dependency Injection**: External dependencies injected through constructor parameters
 
 **Testing Strategy**:
 - Service layer functions must be pure and easily testable
@@ -73,137 +58,47 @@ Preferred communication style: Simple, everyday language.
 - **Separation of Concerns**: Keep business logic, UI state, and animation logic completely separate
 - **Dependency Isolation**: Avoid cross-dependencies between unrelated features to prevent cascade failures
 
-**Automatic Updates Rule**: All approved design changes and architectural improvements are automatically incorporated into project documentation and development guidelines without requiring additional requests.
-
 # System Architecture
 
 ## Frontend Architecture
-
-**Framework**: React 18 with TypeScript and Vite as the build system
-- **Canvas-based Game Engine**: Custom 2D game engine using HTML5 Canvas for rendering geometric shapes, animations, and real-time combat
-- **State Management**: Zustand stores for game state, player data, inventory, and audio management
-- **Mobile-First UI**: Touch-optimized interface with virtual joystick controls and gesture-based rune drawing
-- **Component Structure**: Modular React components for different game screens (Hub, Arena, Shop) with a main Game component orchestrating the experience
-
-**Key Design Patterns**:
-- Game loop architecture with requestAnimationFrame for smooth 60fps rendering
-- Event-driven combat system with timing-based counterattacks
-- Slow-motion mechanics during rune drawing phases
-- Responsive canvas that adapts to device screen sizes
-- Seamless world exploration with automatic zone transitions
-- Chunk-based world loading for performance optimization
-- Zone-aware enemy spawning and collision systems
+The frontend is built with React 18 and TypeScript, using Vite. It features a custom 2D game engine on HTML5 Canvas for rendering. Zustand manages global state. The UI follows a mobile-first design with touch-optimized controls and a modular component structure. Key patterns include a 60fps game loop, event-driven combat, slow-motion during rune drawing, and responsive canvas sizing. Seamless world exploration with chunk-based loading and zone-aware systems enhance performance. UI components utilize an extensible prop interface adhering to the Open/Closed Principle.
 
 ## Backend Architecture
-
-**Server**: Express.js with TypeScript using ES modules
-- **Minimal API**: Currently configured for future expansion with basic routing structure
-- **Storage Interface**: Abstracted storage layer with in-memory implementation (prepared for database integration)
-- **Development Environment**: Vite integration for hot module replacement in development
-
-**Architectural Decisions**:
-- Express chosen for simplicity and rapid prototyping
-- Interface-based storage design allows easy swapping between memory and database implementations
-- Middleware structure prepared for future authentication and session management
+The backend uses Express.js with TypeScript and ES modules. It currently has a minimal API structure with an abstracted storage layer, ready for database integration. Express was chosen for rapid prototyping, and the interface-based storage allows for easy swapping between in-memory and persistent storage.
 
 ## Game Engine Components
-
-**Core Systems**:
-- **Player System**: Character movement, stats management, leveling, and inventory
-- **World System**: Seamless zone transitions with chunk-based loading for performance
-- **Combat System**: Turn-based combat with real-time counterattack windows and damage calculations
-- **Shape Matching**: Algorithm for recognizing hand-drawn runes and mapping them to spells
-- **Enemy AI**: Zone-specific behavioral patterns with different enemy types per area
-- **Spell System**: Casting mechanics with mana costs and effect processing
-- **Zone Management**: Automatic area detection with visual and gameplay changes per zone
-
-**Game Loop Architecture**:
-- Time-scaled updates for slow-motion effects during rune drawing
-- Delta-time based animations for consistent performance across devices
-- Separate update cycles for game logic, rendering, and UI state
-- Chunk-based rendering optimization for large world areas
-- Dynamic enemy and NPC loading based on player proximity
+Core systems include Player, World (seamless transitions, chunk loading), Combat (timing-based counterattacks), Shape Matching (rune recognition), Enemy AI (zone-specific behaviors), and Spell systems. The game loop uses time-scaled updates, delta-time animations, and separate update cycles for logic, rendering, and UI.
 
 ## Mobile Touch Controls
-
-**Input Systems**:
-- **Virtual Joystick**: Bottom-center positioned analog movement control for seamless world exploration
-- **Rune Drawing**: Full-screen touch gesture recognition for spell casting
-- **Touch Zones**: Dedicated areas for counterattack timing inputs
-- **State-based Input**: Touch controls adapt based on game phase (movement disabled during rune drawing)
-- **Zone-aware Controls**: Movement system adapts to different area collision boundaries
+Input systems include a virtual joystick for movement, full-screen touch gesture recognition for rune drawing, and dedicated touch zones for counterattacks. Controls adapt based on game phase and zone-aware collision boundaries.
 
 ## Data Management
+Client-side storage uses local storage for game state, player progress, and settings. Game data is structured in JSON for spells, enemies, and items, with type-safe interfaces. The world architecture supports seamless exploration across distinct zones (Hub, Peaceful Fields, Arena) with dynamic 400x400 unit chunk loading and unloading for performance.
 
-**Client-side Storage**:
-- Game state persistence using local storage
-- Player progress and inventory tracking
-- Settings and preferences storage
-- Chunk-based world data with dynamic loading/unloading
+## Design System
+Implemented an iOS-inspired minimalist design with cartoon-like contours and a sophisticated pastel color palette. UI elements feature glassmorphism effects and floating animations. A reusable `UIContainer` design system component ensures consistent styling. Character information is presented via a comprehensive, tabbed modal, and the location indicator is refined for readability and positioning.
 
-**Game Data Structure**:
-- JSON-based configuration for spells, enemies, items, and game balance
-- Modular data files for easy content updates
-- Type-safe interfaces for all game entities
-- Zone-specific content generation for procedural world areas
-
-**World Architecture**:
-- **Seamless Exploration**: Connected world areas without loading screens
-- **Zone System**: Hub (NPCs/shops) → Peaceful Fields (hexagon enemies) → Arena (triangle enemies)
-- **Chunk Loading**: Dynamic 400x400 unit chunks load within 2-chunk radius of player
-- **Performance Optimization**: Automatic unloading of distant chunks to maintain smooth performance
+## Clean Architecture
+The project employs a clean architecture with strict separation of concerns across four layers: Domain, Application, Infrastructure, and Presentation. This structure adheres to SOLID principles, dependency inversion, and the ports & adapters pattern, ensuring maintainability and testability. Dependencies flow strictly inwards.
 
 # External Dependencies
 
 ## Frontend Dependencies
-
-**Core Framework**:
-- React 18 with TypeScript for component architecture
-- Vite for build tooling and development server
-- TailwindCSS for utility-first styling with custom game theme
-
-**UI Components**:
-- Radix UI primitives for accessible, unstyled components
-- Custom game-specific UI overlays for HUD elements
-- Three.js ecosystem (@react-three/fiber, @react-three/drei) for potential 3D enhancements
-
-**Game Development**:
-- Canvas 2D API for rendering (no external game engine dependency)
-- Custom shape matching algorithms
-- Audio Web API for sound effects and background music
-
-**State & Data**:
-- Zustand for lightweight state management
-- TanStack Query for future API integration
-- Date-fns for time calculations
+- **Core Framework**: React 18, TypeScript, Vite
+- **Styling**: TailwindCSS
+- **UI Primitives**: Radix UI
+- **State Management**: Zustand
+- **Game Dev**: HTML5 Canvas API (custom engine), custom shape matching algorithms
+- **Utilities**: Date-fns
 
 ## Backend Dependencies
-
-**Server Framework**:
-- Express.js for HTTP server and API routes
-- TypeScript for type safety across the entire codebase
-
-**Database & Storage**:
-- Drizzle ORM configured for PostgreSQL
-- Neon Database (@neondatabase/serverless) as the cloud database provider
-- Connection pooling and session management prepared via connect-pg-simple
-
-**Development Tools**:
-- ESBuild for server-side bundling
-- TSX for TypeScript execution in development
-- Runtime error handling and logging middleware
+- **Server Framework**: Express.js, TypeScript
+- **ORM**: Drizzle (with PostgreSQL dialect)
+- **Database Provider**: Neon Database
+- **Development Tools**: ESBuild, TSX
 
 ## Database Architecture
-
-**ORM Setup**: Drizzle configured with PostgreSQL dialect
-- Schema definitions in shared TypeScript files
-- Type-safe database queries with inferred types
-- Migration system for schema updates
-
-**Prepared Tables**: Basic user authentication structure ready for expansion to include player profiles, game saves, and leaderboards
+Drizzle ORM is configured for PostgreSQL with schema definitions in TypeScript. It supports type-safe queries and includes a migration system for schema updates. Basic user authentication tables are prepared for future expansion.
 
 ## Build & Deployment
-
-**Development**: Concurrent frontend and backend development with hot reloading
-**Production**: Static frontend build with Express server bundle
-**Database Migrations**: Drizzle Kit for schema management and deployments
+Development features concurrent frontend and backend processes with hot reloading. Production involves a static frontend build bundled with the Express server. Drizzle Kit manages database schema migrations.

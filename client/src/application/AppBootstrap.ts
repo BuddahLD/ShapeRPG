@@ -1,0 +1,113 @@
+/**
+ * Application Bootstrap: Clean Architecture Dependency Injection
+ * Wires up all dependencies following clean architecture principles
+ */
+
+import { RepositoryFactory } from '../infrastructure/factories/RepositoryFactory';
+import { CombatServiceImpl } from '../infrastructure/services/CombatServiceImpl';
+import { ZustandStateAdapter } from '../infrastructure/adapters/ZustandStateAdapter';
+import { PlayerMovementUseCase } from './useCases/PlayerMovementUseCase';
+import { WorldExplorationUseCase } from './useCases/WorldExplorationUseCase';
+import { CombatUseCase } from './useCases/CombatUseCase';
+import { GameStateService } from './services/GameStateService';
+import { AnimationService } from './services/AnimationService';
+
+export interface AppConfig {
+  readonly environment: 'development' | 'production';
+  readonly persistence: 'memory' | 'localStorage';
+}
+
+export class AppBootstrap {
+  private static instance: AppBootstrap | null = null;
+  
+  private gameStateService!: GameStateService;
+  private animationService!: AnimationService;
+  private zustandAdapter!: ZustandStateAdapter;
+  
+  private constructor(private config: AppConfig) {
+    this.initializeDependencies();
+  }
+
+  static getInstance(config: AppConfig): AppBootstrap {
+    if (!this.instance) {
+      this.instance = new AppBootstrap(config);
+    }
+    return this.instance;
+  }
+
+  getGameStateService(): GameStateService {
+    return this.gameStateService;
+  }
+
+  getAnimationService(): AnimationService {
+    return this.animationService;
+  }
+
+  getZustandAdapter(): ZustandStateAdapter {
+    return this.zustandAdapter;
+  }
+
+  private initializeDependencies(): void {
+    // Create repositories (Infrastructure layer)
+    const repositories = this.config.environment === 'development'
+      ? RepositoryFactory.createDevelopmentRepositories()
+      : RepositoryFactory.createProductionRepositories();
+
+    // Create services (Infrastructure layer)
+    const combatService = new CombatServiceImpl();
+
+    // Create use cases (Application layer)
+    const playerMovementUseCase = new PlayerMovementUseCase(
+      repositories.playerRepository,
+      repositories.worldRepository
+    );
+
+    const worldExplorationUseCase = new WorldExplorationUseCase(
+      repositories.playerRepository,
+      repositories.worldRepository
+    );
+
+    const combatUseCase = new CombatUseCase(
+      repositories.playerRepository,
+      combatService
+    );
+
+    // Create application services (Application layer)
+    this.gameStateService = new GameStateService(
+      repositories.playerRepository,
+      repositories.worldRepository,
+      playerMovementUseCase,
+      worldExplorationUseCase
+    );
+
+    this.animationService = new AnimationService();
+
+    // Create adapters (Infrastructure layer)
+    this.zustandAdapter = new ZustandStateAdapter(this.gameStateService);
+  }
+
+  // Factory methods for common configurations
+  static createDevelopmentApp(): AppBootstrap {
+    return AppBootstrap.getInstance({
+      environment: 'development',
+      persistence: 'memory'
+    });
+  }
+
+  static createProductionApp(): AppBootstrap {
+    return AppBootstrap.getInstance({
+      environment: 'production',
+      persistence: 'localStorage'
+    });
+  }
+
+  // Utility methods
+  reset(): void {
+    RepositoryFactory.clearAllRepositories();
+    AppBootstrap.instance = null;
+  }
+
+  getConfig(): AppConfig {
+    return this.config;
+  }
+}
