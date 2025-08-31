@@ -21,53 +21,25 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
   const { player } = usePlayer();
   const { currentLocation, setDrawingRune } = useGameState();
   const [showLocationIndicator, setShowLocationIndicator] = useState(false);
-  const [locationOpacity, setLocationOpacity] = useState(0);
   const [previousLocation, setPreviousLocation] = useState<string | null>(null);
 
-  // ATOMIC: Location popup with smooth animation - triggers on every location change
+  // ATOMIC: Location popup - triggers on every location change
   useEffect(() => {
-    console.log("🔍 LOCATION CHECK:", { 
-      currentLocation, 
-      previousLocation, 
-      different: currentLocation !== previousLocation,
-      showLocationIndicator,
-      locationOpacity 
-    });
-    
     if (currentLocation && currentLocation !== previousLocation) {
-      console.log("✅ TRIGGERING POPUP FOR:", currentLocation);
-      
-      // Update previous location
+      // Update previous location immediately
       setPreviousLocation(currentLocation);
       
-      // Trigger animation
+      // Show popup with animation
       setShowLocationIndicator(true);
       
-      // Fade in
-      const fadeInTimer = setTimeout(() => {
-        console.log("🎭 FADE IN");
-        setLocationOpacity(1);
-      }, 50);
-      
-      // Fade out after 2 seconds
-      const fadeOutTimer = setTimeout(() => {
-        console.log("🌅 FADE OUT");
-        setLocationOpacity(0);
-      }, 2000);
-      
-      // Hide after fade completes
+      // Hide after 2.5 seconds
       const hideTimer = setTimeout(() => {
-        console.log("🚫 HIDE POPUP");
         setShowLocationIndicator(false);
       }, 2500);
       
-      return () => {
-        clearTimeout(fadeInTimer);
-        clearTimeout(fadeOutTimer);
-        clearTimeout(hideTimer);
-      };
+      return () => clearTimeout(hideTimer);
     }
-  }, [currentLocation, previousLocation]); // ATOMIC: Only depends on location changes
+  }, [currentLocation, previousLocation]);
 
   if (!player) return null;
 
@@ -111,17 +83,11 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
         </UIContainer>
       </div>
       
-      {/* Location Indicator - Below minimap with smooth fade animation */}
+      {/* Location Indicator - Below minimap with smooth animation */}
       {showLocationIndicator && (
         <div 
-          className="absolute right-6 pointer-events-auto transition-all duration-500 ease-in-out transform" 
-          style={{ 
-            top: '86px', 
-            width: '56px',
-            opacity: locationOpacity,
-            transform: `scale(${locationOpacity === 1 ? '1' : '0.95'})`,
-            transition: 'opacity 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-          }}
+          className="absolute right-6 pointer-events-auto animate-in fade-in-0 zoom-in-95 duration-500 ease-out" 
+          style={{ top: '86px', width: '56px' }}
         >
           <UIContainer className="px-2 py-1">
             <div className="flex items-center justify-center">
