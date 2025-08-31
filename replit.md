@@ -63,6 +63,14 @@ Preferred communication style: Simple, everyday language.
 - **Consistent Spacing**: 8px grid system for all UI elements and spacing decisions
 - **Smooth Animations**: Cubic-bezier easing functions for natural iOS-like motion and transitions
 
+**SOLID Principles & Regression Prevention**:
+- **Open/Closed Principle**: Components open for extension, closed for modification - extend/decorate existing functionality rather than changing it
+- **Atomic Logic**: Create separate, independent UI elements and logic units that don't interfere with each other
+- **Non-Breaking Extensions**: New functionality must not break existing features - use composition over modification
+- **Exception Rule**: Only modify existing code when fixing confirmed bugs, never when adding new features
+- **Separation of Concerns**: Keep business logic, UI state, and animation logic completely separate
+- **Dependency Isolation**: Avoid cross-dependencies between unrelated features to prevent cascade failures
+
 **Automatic Updates Rule**: All approved design changes and architectural improvements are automatically incorporated into project documentation and development guidelines without requiring additional requests.
 
 # System Architecture

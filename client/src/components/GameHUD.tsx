@@ -24,43 +24,31 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
   const [locationOpacity, setLocationOpacity] = useState(0);
   const [shownLocations, setShownLocations] = useState<Set<string>>(new Set());
 
-  // Show location popup with smooth fade animation if this location hasn't been shown yet
+  // ATOMIC: Location popup with smooth animation - triggers once per location
   useEffect(() => {
-    console.log("🔍 POPUP CHECK:", { 
-      currentLocation, 
-      hasLocation: !!currentLocation, 
-      alreadyShown: shownLocations.has(currentLocation || ''),
-      shownCount: shownLocations.size 
-    });
-    
     if (currentLocation && !shownLocations.has(currentLocation)) {
-      console.log("✅ TRIGGERING POPUP ANIMATION FOR:", currentLocation);
-      
-      // Add location to shown set
+      // Mark as shown immediately
       setShownLocations(prev => {
         const newSet = new Set(prev);
         newSet.add(currentLocation);
         return newSet;
       });
       
-      // Start animation sequence
+      // Trigger animation
       setShowLocationIndicator(true);
       
-      // Fade in (immediate)
+      // Fade in
       const fadeInTimer = setTimeout(() => {
-        console.log("🎭 FADE IN");
         setLocationOpacity(1);
       }, 50);
       
       // Fade out after 2 seconds
       const fadeOutTimer = setTimeout(() => {
-        console.log("🌅 FADE OUT");
         setLocationOpacity(0);
       }, 2000);
       
-      // Hide completely after fade out completes
+      // Hide after fade completes
       const hideTimer = setTimeout(() => {
-        console.log("🚫 HIDE POPUP");
         setShowLocationIndicator(false);
       }, 2500);
       
@@ -70,7 +58,7 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
         clearTimeout(hideTimer);
       };
     }
-  }, [currentLocation, shownLocations]);
+  }, [currentLocation]); // ATOMIC: Only depends on location changes
 
   if (!player) return null;
 
