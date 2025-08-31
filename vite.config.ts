@@ -9,7 +9,7 @@ const __dirname = dirname(__filename);
 
 export default defineConfig({
   plugins: [
-    react(),
+    react(), // Use default React plugin configuration
     glsl(), // Add GLSL shader support
   ],
   resolve: {
@@ -18,6 +18,7 @@ export default defineConfig({
       "@shared": path.resolve(__dirname, "shared"),
     },
   },
+  // Restore the root setting to point to the client directory
   root: path.resolve(__dirname, "client"),
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
@@ -25,4 +26,13 @@ export default defineConfig({
   },
   // Add support for large models and audio files
   assetsInclude: ["**/*.gltf", "**/*.glb", "**/*.mp3", "**/*.ogg", "**/*.wav"],
+  // Ensure proper development server configuration
+  server: {
+    port: 5173,
+    host: true,
+  },
+  // Ensure proper module resolution
+  optimizeDeps: {
+    include: ['react', 'react-dom']
+  }
 });

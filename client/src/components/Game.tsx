@@ -3,7 +3,7 @@ import GameCanvas from "./GameCanvas";
 import GameHUD from "./GameHUD";
 import VirtualJoystick from "./VirtualJoystick";
 import RuneDrawing from "./RuneDrawing";
-import Minimap from "./Minimap";
+import { MinimapContainer } from "./ui/MinimapContainer";
 import Hub from "./Hub";
 import Arena from "./Arena";
 import Shop from "./Shop";
@@ -72,7 +72,12 @@ const Game: React.FC = () => {
       <VirtualJoystick isModalOpen={showCharInfo} />
       
       {/* Minimap */}
-      <Minimap />
+      <MinimapContainer 
+        wrapContent={true}
+        maxWidth="200px"
+        showLegend={true}
+        className="bg-white/5 border-white/20"
+      />
       
       {/* Rune Drawing Overlay */}
       {isDrawingRune && <RuneDrawing />}
