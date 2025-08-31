@@ -26,7 +26,17 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
 
   // ATOMIC: Location popup with smooth animation - triggers on every location change
   useEffect(() => {
+    console.log("🔍 LOCATION CHECK:", { 
+      currentLocation, 
+      previousLocation, 
+      different: currentLocation !== previousLocation,
+      showLocationIndicator,
+      locationOpacity 
+    });
+    
     if (currentLocation && currentLocation !== previousLocation) {
+      console.log("✅ TRIGGERING POPUP FOR:", currentLocation);
+      
       // Update previous location
       setPreviousLocation(currentLocation);
       
@@ -35,16 +45,19 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
       
       // Fade in
       const fadeInTimer = setTimeout(() => {
+        console.log("🎭 FADE IN");
         setLocationOpacity(1);
       }, 50);
       
       // Fade out after 2 seconds
       const fadeOutTimer = setTimeout(() => {
+        console.log("🌅 FADE OUT");
         setLocationOpacity(0);
       }, 2000);
       
       // Hide after fade completes
       const hideTimer = setTimeout(() => {
+        console.log("🚫 HIDE POPUP");
         setShowLocationIndicator(false);
       }, 2500);
       
