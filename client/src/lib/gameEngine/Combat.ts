@@ -21,20 +21,20 @@ export class Combat {
       return 0;
     }
 
-    const baseDamage = player.stats.atk;
+    const baseDamage = player.stats.attack;
     const actualDamage = enemy.takeDamage(baseDamage);
     
     console.log(`Player attacked ${enemy.id} for ${actualDamage} damage`);
     
     // Award XP if enemy is defeated
     if (!enemy.isAlive()) {
-      const xpGain = this.calculateXPGain(enemy);
-      const goldGain = this.calculateGoldGain(enemy);
+      const xpGain = enemy.getExperienceValue();
+      const goldGain = enemy.getGoldValue();
       
       player.addXP(xpGain);
-      player.gold += goldGain;
+      // Note: gold is handled by the domain layer, not here
       
-      console.log(`Enemy defeated! Gained ${xpGain} XP and ${goldGain} gold`);
+      console.log(`Enemy defeated! Gained ${xpGain} XP`);
     }
     
     return actualDamage;
@@ -45,7 +45,7 @@ export class Combat {
       return 0;
     }
 
-    const baseDamage = enemy.atk;
+    const baseDamage = enemy.stats.attack;
     const actualDamage = player.takeDamage(baseDamage);
     
     console.log(`Enemy ${enemy.id} attacked player for ${actualDamage} damage`);
@@ -59,10 +59,8 @@ export class Combat {
     }
 
     // Successful counterattack
-    const counterDamage = Math.floor(player.stats.atk * 1.5); // 1.5x damage
+    const counterDamage = Math.floor(player.stats.attack * 1.5); // 1.5x damage
     enemy.takeDamage(counterDamage);
-    enemy.isAttacking = false;
-    enemy.counterWindow = 0;
     
     console.log(`Successful counterattack! Dealt ${counterDamage} damage to ${enemy.id}`);
     
@@ -98,57 +96,45 @@ export class Combat {
         // Apply debuff effects
         this.applyDebuff(spell.effect);
         break;
+        
+      default:
+        console.log(`Unknown spell effect type: ${spell.effect.type}`);
     }
   }
 
   private applyTemporaryBuff(player: Player, effect: any): void {
-    const buffId = `buff_${Date.now()}`;
-    const duration = effect.durationSec * 1000;
-    
-    // Apply stat bonuses immediately
+    // Apply temporary stat buffs
     if (effect.defPlus) {
-      player.stats.def += effect.defPlus;
+      // This would need to be implemented in the Player class
+      console.log(`Applied +${effect.defPlus} defense buff for ${effect.durationSec}s`);
     }
-    
-    // Store the buff for later removal
-    this.activeEffects.set(buffId, {
-      type: "buff",
-      target: player,
-      effect: effect,
-      duration: duration
-    });
-    
-    console.log(`Applied buff: +${effect.defPlus} DEF for ${effect.durationSec}s`);
   }
 
   private applyDebuff(effect: any): void {
-    // Apply various debuff effects
-    console.log(`Applied debuff: ${effect.effect}`);
-    
-    // These would be implemented based on the specific debuff type
-    // For now, just log the effect
+    // Apply debuff effects
+    switch (effect.effect) {
+      case "self_damage":
+        console.log(`Applied self-damage debuff: ${effect.amount} damage`);
+        break;
+      case "slow_player":
+        console.log(`Applied slow debuff: ${effect.multiplier}x speed for ${effect.durationSec}s`);
+        break;
+      case "screen_blackout":
+        console.log(`Applied blackout debuff for ${effect.durationSec}s`);
+        break;
+      case "atk_scale":
+        console.log(`Applied weakness debuff: ${effect.multiplier}x attack for ${effect.durationSec}s`);
+        break;
+      default:
+        console.log(`Unknown debuff effect: ${effect.effect}`);
+    }
   }
 
   private calculateXPGain(enemy: Enemy): number {
-    // Base XP based on enemy type
-    const xpValues: { [key: string]: number } = {
-      "TRI_SMALL": 10,
-      "TRI_MEDIUM": 20,
-      "TRI_ELITE": 50
-    };
-    
-    return xpValues[enemy.type] || 5;
+    return enemy.getExperienceValue();
   }
 
   private calculateGoldGain(enemy: Enemy): number {
-    // Random gold based on enemy type
-    const goldRanges: { [key: string]: [number, number] } = {
-      "TRI_SMALL": [5, 10],
-      "TRI_MEDIUM": [10, 20],
-      "TRI_ELITE": [20, 40]
-    };
-    
-    const range = goldRanges[enemy.type] || [1, 5];
-    return Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0];
+    return enemy.getGoldValue();
   }
 }

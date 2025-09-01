@@ -3,7 +3,7 @@ import GameCanvas from "./GameCanvas";
 import GameHUD from "./GameHUD";
 import VirtualJoystick from "./VirtualJoystick";
 import RuneDrawing from "./RuneDrawing";
-import Minimap from "./Minimap";
+import { MinimapContainer } from "./ui/MinimapContainer";
 import Hub from "./Hub";
 import Arena from "./Arena";
 import Shop from "./Shop";
@@ -14,23 +14,49 @@ import { GameEngine } from "../lib/gameEngine/GameEngine";
 const Game: React.FC = () => {
   const gameEngineRef = useRef<GameEngine | null>(null);
   const { currentLocation, isDrawingRune, initializeGame } = useGameState();
-  const { initializePlayer } = usePlayer();
+  const { initializePlayer, resetToHubSpawn } = usePlayer();
   const [showCharInfo, setShowCharInfo] = useState(false);
   const [activeTab, setActiveTab] = useState<'stats' | 'spells' | 'inventory'>('inventory');
 
+  // Debug logging for modal state
   useEffect(() => {
+    console.log('Game component: showCharInfo changed to:', showCharInfo);
+    console.log('Game component: activeTab changed to:', activeTab);
+  }, [showCharInfo, activeTab]);
+
+  // Watch for location changes and reset player to hub spawn when returning
+  useEffect(() => {
+    if (currentLocation === "LOC_HUB_FIGUREIUM") {
+      console.log('Game component: Player returned to hub, resetting to spawn position');
+      resetToHubSpawn();
+    }
+  }, [currentLocation, resetToHubSpawn]);
+
+  useEffect(() => {
+    console.log('Game component: Initializing...');
+    
     // Initialize game engine
     gameEngineRef.current = new GameEngine();
+    console.log('Game component: GameEngine created');
     
     // Initialize player with starting stats (backward compatibility)
     initializePlayer();
+    console.log('Game component: Player initialized');
     
     // Initialize game through clean architecture
     initializeGame();
+    console.log('Game component: Game initialized');
+    
+    // Force a re-render to ensure PlayerManager is properly initialized
+    setTimeout(() => {
+      console.log('Game component: Forcing re-render after initialization');
+      setShowCharInfo(false); // Reset to trigger re-render
+    }, 100);
     
     return () => {
       if (gameEngineRef.current) {
         gameEngineRef.current.destroy();
+        console.log('Game component: GameEngine destroyed');
       }
     };
   }, [initializePlayer, initializeGame]);
@@ -65,8 +91,14 @@ const Game: React.FC = () => {
       {/* Virtual Joystick */}
       <VirtualJoystick isModalOpen={showCharInfo} />
       
-      {/* Minimap */}
-      <Minimap />
+      {/* Minimap - Top Right with Content Wrapping */}
+      <MinimapContainer 
+        wrapContent={true}
+        maxWidth="200px"
+        showLegend={false}
+        showControls={false}
+        className="bg-white/5 border-white/20"
+      />
       
       {/* Rune Drawing Overlay */}
       {isDrawingRune && <RuneDrawing />}

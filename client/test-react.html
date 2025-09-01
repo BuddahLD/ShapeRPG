@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React CDN Test</title>
+</head>
+<body>
+    <div id="root">
+        <p>Loading React test...</p>
+    </div>
+
+    <!-- Load React from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <script>
+        console.log("🔍 DEBUG: HTML loaded");
+        console.log("🔍 DEBUG: React available:", !!window.React);
+        console.log("🔍 DEBUG: ReactDOM available:", !!window.ReactDOM);
+        
+        if (window.React && window.ReactDOM) {
+            console.log("🔍 DEBUG: React version:", window.React.version);
+            console.log("🔍 DEBUG: ReactDOM version:", window.ReactDOM.version);
+            
+            try {
+                const root = window.ReactDOM.createRoot(document.getElementById('root'));
+                const element = window.React.createElement('div', {
+                    style: {
+                        padding: '20px',
+                        backgroundColor: 'purple',
+                        color: 'white',
+                        fontSize: '24px',
+                        textAlign: 'center',
+                        border: '3px solid gold',
+                        margin: '20px'
+                    }
+                }, 
+                    window.React.createElement('h1', null, '🎯 REACT CDN TEST'),
+                    window.React.createElement('p', null, 'If you see this purple box, React from CDN is working!'),
+                    window.React.createElement('p', null, 'The issue is with the local Vite setup.')
+                );
+                
+                root.render(element);
+                console.log("🔍 DEBUG: React CDN test successful!");
+                
+            } catch (error) {
+                console.error("❌ ERROR: React CDN test failed:", error);
+                document.getElementById('root').innerHTML = `
+                    <div style="color: red; padding: 20px; border: 2px solid red;">
+                        <h1>React CDN Test Failed</h1>
+                        <p>Error: ${error}</p>
+                    </div>
+                `;
+            }
+        } else {
+            console.error("❌ ERROR: React not available from CDN");
+            document.getElementById('root').innerHTML = `
+                <div style="color: red; padding: 20px; border: 2px solid red;">
+                    <h1>React CDN Failed to Load</h1>
+                    <p>React or ReactDOM not available</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

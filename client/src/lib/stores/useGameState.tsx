@@ -78,10 +78,19 @@ export const useGameState = create<GameState>()(
     
     setGamePhase: (phase) => set({ gamePhase: phase }),
     
-    setCurrentLocation: (location) => set({ 
-      currentLocation: location,
-      gamePhase: location === "LOC_HUB_FIGUREIUM" ? "hub" : "combat"
-    }),
+    setCurrentLocation: (location) => {
+      set({ 
+        currentLocation: location,
+        gamePhase: location === "LOC_HUB_FIGUREIUM" ? "hub" : "combat"
+      });
+      
+      // Reset player to hub spawn when returning to hub
+      if (location === "LOC_HUB_FIGUREIUM") {
+        // We'll need to access the player manager here
+        // For now, this will be handled by the Game component
+        console.log('Returning to hub - player should reset to spawn position');
+      }
+    },
     
     setDrawingRune: (drawing) => {
       set({ 

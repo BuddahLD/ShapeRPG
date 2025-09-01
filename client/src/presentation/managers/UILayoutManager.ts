@@ -31,15 +31,22 @@ export interface UILayoutConfig {
 export const LAYOUT_CONFIGS = {
   // HUD elements
   healthBar: {
-    position: { top: '2rem', left: '1rem' },
+    position: { top: '1rem', left: '1rem' },
     dimensions: { width: '200px', height: '24px' },
     zIndex: 100,
     isVisible: true
   } as UILayoutConfig,
 
   manaBar: {
-    position: { top: '3.5rem', left: '1rem' },
+    position: { top: '2.5rem', left: '1rem' },
     dimensions: { width: '200px', height: '24px' },
+    zIndex: 100,
+    isVisible: true
+  } as UILayoutConfig,
+
+  hpmpContainer: {
+    position: { top: '1rem', left: '1rem' },
+    dimensions: { width: '200px', height: 'auto' },
     zIndex: 100,
     isVisible: true
   } as UILayoutConfig,
@@ -52,22 +59,22 @@ export const LAYOUT_CONFIGS = {
   } as UILayoutConfig,
 
   virtualJoystick: {
-    position: { bottom: '2rem', left: '2rem' },
+    position: { bottom: '140px', left: '50%', transform: 'translateX(-50%)' },
     dimensions: { width: '120px', height: '120px' },
     zIndex: 90,
     isVisible: true
   } as UILayoutConfig,
 
   actionButtons: {
-    position: { bottom: '2rem', right: '2rem' },
-    dimensions: { width: '80px', height: '80px' },
+    position: { bottom: '180px', right: '2rem' },
+    dimensions: { width: '40px', height: '40px' },
     zIndex: 90,
     isVisible: true
   } as UILayoutConfig,
 
   bottomBar: {
-    position: { bottom: '0', left: '0', right: '0' },
-    dimensions: { width: '100%', height: '60px' },
+    position: { bottom: '2rem', left: '2rem', right: '2rem' },
+    dimensions: { width: 'calc(100% - 4rem)', height: '60px' },
     zIndex: 95,
     isVisible: true
   } as UILayoutConfig,
@@ -130,6 +137,16 @@ export class UILayoutManager {
     this.setupResizeListener();
   }
 
+  // Static instance for immediate access
+  private static instance: UILayoutManager | null = null;
+
+  static getInstance(): UILayoutManager {
+    if (!UILayoutManager.instance) {
+      UILayoutManager.instance = new UILayoutManager();
+    }
+    return UILayoutManager.instance;
+  }
+
   private createStore() {
     this.store = create<UILayoutStore>((set, get) => ({
       // Initial state
@@ -181,8 +198,15 @@ export class UILayoutManager {
 
         return {
           position: 'absolute',
-          ...layout.position,
-          ...layout.dimensions,
+          top: layout.position.top,
+          bottom: layout.position.bottom,
+          left: layout.position.left,
+          right: layout.position.right,
+          transform: layout.position.transform,
+          width: layout.dimensions.width,
+          height: layout.dimensions.height,
+          maxWidth: layout.dimensions.maxWidth,
+          maxHeight: layout.dimensions.maxHeight,
           zIndex: layout.zIndex,
           display: layout.isVisible ? 'block' : 'none',
           // Apply scale factor to fixed sizes only

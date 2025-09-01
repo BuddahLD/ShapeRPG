@@ -36,13 +36,9 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
       const deadzone = 0.1;
       const magnitude = Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
       
-      console.log('CONTINUOUS MOVEMENT - POS:', currentPosition.x.toFixed(1), currentPosition.y.toFixed(1), 'NORM:', normalizedX.toFixed(2), normalizedY.toFixed(2), 'MAG:', magnitude.toFixed(2));
-      
       if (magnitude < deadzone) {
-        console.log('DEADZONE - STOPPING');
         movePlayer(0, 0);
       } else {
-        console.log('CONTINUOUS MOVE:', normalizedX.toFixed(2), normalizedY.toFixed(2));
         movePlayer(normalizedX, normalizedY);
       }
     };
@@ -61,8 +57,6 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
     
     const deltaX = clientX - centerX;
     const deltaY = clientY - centerY;
-    
-    console.log('JOYSTICK START - Center:', centerX.toFixed(1), centerY.toFixed(1), 'Touch:', clientX.toFixed(1), clientY.toFixed(1), 'Initial Delta:', deltaX.toFixed(1), deltaY.toFixed(1));
     
     setCurrentPosition({ x: deltaX, y: deltaY });
     setIsDragging(true);
@@ -88,8 +82,6 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
       knobY = (deltaY / distance) * maxDistance;
     }
 
-    console.log('RAW DELTA:', deltaX.toFixed(1), deltaY.toFixed(1), 'CONSTRAINED:', knobX.toFixed(1), knobY.toFixed(1), 'DISTANCE:', distance.toFixed(1));
-
     // Update current position for continuous movement
     setCurrentPosition({ x: knobX, y: knobY });
 
@@ -108,8 +100,6 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
     if (knobRef.current) {
       knobRef.current.style.transform = 'translate(0px, 0px)';
     }
-    
-    console.log('JOYSTICK END - Movement stopped');
   }, [movePlayer]);
 
   // Touch events
@@ -162,32 +152,52 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
 
   return (
     <div className="pointer-events-auto" style={styles}>
+      {/* Joystick Container - Interactive area */}
       <div
-        className="backdrop-blur-md bg-white/20 rounded-full border border-white/30 shadow-lg w-22 h-22 flex items-center justify-center transition-all duration-300 hover:bg-white/30"
-        style={{ touchAction: 'none', boxSizing: 'border-box' }}
+        ref={joystickRef}
+        className="relative w-32 h-32 rounded-full flex items-center justify-center cursor-pointer"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        style={{
+          touchAction: 'none',
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+        }}
       >
+        {/* Background Circle - Fixed in center position */}
         <div
-          ref={joystickRef}
-          className="relative w-full h-full rounded-full flex items-center justify-center"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onMouseDown={handleMouseDown}
-        >
-          <div
-            ref={knobRef}
-            style={{
-              width: knobRadius * 2,
-              height: knobRadius * 2,
-              borderRadius: '50%',
-              background: 'linear-gradient(145deg, rgba(245, 245, 244, 0.9), rgba(245, 245, 244, 0.7))',
-              border: '1px solid rgba(245, 245, 244, 0.8)',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(245, 245, 244, 0.8)',
-              transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              pointerEvents: 'none'
-            }}
-          />
-        </div>
+          className="absolute rounded-full"
+          style={{
+            width: knobRadius * 2,
+            height: knobRadius * 2,
+            minWidth: knobRadius * 2,
+            minHeight: knobRadius * 2,
+            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+            transform: 'translate(0px, 0px)', // Always centered
+            pointerEvents: 'none',
+          }}
+        />
+        
+        {/* Draggable Knob - Moves with touch/drag */}
+        <div
+          ref={knobRef}
+          className="absolute rounded-full transition-transform duration-300 ease-out"
+          style={{
+            width: knobRadius * 2,
+            height: knobRadius * 2,
+            minWidth: knobRadius * 2,
+            minHeight: knobRadius * 2,
+            background: 'radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)',
+            border: '2px solid rgba(255, 255, 255, 0.8)',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
+            transform: 'translate(0px, 0px)',
+            pointerEvents: 'none',
+          }}
+        />
       </div>
     </div>
   );

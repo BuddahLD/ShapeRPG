@@ -1,6 +1,6 @@
 import React from "react";
 import StatsInventoryModal from "./StatsInventoryModal";
-import { PlayerStatsDisplay } from "./ui/PlayerStatsDisplay";
+import { HPMPContainer } from "./ui/HPMPContainer";
 import { LocationIndicator } from "./ui/LocationIndicator";
 import { PlayerProgressBar } from "./ui/PlayerProgressBar";
 import { ActionBar } from "./ui/ActionBar";
@@ -18,6 +18,7 @@ interface GameHUDProps {
 
 const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, activeTab, setActiveTab }) => {
   const handleLevelBarClick = () => {
+    console.log('Level bar clicked! Setting showCharInfo to true');
     setShowCharInfo(true);
     setActiveTab('inventory');
   };
@@ -29,7 +30,11 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
   return (
     <div className="absolute inset-0 pointer-events-none z-10">
       {/* SOLID: Each component has single responsibility and is extensible */}
-      <PlayerStatsDisplay />
+      <HPMPContainer 
+        wrapContent={true}
+        maxWidth="250px"
+        className="bg-white/5 border-white/20"
+      />
       <LocationIndicator />
       <PlayerProgressBar onLevelBarClick={handleLevelBarClick} />
       <ActionBar />

@@ -1,7 +1,6 @@
 import React from "react";
 import { useGameState } from "../../presentation/hooks/useGameStateManager";
 import { useElementLayout } from "../../presentation/hooks/useUILayout";
-import { UIContainer } from "./UIContainer";
 
 /**
  * ActionBar - Single Responsibility: Provide game action buttons
@@ -31,8 +30,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
     setDrawingRune(true);
   };
 
-  const containerVariant = variant === 'compact' ? 'minimal' : variant === 'enhanced' ? 'enhanced' : 'default';
-  const defaultActions = [{ icon: '⚡', onClick: handleRuneButtonPress, label: 'Cast Rune' }];
+  const defaultActions = [{ icon: '☯', onClick: handleRuneButtonPress, label: 'Cast Rune' }];
   const actionItems = actions || defaultActions;
 
   return (
@@ -41,20 +39,39 @@ export const ActionBar: React.FC<ActionBarProps> = ({
       style={styles}
       {...props}
     >
-      <UIContainer variant={containerVariant} className={variant === 'compact' ? 'p-1' : 'p-2'}>
-        <div className={`flex ${position.includes('left') ? 'flex-row' : 'flex-row-reverse'} gap-2`}>
-          {actionItems.map((action, index) => (
-            <button
+      <div className={`flex ${position.includes('left') ? 'flex-row' : 'flex-row-reverse'} gap-2`}>
+        {actionItems.map((action, index) => {
+          const size = variant === 'compact' ? 'w-8 h-8' : 'w-10 h-10';
+          const sizePx = variant === 'compact' ? '32px' : '40px';
+          
+          // Special styling for rune button (☯) to match other UI containers
+          const isRuneButton = action.icon === '☯';
+          const containerClasses = isRuneButton 
+            ? `backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-full ${size} flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200`
+            : `${size} rounded-full border border-white/30 text-white font-semibold text-lg hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center backdrop-blur-md`;
+          
+          return (
+            <div 
               key={index}
-              onClick={action.onClick}
-              className={`${variant === 'compact' ? 'w-8 h-8' : 'w-10 h-10'} rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 text-white font-semibold text-xs shadow-lg hover:scale-105 active:scale-95 transition-all duration-200`}
-              title={action.label}
+              className={containerClasses}
+              style={{
+                width: sizePx,
+                height: sizePx,
+                minWidth: sizePx,
+                minHeight: sizePx
+              }}
             >
-              {action.icon}
-            </button>
-          ))}
-        </div>
-      </UIContainer>
+              <button
+                onClick={action.onClick}
+                className="w-full h-full rounded-full text-white font-semibold text-lg flex items-center justify-center transition-all duration-200"
+                title={action.label}
+              >
+                {action.icon}
+              </button>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

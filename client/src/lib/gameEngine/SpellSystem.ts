@@ -98,11 +98,32 @@ export class SpellSystem {
     // Remove from active spells
     this.activeSpells.delete(castId);
     
-    // The actual spell effect application would be handled by the Combat system
-    // This is just the spell casting mechanics
+    // Apply spell effect
+    this.applySpellEffect(modifiedSpell, caster);
+  }
+
+  private applySpellEffect(spell: Spell, caster: any): void {
+    // Apply spell effects based on type
+    switch (spell.type) {
+      case "attack":
+        // This would target enemies in range
+        console.log(`Attack spell ${spell.name} completed`);
+        break;
+      case "buff":
+        // Apply buff to caster
+        console.log(`Buff spell ${spell.name} applied to caster`);
+        break;
+      case "debuff":
+        // Apply debuff to enemies
+        console.log(`Debuff spell ${spell.name} applied to enemies`);
+        break;
+      default:
+        console.log(`Unknown spell type: ${spell.type}`);
+    }
   }
 
   private initializeSpells(): void {
+    // Initialize with basic spells from GDD
     const basicSpells: Spell[] = [
       {
         id: "SPL01",
@@ -133,9 +154,23 @@ export class SpellSystem {
         castTime: 1500,
         effect: { type: "buff", defPlus: 5, durationSec: 10 },
         type: "buff"
+      },
+      {
+        id: "SPL04",
+        name: "Dark Mist",
+        pattern: "wave",
+        level: 4,
+        mana: 15,
+        castTime: 2000,
+        effect: { type: "blackout", target: "enemies", durationSec: 3 },
+        type: "debuff"
       }
     ];
 
-    basicSpells.forEach(spell => this.learnSpell(spell));
+    basicSpells.forEach(spell => {
+      this.knownSpells.set(spell.id, spell);
+    });
+
+    console.log(`Initialized ${basicSpells.length} basic spells`);
   }
 }

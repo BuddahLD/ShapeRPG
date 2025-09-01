@@ -21,7 +21,6 @@ export const PlayerStatsDisplay: React.FC<PlayerStatsDisplayProps> = ({
   ...props 
 }) => {
   const { stats } = usePlayer();
-  const { styles } = useElementLayout('healthBar');
 
   if (!stats) return null;
 
@@ -30,7 +29,6 @@ export const PlayerStatsDisplay: React.FC<PlayerStatsDisplayProps> = ({
   return (
     <div 
       className={`pointer-events-auto ${className}`}
-      style={styles}
       {...props}
     >
       <UIContainer variant={containerVariant} className={variant === 'compact' ? 'p-1 space-y-1' : 'p-2 space-y-2'}>

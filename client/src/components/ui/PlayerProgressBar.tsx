@@ -38,7 +38,15 @@ export const PlayerProgressBar: React.FC<PlayerProgressBarProps> = ({
       {...props}
     >
       <div 
-        onClick={onLevelBarClick}
+        onClick={() => {
+          console.log('PlayerProgressBar: onClick triggered!');
+          console.log('PlayerProgressBar: onLevelBarClick function:', onLevelBarClick);
+          if (onLevelBarClick) {
+            onLevelBarClick();
+          } else {
+            console.log('PlayerProgressBar: onLevelBarClick is undefined!');
+          }
+        }}
         className="cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
       >
         <UIContainer variant={containerVariant} className={`px-4 py-2 hover:bg-white/25 transition-colors duration-200 ${variant === 'compact' ? 'px-2 py-1' : ''}`}>

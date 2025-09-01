@@ -1,0 +1,199 @@
+# Cursor Rules for Shapes RPG: Figureium
+
+## Project Overview
+Shapes RPG: Figureium is a minimalist 2D RPG built with React 18, TypeScript, and a custom HTML5 Canvas game engine. The project follows clean architecture principles with strict separation of concerns across four layers: Domain, Application, Infrastructure, and Presentation.
+
+## Core Architecture Principles
+
+### Clean Architecture Implementation
+- **Layer Separation**: Code organized into four distinct layers with strict dependency rules
+- **Dependency Direction**: Dependencies flow inward only (Presentation → Application → Domain)
+- **No Layer Skipping**: Each layer may only depend on the layer directly inside it
+- **Interface Segregation**: Use interfaces to define contracts between layers (ports & adapters)
+
+### Layer Structure
+1. **Domain Layer** (innermost): Pure business logic, entities, value objects, domain services
+2. **Application Layer**: Use cases, application services, orchestration logic
+3. **Infrastructure Layer**: External dependencies, repositories, adapters, frameworks
+4. **Presentation Layer**: UI components, state management, user interactions
+
+### SOLID Principles
+- **Single Responsibility**: Each class/function has one reason to change
+- **Open/Closed**: Open for extension, closed for modification
+- **Liskov Substitution**: Derived classes can substitute base classes
+- **Interface Segregation**: Clients depend only on interfaces they use
+- **Dependency Inversion**: High-level modules don't depend on low-level modules
+
+## Critical Development Rules
+
+### Zero-Impact Development
+- New functionality must have 0% impact on existing logic and UI until explicitly stated
+- Maintain backward compatibility during development
+- Test changes thoroughly to prevent regressions
+
+### Code Modification Rules
+- **Exception Rule**: Only modify existing code when fixing confirmed bugs, never when adding new features
+- **Non-Breaking Extensions**: New functionality must not break existing features
+- **Composition Over Modification**: Use composition and extension rather than changing existing code
+- **Open/Closed Principle**: Components open for extension, closed for modification
+
+### Mandatory Patterns
+- **Use Managers**: Implement managers, domain models, and UI models for proper separation
+- **Manager Pattern**: Coordinate state and logic through dedicated manager classes
+- **Repository Pattern**: Data persistence abstracted through repository interfaces
+- **Service Layer Pattern**: Business logic separated from UI components
+
+## Code Quality Standards
+
+### Testing Requirements
+- **Mandatory Testing**: All managers/helpers/workers must be tested before implementation
+- **Unit Testing**: All core logic must be comprehensively unit tested with high coverage
+- **Service Layer Testing**: Service layer functions must be pure and easily testable
+- **Mock Dependencies**: External dependencies should be mocked for testing
+
+### Function Design
+- **Atomic Functions**: Use small, focused functions that are easy to test and reason about
+- **Single Responsibility**: Each function should do one thing well
+- **Pure Functions**: Prefer pure functions when possible
+- **Clear Naming**: Use descriptive names that explain function purpose
+
+### State Management
+- **No Global Constants**: Avoid global state and constants
+- **Dependency Injection**: Prefer dependency injection and configuration
+- **Local State**: Keep state as local as possible
+- **Immutable Data**: Use immutable data structures when appropriate
+
+## Technical Implementation
+
+### Game Engine
+- **Custom 2D Engine**: Built on HTML5 Canvas API
+- **60fps Game Loop**: Optimized rendering cycle with time-scaled updates
+- **Chunk-based World**: Dynamic 400x400 unit chunk loading/unloading
+- **Event-driven Systems**: Decoupled game event handling
+
+### State Management
+- **Zustand**: Lightweight state management for global state
+- **React Hooks**: Local component state management
+- **Service Layer**: Business logic separated from state management
+
+### UI Architecture
+- **Mobile-First Design**: Touch-optimized interface for iPhone
+- **Relative Positioning**: UI elements use relative positioning for screen scaling
+- **Fixed Element Sizes**: Element sizes remain fixed while using relative positioning
+- **Touch Controls**: Virtual joystick, gesture recognition, dedicated touch zones
+
+## File Organization
+
+### Project Structure
+- **client/**: Frontend React application
+- **server/**: Backend Express.js server
+- **shared/**: Shared types and schemas
+- **docs/**: Project documentation
+
+### Frontend Structure
+- **src/application/**: Application layer (use cases, services)
+- **src/components/**: Presentation layer (UI components)
+- **src/domain/**: Domain layer (entities, value objects, domain services)
+- **src/infrastructure/**: Infrastructure layer (repositories, adapters)
+- **src/lib/**: Shared utilities and game engine
+- **src/hooks/**: Custom React hooks
+- **src/pages/**: Page components
+
+### Backend Structure
+- **routes/**: API endpoint definitions
+- **storage/**: Data persistence layer
+- **schema/**: Database schema definitions
+
+## Development Guidelines
+
+### Quality Assurance
+- **95% Requirement Clarity**: Only implement features/updates after 95% requirement clarity
+- **Regression Prevention**: Ensure 0% impact on existing app logic or UI when making changes
+- **Rules First**: Always read and follow rules before implementing anything
+
+### Code Organization
+- **Feature-based Structure**: Organized by game features
+- **Service Layer Pattern**: Business logic separation
+- **Repository Pattern**: Data access abstraction
+- **Manager Pattern**: State and logic coordination
+
+### Testing Strategy
+- **Service Layer Functions**: Must be pure and easily testable
+- **Business Logic**: Separated from state management for independent testing
+- **Critical Systems**: Comprehensive test coverage for chunk loading, combat, spell casting
+- **External Dependencies**: Mocked for focused unit testing
+
+## Design System Standards
+
+### Visual Design
+- **iOS-Inspired Minimalism**: Clean, modern interface following 2025 design trends
+- **Glassmorphism Effects**: Modern UI elements with depth and transparency
+- **Cartoon Contours**: Prince of Persia 2008-style outline rendering for all game objects
+- **Rounded Edges**: Smooth, friendly geometric shapes
+
+### Layout and Spacing
+- **8px Grid System**: All UI elements and spacing decisions based on 8px increments
+- **Consistent Spacing**: Uniform spacing between related elements
+- **Visual Hierarchy**: Clear information hierarchy through size and spacing
+- **Responsive Layout**: Adapt to different screen sizes while maintaining proportions
+
+### Animation and Motion
+- **Smooth Animations**: Cubic-bezier easing functions for natural iOS-like motion
+- **Floating Animations**: Subtle floating effects for UI elements
+- **Transition Timing**: Consistent animation durations and easing
+- **Performance**: Ensure animations don't impact game performance
+
+## Dependencies
+
+### Frontend
+- **React 18**: Modern React with concurrent features
+- **TypeScript**: Type-safe development
+- **Vite**: Fast build tool and development server
+- **TailwindCSS**: Utility-first CSS framework
+- **Radix UI**: Accessible UI primitives
+- **Zustand**: Lightweight state management
+
+### Backend
+- **Express.js**: Fast web framework
+- **TypeScript**: Type-safe backend development
+- **Drizzle ORM**: Type-safe SQL ORM
+- **PostgreSQL**: Database with Neon service
+- **ESBuild**: Fast TypeScript compilation
+
+## Performance Considerations
+
+### Game Loop Optimization
+- **60fps Target**: Smooth gameplay experience
+- **Delta-time Updates**: Consistent game speed
+- **Separate Update Cycles**: Logic, rendering, and UI updates
+- **Chunk Management**: Efficient world loading/unloading
+
+### Rendering Optimization
+- **Canvas Optimization**: Efficient drawing operations
+- **Spatial Partitioning**: Smart object rendering
+- **Memory Management**: Proper resource cleanup
+- **Mobile Optimization**: Touch device performance
+
+## Security & Best Practices
+
+### Code Security
+- **Type Safety**: Compile-time error prevention
+- **Input Validation**: Proper data validation and sanitization
+- **Error Handling**: Comprehensive error handling and logging
+
+### Development Security
+- **Environment Variables**: Secure configuration management
+- **API Security**: RESTful API security best practices
+- **Data Validation**: Input and output data validation
+
+## Future Considerations
+
+### Scalability
+- **Microservices**: Potential for service decomposition
+- **Database Scaling**: Horizontal and vertical scaling strategies
+- **Performance Monitoring**: Application performance tracking
+
+### Feature Expansion
+- **Plugin Architecture**: Extensible game systems
+- **API Versioning**: Backward-compatible API evolution
+- **Multiplayer Support**: Real-time multiplayer capabilities

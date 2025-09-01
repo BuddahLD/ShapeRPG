@@ -4,7 +4,6 @@ import { useElementLayout } from "../presentation/hooks/useUILayout";
 
 const Minimap: React.FC = () => {
   const { position } = usePlayer();
-  const { styles } = useElementLayout('minimap');
 
   if (!position) return null;
 
@@ -44,7 +43,7 @@ const Minimap: React.FC = () => {
   
 
   return (
-    <div className="pointer-events-auto" style={styles}>
+    <div className="pointer-events-auto">
       {/* Minimap Container */}
       <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl" style={{ padding: '2px' }}>
         {/* Minimap Display */}
