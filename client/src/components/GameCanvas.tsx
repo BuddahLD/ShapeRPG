@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useCallback } from "react";
-import { useGameState } from "../lib/stores/useGameState";
-import { usePlayer } from "../lib/stores/usePlayer";
+import { useGameState } from "../presentation/hooks/useGameStateManager";
+import { usePlayer } from "../presentation/hooks/usePlayerManager";
 import { GameEngine } from "../lib/gameEngine/GameEngine";
 import { DesignSystem } from "../lib/services/DesignSystem";
 import { VisualEffects } from "../lib/services/VisualEffects";
@@ -13,8 +13,12 @@ interface GameCanvasProps {
 const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number>();
-  const { currentLocation, enemies, isSlowMotion } = useGameState();
+  const { currentLocation, isDrawingRune } = useGameState();
   const { player } = usePlayer();
+
+  // For now, use default values for missing properties
+  const enemies: any[] = []; // TODO: Get from new architecture
+  const isSlowMotion = false; // TODO: Get from new architecture
 
   // Debug logging
   console.log('GameCanvas render:', { 
