@@ -14,7 +14,7 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number>();
   const { currentLocation, enemies, isSlowMotion, gameState } = useGameState();
-  const { player } = usePlayer();
+  const { player, position } = usePlayer();
 
   // Debug logging
   console.log('GameCanvas render:', { 
@@ -66,14 +66,20 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     // Use current area from clean architecture game state
     const currentArea = gameState.currentArea;
     
+    // Debug: Log area detection (only once)
+    if (currentArea && !(window as any).areaLogged) {
+      console.log('Current area detected:', {
+        id: currentArea.id,
+        name: currentArea.name,
+        primary: currentArea.visualTheme.primary,
+        secondary: currentArea.visualTheme.secondary
+      });
+      (window as any).areaLogged = true;
+    }
+    
     if (currentArea) {
-      // Create gradient for current area
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-      gradient.addColorStop(0, currentArea.visualTheme.primary);
-      gradient.addColorStop(1, currentArea.visualTheme.secondary);
-      
-      // Draw area background
-      ctx.fillStyle = gradient;
+      // Use the same color as shown in minimap for consistency
+      ctx.fillStyle = currentArea.backgroundGradient || currentArea.visualTheme.primary;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     } else {
       // Default background if no area
@@ -108,13 +114,16 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
   };
 
   const renderPlayer = (ctx: CanvasRenderingContext2D) => {
-    if (!player) return;
+    // Use player position or fallback to position from hook
+    const playerPos = player?.position || position;
+    if (!playerPos) return;
 
     const canvas = canvasRef.current!;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
-    // Player with modern cartoon styling
+    // Player is always rendered at center (camera follows player)
+    // The world moves around the player, not the player around the world
     const size = 30;
     
     VisualEffects.drawPlayer(ctx, centerX, centerY, size);
@@ -122,7 +131,8 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
 
   // Invisible boundary system - no visual walls but movement limits
   const handleBoundaryLimits = () => {
-    if (!player) return;
+    const playerPos = player?.position || position;
+    if (!playerPos) return;
     
     // Define world boundaries (keep movement constraints without visual walls)
     const worldBounds = {
@@ -137,7 +147,9 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
   };
 
   const renderNPCs = (ctx: CanvasRenderingContext2D) => {
-    if (!player) return;
+    // Use player position or fallback to position from hook
+    const playerPos = player?.position || position;
+    if (!playerPos) return;
 
     const canvas = canvasRef.current!;
     const centerX = canvas.width / 2;
@@ -151,8 +163,8 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     ];
 
     npcs.forEach(npc => {
-      const screenX = centerX + (npc.x - player.x);
-      const screenY = centerY + (npc.y - player.y);
+      const screenX = centerX + (npc.x - playerPos.x);
+      const screenY = centerY + (npc.y - playerPos.y);
 
       // Only render if on screen (NPCs are always visible when their area is on screen)
       if (screenX > -30 && screenX < canvas.width + 30 && 

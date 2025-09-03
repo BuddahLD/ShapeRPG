@@ -35,7 +35,7 @@ export function usePlayer() {
       gold: 100,
       inventory: [],
       knownSpells: ['fire-bolt', 'ice-shard', 'shield-aura'],
-      position: { x: 0, y: 20 }, // Spawn at center of hub, near all NPCs
+      position: { x: 0, y: 0 }, // Spawn at center of hub, near all NPCs
       initializePlayer: () => {},
       updateStats: () => {},
       addGold: () => {},
@@ -73,7 +73,7 @@ export function usePlayer() {
       gold: 100,
       inventory: [],
       knownSpells: ['fire-bolt', 'ice-shard', 'shield-aura'],
-      position: { x: 0, y: 20 }, // Spawn at center of hub, near all NPCs
+      position: { x: 0, y: 0 }, // Spawn at center of hub, near all NPCs
       initializePlayer: () => {},
       updateStats: () => {},
       addGold: () => {},

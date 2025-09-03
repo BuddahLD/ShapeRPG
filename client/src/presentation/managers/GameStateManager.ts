@@ -61,7 +61,7 @@ interface GameStateStore {
   initializeGame: (playerId?: string) => Promise<void>;
   updateGameState: (deltaTime: number) => Promise<void>;
   setDrawingRune: (isDrawing: boolean) => void;
-  movePlayer: (newPosition: { x: number; y: number }) => Promise<void>;
+  movePlayer: (deltaX: number, deltaY: number) => Promise<void>;
   clearError: () => void;
   
   // Getters for backward compatibility
@@ -151,14 +151,30 @@ export class GameStateManager {
         set({ gameState: uiGameState });
       },
 
-      movePlayer: async (newPosition: { x: number; y: number }) => {
+      movePlayer: async (deltaX: number, deltaY: number) => {
         const currentState = get();
         if (!currentState.gameState.player) return;
 
         try {
-          // This would use PlayerMovementUseCase through GameStateService
-          // For now, we'll implement a simplified version
-          console.log('Moving player to:', newPosition);
+          // Calculate new position based on current position + movement delta
+          const currentPos = currentState.gameState.player.position;
+          const newPosition = {
+            x: currentPos.x + deltaX * 2, // Scale movement speed
+            y: currentPos.y + deltaY * 2
+          };
+
+          // Use the Player entity's moveTo method to create a new player instance
+          const updatedPlayer = currentState.gameState.player.moveTo(newPosition);
+
+          // Update player in the store
+          set(state => ({
+            gameState: {
+              ...state.gameState,
+              player: updatedPlayer
+            }
+          }));
+
+          console.log('Player moved to:', newPosition);
         } catch (error) {
           console.warn('Failed to move player:', error);
         }
