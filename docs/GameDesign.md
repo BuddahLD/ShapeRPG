@@ -72,6 +72,7 @@ Shapes RPG: Figureium is a minimalist 2D RPG where players control a square hero
 - **Chunk-based Loading**: Dynamic 400x400 unit chunk loading/unloading
 - **Zone System**: Distinct areas (Hub, Peaceful Fields, Arena)
 - **Performance Optimization**: Efficient world rendering and exploration
+- **Chunks System**: Detailed implementation plan and architecture - see [ChunksSystem.md](./ChunksSystem.md)
 
 ### Enemy AI & Content
 - **Zone-specific Behaviors**: Different enemy types per area
