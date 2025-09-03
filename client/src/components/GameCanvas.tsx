@@ -151,6 +151,11 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     const playerPos = player?.position || position;
     if (!playerPos) return;
 
+    // Debug: Log player position every 300 frames (once per 5 seconds at 60fps)
+    if (Math.random() < 0.003) { // ~1/300 chance
+      console.log('GameCanvas renderNPCs - Player position:', playerPos);
+    }
+
     const canvas = canvasRef.current!;
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;

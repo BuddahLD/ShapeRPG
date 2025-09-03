@@ -80,6 +80,10 @@ export class GameStateManager {
     this.createStore();
   }
 
+  getStore() {
+    return this.store;
+  }
+
   private createStore() {
     this.store = create<GameStateStore>((set, get) => ({
       // Initial state
@@ -153,28 +157,40 @@ export class GameStateManager {
 
       movePlayer: async (deltaX: number, deltaY: number) => {
         const currentState = get();
-        if (!currentState.gameState.player) return;
+        
+        if (!currentState.gameState.player) {
+          return;
+        }
 
         try {
+          // Get the actual Player entity from GameStateService
+          const gameState = this.gameStateService.getCurrentGameState();
+          
+          if (!gameState.player) {
+            return;
+          }
+
           // Calculate new position based on current position + movement delta
-          const currentPos = currentState.gameState.player.position;
+          const currentPos = gameState.player.position;
           const newPosition = {
-            x: currentPos.x + deltaX * 2, // Scale movement speed
-            y: currentPos.y + deltaY * 2
+            x: currentPos.x + (deltaX * 12) / 30, // Sensitivity 12, but movement speed 30x slower (3x slower than before)
+            y: currentPos.y + (deltaY * 12) / 30
           };
 
           // Use the Player entity's moveTo method to create a new player instance
-          const updatedPlayer = currentState.gameState.player.moveTo(newPosition);
+          const updatedPlayer = gameState.player.moveTo(newPosition);
 
-          // Update player in the store
-          set(state => ({
-            gameState: {
-              ...state.gameState,
-              player: updatedPlayer
-            }
-          }));
+          // Update the GameStateService with the new player
+          this.gameStateService.updatePlayer(updatedPlayer);
 
-          console.log('Player moved to:', newPosition);
+          // Update the UI state
+          const uiGameState = this.adaptGameStateToUI(this.gameStateService.getCurrentGameState());
+          set({ gameState: uiGameState });
+
+          // Reduced logging for performance
+          if (Math.random() < 0.1) { // Log only 10% of movements
+            console.log('Player moved to:', newPosition);
+          }
         } catch (error) {
           console.warn('Failed to move player:', error);
         }
@@ -195,10 +211,6 @@ export class GameStateManager {
         return get().gameState.isDrawingRune;
       }
     }));
-  }
-
-  getStore() {
-    return this.store;
   }
 
   // Adapters to convert domain models to UI models

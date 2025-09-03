@@ -169,6 +169,13 @@ export class GameStateService {
     return this.currentGameState;
   }
 
+  updatePlayer(updatedPlayer: Player): void {
+    this.currentGameState = {
+      ...this.currentGameState,
+      player: updatedPlayer
+    };
+  }
+
   private createNewPlayer(playerId: string): Player {
     return new Player(
       playerId,

@@ -89,7 +89,7 @@ export function usePlayer() {
     };
   }
   
-  const state = store.getState();
+  const state = store();
   console.log('usePlayer: Returning state from store:', state);
   
   // Extract player data from gameState

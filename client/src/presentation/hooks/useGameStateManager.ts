@@ -39,7 +39,7 @@ export function useGameState() {
 
   // Use the Zustand hook pattern to get reactive state and actions
   const store = manager.getStore();
-  const state = store.getState();
+  const state = store();
   
   // Extract data from gameState and provide backward compatibility
   return {

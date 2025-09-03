@@ -16,7 +16,9 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
   const joystickRef = useRef<HTMLDivElement>(null);
   const knobRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false); // For immediate state tracking
   const [currentPosition, setCurrentPosition] = useState<TouchPoint>({ x: 0, y: 0 });
+  const currentPositionRef = useRef<TouchPoint>({ x: 0, y: 0 }); // For immediate position tracking
   const { movePlayer } = usePlayer();
   const { isDrawingRune } = useGameState();
   const { styles } = useElementLayout('virtualJoystick');
@@ -24,28 +26,46 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
   const joystickRadius = 65;
   const knobRadius = 20;
 
-  // Continuous movement loop
+  // Continuous movement loop - optimized for performance
   useEffect(() => {
     if (!isDragging) return;
 
-    const gameLoop = () => {
+    let lastStoreUpdate = 0;
+    const STORE_UPDATE_INTERVAL = 100; // Update store every 100ms (10fps)
+    
+    const gameLoop = (timestamp: number) => {
+      // Stop immediately if not dragging (use ref for immediate state)
+      if (!isDraggingRef.current) {
+        movePlayer(0, 0);
+        return;
+      }
+
       const maxDistance = joystickRadius - knobRadius;
-      const normalizedX = currentPosition.x / maxDistance;
-      const normalizedY = currentPosition.y / maxDistance;
+      // Use ref for immediate position updates (no React state delay)
+      const normalizedX = currentPositionRef.current.x / maxDistance;
+      const normalizedY = currentPositionRef.current.y / maxDistance;
 
       const deadzone = 0.1;
       const magnitude = Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
       
-      if (magnitude < deadzone) {
-        movePlayer(0, 0);
-      } else {
-        movePlayer(normalizedX, normalizedY);
+      // Only update store at lower frequency to reduce re-renders
+      if (timestamp - lastStoreUpdate > STORE_UPDATE_INTERVAL) {
+        if (magnitude < deadzone) {
+          movePlayer(0, 0);
+        } else {
+          movePlayer(normalizedX, normalizedY);
+        }
+        lastStoreUpdate = timestamp;
+      }
+      
+      // Continue the loop only if still dragging
+      if (isDraggingRef.current) {
+        requestAnimationFrame(gameLoop);
       }
     };
 
-    // Run movement loop at 60fps
-    const interval = setInterval(gameLoop, 16);
-    return () => clearInterval(interval);
+    // Start the optimized game loop
+    requestAnimationFrame(gameLoop);
   }, [isDragging, currentPosition, movePlayer, joystickRadius, knobRadius]);
 
   const handleStart = useCallback((clientX: number, clientY: number) => {
@@ -59,7 +79,9 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
     const deltaY = clientY - centerY;
     
     setCurrentPosition({ x: deltaX, y: deltaY });
+    currentPositionRef.current = { x: deltaX, y: deltaY }; // Set ref immediately
     setIsDragging(true);
+    isDraggingRef.current = true; // Set ref immediately
   }, [isDrawingRune]);
 
   const handleMove = useCallback((clientX: number, clientY: number) => {
@@ -84,6 +106,7 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
 
     // Update current position for continuous movement
     setCurrentPosition({ x: knobX, y: knobY });
+    currentPositionRef.current = { x: knobX, y: knobY }; // Set ref immediately
 
     // Update knob visual position
     if (knobRef.current) {
@@ -93,7 +116,11 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
 
   const handleEnd = useCallback(() => {
     setIsDragging(false);
+    isDraggingRef.current = false; // Set ref immediately
     setCurrentPosition({ x: 0, y: 0 });
+    currentPositionRef.current = { x: 0, y: 0 }; // Reset ref immediately
+    
+    // Immediately stop the character
     movePlayer(0, 0);
     
     // Reset knob position
@@ -109,13 +136,13 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
     handleStart(touch.clientX, touch.clientY);
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const handleTouchMove = (e: React.TouchEvent | TouchEvent) => {
     e.preventDefault();
-    const touch = e.touches[0];
+    const touch = 'touches' in e ? e.touches[0] : (e as TouchEvent).changedTouches[0];
     handleMove(touch.clientX, touch.clientY);
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
+  const handleTouchEnd = (e: React.TouchEvent | TouchEvent) => {
     e.preventDefault();
     handleEnd();
   };
@@ -138,10 +165,14 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd, { passive: false });
       
       return () => {
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('touchmove', handleTouchMove);
+        window.removeEventListener('touchend', handleTouchEnd);
       };
     }
   }, [isDragging]);
@@ -157,8 +188,6 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
         ref={joystickRef}
         className="relative w-32 h-32 rounded-full flex items-center justify-center cursor-pointer"
         onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
         onMouseDown={handleMouseDown}
         style={{
           touchAction: 'none',
