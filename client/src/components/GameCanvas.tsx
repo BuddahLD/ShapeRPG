@@ -294,8 +294,8 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
       canvas.height = window.innerHeight;
     };
 
-    // Initialize local position from store
-    if (player?.position) {
+    // Initialize local position from store only once
+    if (player?.position && localPlayerPosition.current.x === 0 && localPlayerPosition.current.y === 0) {
       localPlayerPosition.current = { ...player.position };
     }
 
@@ -331,7 +331,7 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [gameLoop, player]);
+  }, [gameLoop]); // Removed player dependency to prevent position reset
 
   return (
     <canvas
