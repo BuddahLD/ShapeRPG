@@ -15,6 +15,11 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
   const animationFrameRef = useRef<number>();
   const { currentLocation, enemies, isSlowMotion, gameState } = useGameState();
   const { player, position } = usePlayer();
+  
+  // Local movement state - no store updates needed
+  const localPlayerPosition = useRef({ x: 0, y: 0 });
+  const movementVelocity = useRef({ x: 0, y: 0 });
+  const isMoving = useRef(false);
 
   // Debug logging
   console.log('GameCanvas render:', { 
@@ -26,14 +31,18 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
 
   const gameLoop = useCallback(() => {
     if (!canvasRef.current) {
-      console.log('GameCanvas: Missing canvas');
       return;
     }
 
     const ctx = canvasRef.current.getContext("2d");
     if (!ctx) {
-      console.log('GameCanvas: Could not get 2D context');
       return;
+    }
+
+    // Update local player position based on movement
+    if (isMoving.current) {
+      localPlayerPosition.current.x += movementVelocity.current.x;
+      localPlayerPosition.current.y += movementVelocity.current.y;
     }
 
     // Clear canvas
@@ -42,8 +51,6 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     // Apply slow motion effect
     const timeScale = isSlowMotion ? 0.2 : 1.0;
     
-    // Game engine removed - using clean architecture instead
-
     // Render game elements
     renderBackground(ctx);
     handleBoundaryLimits();
@@ -131,7 +138,7 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
 
   // Invisible boundary system - no visual walls but movement limits
   const handleBoundaryLimits = () => {
-    const playerPos = player?.position || position;
+    const playerPos = localPlayerPosition.current;
     if (!playerPos) return;
     
     // Define world boundaries (keep movement constraints without visual walls)
@@ -147,14 +154,9 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
   };
 
   const renderNPCs = (ctx: CanvasRenderingContext2D) => {
-    // Use player position or fallback to position from hook
-    const playerPos = player?.position || position;
+    // Use local player position for smooth movement
+    const playerPos = localPlayerPosition.current;
     if (!playerPos) return;
-
-    // Debug: Log player position every 300 frames (once per 5 seconds at 60fps)
-    if (Math.random() < 0.003) { // ~1/300 chance
-      console.log('GameCanvas renderNPCs - Player position:', playerPos);
-    }
 
     const canvas = canvasRef.current!;
     const centerX = canvas.width / 2;
@@ -247,13 +249,16 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     
+    // Use local player position for consistent rendering
+    const playerPos = localPlayerPosition.current;
+    
     // Modern zone transition lines
     ctx.strokeStyle = `rgba(255, 255, 255, 0.2)`;
     ctx.lineWidth = 1;
     ctx.setLineDash([8, 12]);
     
     // Hub → Fields transition at x=200
-    const hubFieldsLine = centerX + (200 - player.x);
+    const hubFieldsLine = centerX + (200 - playerPos.x);
     if (hubFieldsLine > -50 && hubFieldsLine < canvas.width + 50) {
       ctx.beginPath();
       ctx.moveTo(hubFieldsLine, 0);
@@ -262,7 +267,7 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     }
     
     // Fields → Arena transition at x=600
-    const fieldsArenaLine = centerX + (600 - player.x);
+    const fieldsArenaLine = centerX + (600 - playerPos.x);
     if (fieldsArenaLine > -50 && fieldsArenaLine < canvas.width + 50) {
       ctx.beginPath();
       ctx.moveTo(fieldsArenaLine, 0);
@@ -289,19 +294,44 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
       canvas.height = window.innerHeight;
     };
 
+    // Initialize local position from store
+    if (player?.position) {
+      localPlayerPosition.current = { ...player.position };
+    }
+
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
+
+    // Add joystick event listeners
+    const handleJoystickMove = (event: CustomEvent) => {
+      const { deltaX, deltaY } = event.detail;
+      movementVelocity.current = { 
+        x: deltaX * 0.8, // Movement speed
+        y: deltaY * 0.8 
+      };
+      isMoving.current = true;
+    };
+
+    const handleJoystickStop = () => {
+      movementVelocity.current = { x: 0, y: 0 };
+      isMoving.current = false;
+    };
+
+    window.addEventListener('joystickMove', handleJoystickMove as EventListener);
+    window.addEventListener('joystickStop', handleJoystickStop);
 
     // Start game loop
     gameLoop();
 
     return () => {
       window.removeEventListener("resize", resizeCanvas);
+      window.removeEventListener('joystickMove', handleJoystickMove as EventListener);
+      window.removeEventListener('joystickStop', handleJoystickStop);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [gameLoop]);
+  }, [gameLoop, player]);
 
   return (
     <canvas

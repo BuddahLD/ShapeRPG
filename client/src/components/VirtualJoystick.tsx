@@ -26,47 +26,30 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
   const joystickRadius = 65;
   const knobRadius = 20;
 
-  // Continuous movement loop - optimized for performance
+  // Simple movement state - no game loop needed
   useEffect(() => {
-    if (!isDragging) return;
+    if (!isDragging) {
+      // Notify GameCanvas to stop movement
+      window.dispatchEvent(new CustomEvent('joystickStop'));
+      return;
+    }
 
-    let lastStoreUpdate = 0;
-    const STORE_UPDATE_INTERVAL = 100; // Update store every 100ms (10fps)
+    // Notify GameCanvas of movement direction
+    const maxDistance = joystickRadius - knobRadius;
+    const normalizedX = currentPositionRef.current.x / maxDistance;
+    const normalizedY = currentPositionRef.current.y / maxDistance;
+
+    const deadzone = 0.1;
+    const magnitude = Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
     
-    const gameLoop = (timestamp: number) => {
-      // Stop immediately if not dragging (use ref for immediate state)
-      if (!isDraggingRef.current) {
-        movePlayer(0, 0);
-        return;
-      }
-
-      const maxDistance = joystickRadius - knobRadius;
-      // Use ref for immediate position updates (no React state delay)
-      const normalizedX = currentPositionRef.current.x / maxDistance;
-      const normalizedY = currentPositionRef.current.y / maxDistance;
-
-      const deadzone = 0.1;
-      const magnitude = Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
-      
-      // Only update store at lower frequency to reduce re-renders
-      if (timestamp - lastStoreUpdate > STORE_UPDATE_INTERVAL) {
-        if (magnitude < deadzone) {
-          movePlayer(0, 0);
-        } else {
-          movePlayer(normalizedX, normalizedY);
-        }
-        lastStoreUpdate = timestamp;
-      }
-      
-      // Continue the loop only if still dragging
-      if (isDraggingRef.current) {
-        requestAnimationFrame(gameLoop);
-      }
-    };
-
-    // Start the optimized game loop
-    requestAnimationFrame(gameLoop);
-  }, [isDragging, currentPosition, movePlayer, joystickRadius, knobRadius]);
+    if (magnitude < deadzone) {
+      window.dispatchEvent(new CustomEvent('joystickStop'));
+    } else {
+      window.dispatchEvent(new CustomEvent('joystickMove', { 
+        detail: { deltaX: normalizedX, deltaY: normalizedY } 
+      }));
+    }
+  }, [isDragging, currentPosition, joystickRadius, knobRadius]);
 
   const handleStart = useCallback((clientX: number, clientY: number) => {
     if (isDrawingRune || !joystickRef.current) return;

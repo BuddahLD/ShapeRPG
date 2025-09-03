@@ -173,8 +173,8 @@ export class GameStateManager {
           // Calculate new position based on current position + movement delta
           const currentPos = gameState.player.position;
           const newPosition = {
-            x: currentPos.x + (deltaX * 12) / 30, // Sensitivity 12, but movement speed 30x slower (3x slower than before)
-            y: currentPos.y + (deltaY * 12) / 30
+            x: currentPos.x + (deltaX * 12) / 15, // Sensitivity 12, but movement speed 15x slower (compensated for 5fps vs 10fps)
+            y: currentPos.y + (deltaY * 12) / 15
           };
 
           // Use the Player entity's moveTo method to create a new player instance
@@ -188,7 +188,7 @@ export class GameStateManager {
           set({ gameState: uiGameState });
 
           // Reduced logging for performance
-          if (Math.random() < 0.1) { // Log only 10% of movements
+          if (Math.random() < 0.01) { // Log only 1% of movements
             console.log('Player moved to:', newPosition);
           }
         } catch (error) {
