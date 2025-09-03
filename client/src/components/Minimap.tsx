@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { usePlayer } from "../presentation/hooks/usePlayerManager";
-import { useElementLayout } from "../presentation/hooks/useUILayout";
+
 import { useGameState } from "../presentation/hooks/useGameStateManager";
 import { MinimapService } from "../application/services/MinimapService";
 import { MapData, MapEntity } from "../domain/interfaces/services/IMapService";
@@ -9,7 +9,7 @@ import { AppBootstrapService } from "../application/AppBootstrapService";
 const Minimap: React.FC = () => {
   const { position } = usePlayer();
   const { enemies } = useGameState();
-  const { styles } = useElementLayout('minimap');
+
   const [minimapData, setMinimapData] = useState<MapData | null>(null);
   const [minimapEntities, setMinimapEntities] = useState<MapEntity[]>([]);
 
@@ -27,13 +27,17 @@ const Minimap: React.FC = () => {
   useEffect(() => {
     if (!position) return;
 
+    console.log('Minimap: Position changed to:', position);
+
     const updateMinimap = async () => {
       try {
+        console.log('Minimap: Updating with position:', position);
         const data = await minimapService.getMapData(position, {
           viewRadius,
           mapSize
         });
         
+        console.log('Minimap: Got data:', data);
         setMinimapData(data);
         
         // Get entities for minimap
@@ -174,9 +178,9 @@ const Minimap: React.FC = () => {
   };
 
   return (
-    <div className="pointer-events-auto" style={styles}>
+    <div className="pointer-events-auto">
       {/* Minimap Container */}
-      <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl" style={{ padding: '2px' }}>
+      <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl">
         {/* Minimap Display */}
         <div 
           className="relative border border-white/20 overflow-hidden"
