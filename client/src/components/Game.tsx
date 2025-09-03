@@ -3,7 +3,6 @@ import GameCanvas from "./GameCanvas";
 import GameHUD from "./GameHUD";
 import VirtualJoystick from "./VirtualJoystick";
 import RuneDrawing from "./RuneDrawing";
-import { MinimapContainer } from "./ui/MinimapContainer";
 import { LocationIndicator } from "./ui/LocationIndicator";
 import Hub from "./Hub";
 
@@ -101,15 +100,6 @@ const Game: React.FC = () => {
       
       {/* Virtual Joystick */}
       <VirtualJoystick isModalOpen={showCharInfo} />
-      
-      {/* Minimap */}
-      <MinimapContainer 
-        wrapContent={true}
-        maxWidth="200px"
-        showLegend={false}
-        showControls={false}
-        className="border-white/20"
-      />
       
       {/* Location Indicator */}
       <LocationIndicator 

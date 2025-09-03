@@ -4,6 +4,7 @@ import { HPMPContainer } from "./ui/HPMPContainer";
 import { LocationIndicator } from "./ui/LocationIndicator";
 import { PlayerProgressBar } from "./ui/PlayerProgressBar";
 import { ActionBar } from "./ui/ActionBar";
+import { MinimapContainer } from "./ui/MinimapContainer";
 
 /**
  * GameHUD - Single Responsibility: Orchestrate UI components layout
@@ -38,6 +39,15 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
       <LocationIndicator />
       <PlayerProgressBar onLevelBarClick={handleLevelBarClick} />
       <ActionBar />
+      
+      {/* Minimap */}
+      <MinimapContainer 
+        wrapContent={true}
+        maxWidth="200px"
+        showLegend={false}
+        showControls={false}
+        className="border-white/20"
+      />
 
       {/* Character Info Modal */}
       {showCharInfo && (

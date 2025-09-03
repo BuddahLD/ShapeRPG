@@ -11,6 +11,7 @@ import { WorldExplorationUseCase } from './useCases/WorldExplorationUseCase';
 import { CombatUseCase } from './useCases/CombatUseCase';
 import { GameStateService } from './services/GameStateService';
 import { AnimationService } from './services/AnimationService';
+import { MinimapService } from './services/MinimapService';
 
 export interface AppConfig {
   readonly environment: 'development' | 'production';
@@ -22,6 +23,7 @@ export class AppBootstrap {
   
   private gameStateService!: GameStateService;
   private animationService!: AnimationService;
+  private minimapService!: MinimapService;
   // ZustandStateAdapter removed - using GameStateManager directly
   
   private constructor(private config: AppConfig) {
@@ -41,6 +43,10 @@ export class AppBootstrap {
 
   getAnimationService(): AnimationService {
     return this.animationService;
+  }
+
+  getMinimapService(): MinimapService {
+    return this.minimapService;
   }
 
   // ZustandStateAdapter removed - using GameStateManager directly
@@ -79,6 +85,8 @@ export class AppBootstrap {
     );
 
     this.animationService = new AnimationService();
+
+    this.minimapService = new MinimapService(repositories.worldRepository);
 
     // ZustandStateAdapter removed - using GameStateManager directly
   }

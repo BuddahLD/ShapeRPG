@@ -19,7 +19,7 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
   const isDraggingRef = useRef(false); // For immediate state tracking
   const [currentPosition, setCurrentPosition] = useState<TouchPoint>({ x: 0, y: 0 });
   const currentPositionRef = useRef<TouchPoint>({ x: 0, y: 0 }); // For immediate position tracking
-  const { movePlayer } = usePlayer();
+  // movePlayer removed - using event-driven system instead
   const { isDrawingRune } = useGameState();
   const { styles } = useElementLayout('virtualJoystick');
 
@@ -103,14 +103,11 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
     setCurrentPosition({ x: 0, y: 0 });
     currentPositionRef.current = { x: 0, y: 0 }; // Reset ref immediately
     
-    // Immediately stop the character
-    movePlayer(0, 0);
-    
     // Reset knob position
     if (knobRef.current) {
       knobRef.current.style.transform = 'translate(0px, 0px)';
     }
-  }, [movePlayer]);
+  }, []);
 
   // Touch events
   const handleTouchStart = (e: React.TouchEvent) => {

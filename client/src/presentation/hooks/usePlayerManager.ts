@@ -14,8 +14,6 @@ export function usePlayerManager() {
 export function usePlayer() {
   const manager = usePlayerManager();
   
-  console.log('usePlayer: manager =', manager);
-  
   if (!manager) {
     console.log('usePlayer: No manager, returning default state');
     // Return default state while manager initializes
@@ -51,9 +49,8 @@ export function usePlayer() {
     };
   }
 
-  // Use the Zustand hook pattern to get reactive state and actions
+  // Use the Zustand store properly - get the store instance
   const store = manager.getStore();
-  console.log('usePlayer: Store from manager:', store);
   
   if (!store) {
     console.log('usePlayer: Store is null, returning default state');
@@ -89,8 +86,8 @@ export function usePlayer() {
     };
   }
   
+  // Use Zustand store as a hook for reactivity
   const state = store();
-  console.log('usePlayer: Returning state from store:', state);
   
   // Extract player data from gameState
   const player = state.gameState.player;

@@ -1,124 +1,207 @@
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { usePlayer } from "../presentation/hooks/usePlayerManager";
 import { useElementLayout } from "../presentation/hooks/useUILayout";
+import { useGameState } from "../presentation/hooks/useGameStateManager";
+import { MinimapService } from "../application/services/MinimapService";
+import { MapData, MapEntity } from "../domain/interfaces/services/IMapService";
+import { AppBootstrapService } from "../application/AppBootstrapService";
 
 const Minimap: React.FC = () => {
   const { position } = usePlayer();
+  const { enemies } = useGameState();
+  const { styles } = useElementLayout('minimap');
+  const [minimapData, setMinimapData] = useState<MapData | null>(null);
+  const [minimapEntities, setMinimapEntities] = useState<MapEntity[]>([]);
 
-  if (!position) return null;
-
-  const enemies: Array<{id: string, x: number, y: number}> = []; // Placeholder for enemies
-  
   // Minimap dimensions - square matching HP/MP container height
-  const mapWidth = 52;
-  const mapHeight = 52;
-  
-  // World bounds for minimap scaling
-  const worldBounds = {
-    minX: -200,
-    maxX: 1100,
-    minY: -450,
-    maxY: 450
-  };
-  
-  const worldWidth = worldBounds.maxX - worldBounds.minX;
-  const worldHeight = worldBounds.maxY - worldBounds.minY;
-  
+  const mapSize = 52;
+  const viewRadius = 200; // Show 200 units around player
+
+  // Memoize minimap service to avoid recreating on every render
+  const minimapService = useMemo(() => {
+    const bootstrap = AppBootstrapService.getInstance();
+    return bootstrap.getMinimapService();
+  }, []);
+
+  // Update minimap data when player position changes (throttled)
+  useEffect(() => {
+    if (!position) return;
+
+    const updateMinimap = async () => {
+      try {
+        const data = await minimapService.getMapData(position, {
+          viewRadius,
+          mapSize
+        });
+        
+        setMinimapData(data);
+        
+        // Get entities for minimap
+        const entities = minimapService.getMapEntities(data, enemies);
+        setMinimapEntities(entities);
+      } catch (error) {
+        console.warn('Failed to update minimap:', error);
+      }
+    };
+
+    // Throttle updates to reduce performance impact
+    const timeoutId = setTimeout(updateMinimap, 100); // Update every 100ms max
+    
+    return () => clearTimeout(timeoutId);
+  }, [position, enemies, minimapService]);
+
+  if (!position || !minimapData) return null;
+
   // Convert world coordinates to minimap coordinates
-  const worldToMinimap = (x: number, y: number) => ({
-    x: ((x - worldBounds.minX) / worldWidth) * mapWidth,
-    y: ((y - worldBounds.minY) / worldHeight) * mapHeight
-  });
-  
-  const playerPos = worldToMinimap(position.x, position.y);
-  
-  // Get zone colors
-  const getZoneColor = (x: number) => {
-    if (x >= -200 && x <= 200) return "#8b5cf6"; // Hub - violet
-    if (x >= 200 && x <= 600) return "#10b981"; // Fields - green  
-    if (x >= 600 && x <= 1100) return "#dc2626"; // Shards - red
-    return "#6b7280"; // Nowhere - gray
+  const worldToMinimap = (worldPos: { x: number; y: number }) => {
+    return minimapService.worldToMap(worldPos, minimapData.viewBounds, mapSize);
   };
 
-  
+  // Render zone backgrounds for visible areas
+  const renderZoneBackgrounds = () => {
+    return minimapData.visibleAreas.map(area => {
+      const color = minimapData.zoneColors.get(area.id) || '#6b7280';
+      
+      // Calculate zone position relative to view bounds
+      const zoneLeft = worldToMinimap({ x: area.bounds.minX, y: 0 }).x;
+      const zoneRight = worldToMinimap({ x: area.bounds.maxX, y: 0 }).x;
+      const zoneTop = worldToMinimap({ x: 0, y: area.bounds.minY }).y;
+      const zoneBottom = worldToMinimap({ x: 0, y: area.bounds.maxY }).y;
+      
+      // Clamp to minimap bounds
+      const left = Math.max(0, zoneLeft);
+      const right = Math.min(mapSize, zoneRight);
+      const top = Math.max(0, zoneTop);
+      const bottom = Math.min(mapSize, zoneBottom);
+      
+      if (right <= left || bottom <= top) return null;
+      
+      return (
+        <div
+          key={area.id}
+          className="absolute opacity-30"
+          style={{
+            left: `${(left / mapSize) * 100}%`,
+            top: `${(top / mapSize) * 100}%`,
+            width: `${((right - left) / mapSize) * 100}%`,
+            height: `${((bottom - top) / mapSize) * 100}%`,
+            backgroundColor: color,
+            borderRadius: '2px'
+          }}
+        />
+      );
+    });
+  };
+
+  // Render zone boundaries
+  const renderZoneBoundaries = () => {
+    return minimapData.visibleAreas.map(area => {
+      const zoneLeft = worldToMinimap({ x: area.bounds.minX, y: 0 }).x;
+      const zoneRight = worldToMinimap({ x: area.bounds.maxX, y: 0 }).x;
+      const zoneTop = worldToMinimap({ x: 0, y: area.bounds.minY }).y;
+      const zoneBottom = worldToMinimap({ x: 0, y: area.bounds.maxY }).y;
+      
+      const boundaries = [];
+      
+      // Left boundary
+      if (zoneLeft >= 0 && zoneLeft <= mapSize) {
+        boundaries.push(
+          <div
+            key={`${area.id}-left`}
+            className="absolute top-0 h-full w-px bg-white/40"
+            style={{ left: `${(zoneLeft / mapSize) * 100}%` }}
+          />
+        );
+      }
+      
+      // Right boundary
+      if (zoneRight >= 0 && zoneRight <= mapSize) {
+        boundaries.push(
+          <div
+            key={`${area.id}-right`}
+            className="absolute top-0 h-full w-px bg-white/40"
+            style={{ left: `${(zoneRight / mapSize) * 100}%` }}
+          />
+        );
+      }
+      
+      // Top boundary
+      if (zoneTop >= 0 && zoneTop <= mapSize) {
+        boundaries.push(
+          <div
+            key={`${area.id}-top`}
+            className="absolute left-0 w-full h-px bg-white/40"
+            style={{ top: `${(zoneTop / mapSize) * 100}%` }}
+          />
+        );
+      }
+      
+      // Bottom boundary
+      if (zoneBottom >= 0 && zoneBottom <= mapSize) {
+        boundaries.push(
+          <div
+            key={`${area.id}-bottom`}
+            className="absolute left-0 w-full h-px bg-white/40"
+            style={{ top: `${(zoneBottom / mapSize) * 100}%` }}
+          />
+        );
+      }
+      
+      return boundaries;
+    }).flat();
+  };
+
+  // Render entities (player, enemies, etc.)
+  const renderEntities = () => {
+    return minimapEntities.map(entity => {
+      const pos = worldToMinimap(entity.position);
+      
+      return (
+        <div
+          key={entity.id}
+          className="absolute rounded-full shadow-lg transform -translate-x-1/2 -translate-y-1/2"
+          style={{
+            left: pos.x,
+            top: pos.y,
+            width: entity.size,
+            height: entity.size,
+            backgroundColor: entity.color,
+            border: entity.type === 'player' ? '1px solid #3b82f6' : 'none'
+          }}
+        />
+      );
+    });
+  };
 
   return (
-    <div className="pointer-events-auto">
+    <div className="pointer-events-auto" style={styles}>
       {/* Minimap Container */}
       <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl" style={{ padding: '2px' }}>
         {/* Minimap Display */}
         <div 
-          className="relative border border-white/20"
+          className="relative border border-white/20 overflow-hidden"
           style={{ 
-            width: mapWidth, 
-            height: mapHeight, 
-            overflow: 'hidden', 
+            width: mapSize, 
+            height: mapSize, 
             backgroundColor: 'transparent',
             borderRadius: '10px'
           }}
         >
           {/* Zone backgrounds */}
-          <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: '10px' }}>
-            {/* Hub zone */}
-            <div 
-              className="absolute top-0 h-full opacity-30"
-              style={{
-                left: '0%',
-                width: `${(400 / worldWidth) * 100}%`,
-                backgroundColor: getZoneColor(0)
-              }}
-            />
-            {/* Fields zone */}
-            <div 
-              className="absolute top-0 h-full opacity-30"
-              style={{
-                left: `${(400 / worldWidth) * 100}%`,
-                width: `${(400 / worldWidth) * 100}%`,
-                backgroundColor: getZoneColor(400)
-              }}
-            />
-            {/* Shards zone */}
-            <div 
-              className="absolute top-0 h-full opacity-30"
-              style={{
-                left: `${(800 / worldWidth) * 100}%`,
-                width: `${(500 / worldWidth) * 100}%`,
-                backgroundColor: getZoneColor(850)
-              }}
-            />
+          <div className="absolute inset-0" style={{ borderRadius: '10px' }}>
+            {renderZoneBackgrounds()}
           </div>
           
           {/* Zone boundaries */}
           <div className="absolute inset-0">
-            <div className="absolute top-0 h-full w-px bg-white/40" style={{ left: `${(400 / worldWidth) * 100}%` }} />
-            <div className="absolute top-0 h-full w-px bg-white/40" style={{ left: `${(800 / worldWidth) * 100}%` }} />
+            {renderZoneBoundaries()}
           </div>
           
-          {/* Player position */}
-          <div
-            className="absolute w-2 h-2 bg-white rounded-full border border-blue-400 shadow-lg transform -translate-x-1 -translate-y-1"
-            style={{
-              left: playerPos.x,
-              top: playerPos.y
-            }}
-          />
-          
-          {/* Enemy dots */}
-          {enemies.map(enemy => {
-            const enemyPos = worldToMinimap(enemy.x, enemy.y);
-            return (
-              <div
-                key={enemy.id}
-                className="absolute w-1 h-1 bg-red-400 rounded-full transform -translate-x-0.5 -translate-y-0.5"
-                style={{
-                  left: enemyPos.x,
-                  top: enemyPos.y
-                }}
-              />
-            );
-          })}
+          {/* Entities (player, enemies, etc.) */}
+          <div className="absolute inset-0">
+            {renderEntities()}
+          </div>
         </div>
-        
       </div>
     </div>
   );
