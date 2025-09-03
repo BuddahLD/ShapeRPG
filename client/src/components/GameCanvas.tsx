@@ -69,39 +69,65 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     if (!player) return;
     
     const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
     
-    // Use current area from clean architecture game state
-    const currentArea = gameState.currentArea;
+    // Use local player position for consistent rendering
+    const playerPos = localPlayerPosition.current;
     
-    // Debug: Log area detection (only once)
-    if (currentArea && !(window as any).areaLogged) {
-      console.log('Current area detected:', {
-        id: currentArea.id,
-        name: currentArea.name,
-        primary: currentArea.visualTheme.primary,
-        secondary: currentArea.visualTheme.secondary
-      });
-      (window as any).areaLogged = true;
-    }
+    // Zone colors and bounds (matching zone indicators)
+    const zones = [
+      {
+        name: 'hub',
+        color: '#8b5cf6',      // violet
+        bounds: { minX: -200, maxX: 200, minY: -150, maxY: 150 }
+      },
+      {
+        name: 'fields', 
+        color: '#10b981',     // green
+        bounds: { minX: 200, maxX: 600, minY: -150, maxY: 150 }
+      },
+      {
+        name: 'arena',
+        color: '#dc2626',     // red
+        bounds: { minX: 600, maxX: 2600, minY: -150, maxY: 150 }
+      }
+    ];
     
-    if (currentArea) {
-      // Use the same color as shown in minimap for consistency
-      ctx.fillStyle = currentArea.backgroundGradient || currentArea.visualTheme.primary;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    } else {
-      // Default background if no area
-      ctx.fillStyle = '#1a1a2e';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
+    // Clear canvas with default background
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Render zone backgrounds based on what's visible on screen
+    zones.forEach(zone => {
+      const bounds = zone.bounds;
+      
+      // Calculate screen positions for zone boundaries
+      const left = centerX + (bounds.minX - playerPos.x);
+      const right = centerX + (bounds.maxX - playerPos.x);
+      const top = centerY + (bounds.minY - playerPos.y);
+      const bottom = centerY + (bounds.maxY - playerPos.y);
+      
+      // Only render if zone is visible on screen
+      if (right > 0 && left < canvas.width && bottom > 0 && top < canvas.height) {
+        // Clamp to screen bounds
+        const renderLeft = Math.max(0, left);
+        const renderRight = Math.min(canvas.width, right);
+        const renderTop = Math.max(0, top);
+        const renderBottom = Math.min(canvas.height, bottom);
+        
+        // Render zone background with low opacity for subtle effect
+        ctx.fillStyle = `${zone.color}20`; // 12.5% opacity
+        ctx.fillRect(renderLeft, renderTop, renderRight - renderLeft, renderBottom - renderTop);
+      }
+    });
 
     // Add subtle grid pattern with modern styling
     ctx.strokeStyle = `rgba(255, 255, 255, 0.08)`;
     ctx.lineWidth = 0.5;
     
     const gridSize = 50;
-    const offsetX = (-player.x % gridSize) + gridSize;
-    const offsetY = (-player.y % gridSize) + gridSize;
+    const offsetX = (-playerPos.x % gridSize) + gridSize;
+    const offsetY = (-playerPos.y % gridSize) + gridSize;
     
     // Vertical lines
     for (let x = offsetX; x < canvas.width; x += gridSize) {
@@ -252,10 +278,58 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     // Use local player position for consistent rendering
     const playerPos = localPlayerPosition.current;
     
-    // Modern zone transition lines
-    ctx.strokeStyle = `rgba(255, 255, 255, 0.2)`;
-    ctx.lineWidth = 1;
-    ctx.setLineDash([8, 12]);
+    // Zone colors (matching minimap)
+    const zoneColors = {
+      hub: '#8b5cf6',      // violet
+      fields: '#10b981',   // green
+      arena: '#dc2626'     // red
+    };
+    
+    // Zone boundaries
+    const zoneBounds = {
+      hub: { minX: -200, maxX: 200, minY: -150, maxY: 150 },
+      fields: { minX: 200, maxX: 600, minY: -150, maxY: 150 },
+      arena: { minX: 600, maxX: 2600, minY: -150, maxY: 150 }
+    };
+    
+    // Render zone boundary boxes
+    Object.entries(zoneBounds).forEach(([zoneName, bounds]) => {
+      const color = zoneColors[zoneName as keyof typeof zoneColors];
+      
+      // Calculate screen positions for zone boundaries
+      const left = centerX + (bounds.minX - playerPos.x);
+      const right = centerX + (bounds.maxX - playerPos.x);
+      const top = centerY + (bounds.minY - playerPos.y);
+      const bottom = centerY + (bounds.maxY - playerPos.y);
+      
+      // Only render if zone is visible on screen
+      if (right > 0 && left < canvas.width && bottom > 0 && top < canvas.height) {
+        // Zone boundary box
+        ctx.strokeStyle = `${color}80`; // 50% opacity
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 8]);
+        
+        ctx.beginPath();
+        ctx.rect(left, top, right - left, bottom - top);
+        ctx.stroke();
+        
+        // Zone corner markers
+        ctx.fillStyle = color;
+        ctx.setLineDash([]);
+        
+        // Corner squares (8x8 pixels)
+        const cornerSize = 8;
+        ctx.fillRect(left - cornerSize/2, top - cornerSize/2, cornerSize, cornerSize);
+        ctx.fillRect(right - cornerSize/2, top - cornerSize/2, cornerSize, cornerSize);
+        ctx.fillRect(left - cornerSize/2, bottom - cornerSize/2, cornerSize, cornerSize);
+        ctx.fillRect(right - cornerSize/2, bottom - cornerSize/2, cornerSize, cornerSize);
+      }
+    });
+    
+    // Zone transition lines (enhanced)
+    ctx.strokeStyle = `rgba(255, 255, 255, 0.4)`;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([12, 8]);
     
     // Hub → Fields transition at x=200
     const hubFieldsLine = centerX + (200 - playerPos.x);
