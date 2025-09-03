@@ -5,7 +5,7 @@
 
 import { RepositoryFactory } from '../infrastructure/factories/RepositoryFactory';
 import { CombatServiceImpl } from '../infrastructure/services/CombatServiceImpl';
-import { ZustandStateAdapter } from '../infrastructure/adapters/ZustandStateAdapter';
+// ZustandStateAdapter removed - using GameStateManager directly
 import { PlayerMovementUseCase } from './useCases/PlayerMovementUseCase';
 import { WorldExplorationUseCase } from './useCases/WorldExplorationUseCase';
 import { CombatUseCase } from './useCases/CombatUseCase';
@@ -22,7 +22,7 @@ export class AppBootstrap {
   
   private gameStateService!: GameStateService;
   private animationService!: AnimationService;
-  private zustandAdapter!: ZustandStateAdapter;
+  // ZustandStateAdapter removed - using GameStateManager directly
   
   private constructor(private config: AppConfig) {
     this.initializeDependencies();
@@ -43,9 +43,7 @@ export class AppBootstrap {
     return this.animationService;
   }
 
-  getZustandAdapter(): ZustandStateAdapter {
-    return this.zustandAdapter;
-  }
+  // ZustandStateAdapter removed - using GameStateManager directly
 
   private initializeDependencies(): void {
     // Create repositories (Infrastructure layer)
@@ -82,8 +80,7 @@ export class AppBootstrap {
 
     this.animationService = new AnimationService();
 
-    // Create adapters (Infrastructure layer)
-    this.zustandAdapter = new ZustandStateAdapter(this.gameStateService);
+    // ZustandStateAdapter removed - using GameStateManager directly
   }
 
   // Factory methods for common configurations

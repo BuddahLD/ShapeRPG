@@ -3,29 +3,11 @@
  * Provides React hooks for accessing the GameStateManager
  */
 
-import { useEffect, useRef } from 'react';
-import { GameStateManager } from '../managers/GameStateManager';
-import { AppBootstrap } from '../../application/AppBootstrap';
-
-let gameStateManagerInstance: GameStateManager | null = null;
+import { GameStateService } from '../GameStateService';
 
 export function useGameStateManager() {
-  const managerRef = useRef<GameStateManager | null>(null);
-
-  useEffect(() => {
-    if (!managerRef.current) {
-      // Initialize clean architecture bootstrap
-      const appBootstrap = AppBootstrap.createDevelopmentApp();
-      const gameStateService = appBootstrap.getGameStateService();
-      const animationService = appBootstrap.getAnimationService();
-      
-      // Create manager instance
-      managerRef.current = new GameStateManager(gameStateService, animationService);
-      gameStateManagerInstance = managerRef.current;
-    }
-  }, []);
-
-  return managerRef.current;
+  // Use singleton GameStateManager instance
+  return GameStateService.getInstance();
 }
 
 // Hook for accessing the game state store

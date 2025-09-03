@@ -10,13 +10,15 @@ import Arena from "./Arena";
 import Shop from "./Shop";
 import { useGameState } from "../presentation/hooks/useGameStateManager";
 import { usePlayer } from "../presentation/hooks/usePlayerManager";
+import { AppBootstrapService } from "../application/AppBootstrapService";
 // GameEngine removed - using clean architecture instead
 
 const Game: React.FC = () => {
   const { currentLocation, isDrawingRune, initializeGame } = useGameState();
-  const { initializePlayer, resetToHubSpawn } = usePlayer();
+  const { resetToHubSpawn } = usePlayer();
   const [showCharInfo, setShowCharInfo] = useState(false);
   const [activeTab, setActiveTab] = useState<'stats' | 'spells' | 'inventory'>('inventory');
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Debug logging for modal state
   useEffect(() => {
@@ -33,32 +35,33 @@ const Game: React.FC = () => {
   }, [currentLocation, resetToHubSpawn]);
 
   useEffect(() => {
-    console.log('Game component: Initializing...');
+    const initializeApp = async () => {
+      console.log('Game component: Initializing with AppBootstrap...');
+      
+      try {
+        // Initialize AppBootstrap singleton
+        const bootstrap = AppBootstrapService.getInstance();
+        
+        console.log('Game component: AppBootstrap initialized');
+        
+        // Initialize game (this will also initialize the player)
+        await initializeGame();
+        console.log('Game component: Game initialized successfully');
+        
+        // Mark as initialized
+        setIsInitialized(true);
+        
+      } catch (error) {
+        console.error('Game component: Failed to initialize:', error);
+      }
+    };
     
-    // GameEngine removed - using clean architecture instead
-    
-    // Initialize player with starting stats (backward compatibility)
-    initializePlayer();
-    console.log('Game component: Player initialized');
-    
-    // Initialize game through clean architecture
-    initializeGame().then(() => {
-      console.log('Game component: Game initialized successfully');
-    }).catch((error) => {
-      console.error('Game component: Failed to initialize game:', error);
-    });
-    
-    // Force a re-render to ensure PlayerManager is properly initialized
-    setTimeout(() => {
-      console.log('Game component: Forcing re-render after initialization');
-      setShowCharInfo(false); // Reset to trigger re-render
-    }, 100);
+    initializeApp();
     
     return () => {
-      // Cleanup handled by clean architecture
       console.log('Game component: Cleanup completed');
     };
-  }, [initializePlayer, initializeGame]);
+  }, [initializeGame]);
 
   const renderLocationContent = () => {
     switch (currentLocation) {
@@ -71,10 +74,19 @@ const Game: React.FC = () => {
     }
   };
 
+  // Show loading state until initialization is complete
+  if (!isInitialized) {
+    return (
+      <div className="relative w-full h-full flex items-center justify-center">
+        <div className="text-white text-lg">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full h-full">
       {/* Game Canvas */}
-              <GameCanvas />
+      <GameCanvas />
       
       {/* Location-specific content */}
       {renderLocationContent()}

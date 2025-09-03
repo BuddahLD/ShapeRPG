@@ -4,7 +4,7 @@ import { usePlayer } from "../presentation/hooks/usePlayerManager";
 // GameEngine removed - using clean architecture instead
 import { DesignSystem } from "../lib/services/DesignSystem";
 import { VisualEffects } from "../lib/services/VisualEffects";
-import { WorldAreaManager } from "../lib/services/WorldAreaManager";
+// WorldAreaManager removed - using clean architecture game state instead
 
 interface GameCanvasProps {
   // No props needed - using clean architecture hooks
@@ -13,7 +13,7 @@ interface GameCanvasProps {
 const GameCanvas: React.FC<GameCanvasProps> = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number>();
-  const { currentLocation, enemies, isSlowMotion } = useGameState();
+  const { currentLocation, enemies, isSlowMotion, gameState } = useGameState();
   const { player } = usePlayer();
 
   // Debug logging
@@ -63,26 +63,23 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     
     const centerX = canvas.width / 2;
     
-    // Get unified area boundaries from WorldAreaManager
-    const visualBoundaries = WorldAreaManager.getVisualBoundaries(player.x, player.y, centerX);
+    // Use current area from clean architecture game state
+    const currentArea = gameState.currentArea;
     
-    // Draw territorial backgrounds using unified boundaries
-    visualBoundaries.forEach(area => {
-      const screenStartX = area.screenStartX;
-      const screenEndX = area.screenEndX;
+    if (currentArea) {
+      // Create gradient for current area
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+      gradient.addColorStop(0, currentArea.visualTheme.primary);
+      gradient.addColorStop(1, currentArea.visualTheme.secondary);
       
-      // Calculate visible portion of this area
-      const visibleStartX = Math.max(0, screenStartX);
-      const visibleEndX = Math.min(canvas.width, screenEndX);
-      const visibleWidth = visibleEndX - visibleStartX;
-      
-      // Only render if area is visible on screen
-      if (visibleWidth > 0) {
-        const gradient = DesignSystem.createZoneGradient(ctx, area.areaId, visibleWidth, canvas.height);
-        ctx.fillStyle = gradient;
-        ctx.fillRect(visibleStartX, 0, visibleWidth, canvas.height);
-      }
-    });
+      // Draw area background
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+      // Default background if no area
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
 
     // Add subtle grid pattern with modern styling
