@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import { useGameState } from "../lib/stores/useGameState";
-import { usePlayer } from "../lib/stores/usePlayer";
+import { useGameState } from "../presentation/hooks/useGameStateManager";
+import { usePlayer } from "../presentation/hooks/usePlayerManager";
 
 const Arena: React.FC = () => {
   const { 

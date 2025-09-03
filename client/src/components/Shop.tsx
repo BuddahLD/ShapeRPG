@@ -1,13 +1,13 @@
 import React from "react";
-import { useGameState } from "../lib/stores/useGameState";
-import { usePlayer } from "../lib/stores/usePlayer";
-import { useInventory } from "../lib/stores/useInventory";
-import { gameData } from "../lib/gameData/gameData";
+import { useGameState } from "../presentation/hooks/useGameStateManager";
+import { usePlayer } from "../presentation/hooks/usePlayerManager";
+// useInventory removed - using clean architecture instead
+// gameData removed - using clean architecture instead
 
 const Shop: React.FC = () => {
   const { showShop, setShowShop } = useGameState();
   const { player, updatePlayer } = usePlayer();
-  const { addItem } = useInventory();
+  // useInventory removed - using clean architecture instead
 
   if (!showShop || !player) return null;
 

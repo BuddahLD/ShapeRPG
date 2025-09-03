@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { usePlayer } from "../lib/stores/usePlayer";
+import { usePlayer } from "../presentation/hooks/usePlayerManager";
 
 interface StatsInventoryModalProps {
   isOpen: boolean;

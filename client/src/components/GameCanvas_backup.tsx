@@ -1,23 +1,28 @@
 import React, { useRef, useEffect, useCallback } from "react";
 import { useGameState } from "../presentation/hooks/useGameStateManager";
 import { usePlayer } from "../presentation/hooks/usePlayerManager";
-// GameEngine removed - using clean architecture instead
+import { GameEngine } from "../lib/gameEngine/GameEngine";
 import { DesignSystem } from "../lib/services/DesignSystem";
 import { VisualEffects } from "../lib/services/VisualEffects";
 import { WorldAreaManager } from "../lib/services/WorldAreaManager";
 
 interface GameCanvasProps {
-  // No props needed - using clean architecture hooks
+  gameEngine: GameEngine | null;
 }
 
-const GameCanvas: React.FC<GameCanvasProps> = () => {
+const GameCanvas: React.FC<GameCanvasProps> = ({ gameEngine }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number>();
-  const { currentLocation, enemies, isSlowMotion } = useGameState();
+  const { currentLocation, isDrawingRune } = useGameState();
   const { player } = usePlayer();
+
+  // For now, use default values for missing properties
+  const enemies: any[] = []; // TODO: Get from new architecture
+  const isSlowMotion = false; // TODO: Get from new architecture
 
   // Debug logging
   console.log('GameCanvas render:', { 
+    gameEngine: !!gameEngine, 
     currentLocation, 
     enemies: enemies?.length, 
     isSlowMotion, 
@@ -25,8 +30,8 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
   });
 
   const gameLoop = useCallback(() => {
-    if (!canvasRef.current) {
-      console.log('GameCanvas: Missing canvas');
+    if (!canvasRef.current || !gameEngine) {
+      console.log('GameCanvas: Missing canvas or gameEngine');
       return;
     }
 
@@ -42,7 +47,8 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     // Apply slow motion effect
     const timeScale = isSlowMotion ? 0.2 : 1.0;
     
-    // Game engine removed - using clean architecture instead
+    // Update game engine
+    gameEngine.update(timeScale);
 
     // Render game elements
     renderBackground(ctx);
@@ -55,7 +61,7 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
 
     // Continue game loop
     animationFrameRef.current = requestAnimationFrame(gameLoop);
-  }, [isSlowMotion, player, currentLocation, enemies]);
+  }, [gameEngine, isSlowMotion, player, currentLocation, enemies]);
 
   const renderBackground = (ctx: CanvasRenderingContext2D) => {
     const canvas = canvasRef.current!;
@@ -194,7 +200,7 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
-    enemies.forEach((enemy: any) => {
+    enemies.forEach(enemy => {
       // Calculate enemy position relative to player
       const relativeX = enemy.x - player.x;
       const relativeY = enemy.y - player.y;

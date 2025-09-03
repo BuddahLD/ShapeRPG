@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { useGameState } from "../lib/stores/useGameState";
-import { usePlayer } from "../lib/stores/usePlayer";
-import { ShapeMatching } from "../lib/gameEngine/ShapeMatching";
+import { useGameState } from "../presentation/hooks/useGameStateManager";
+import { usePlayer } from "../presentation/hooks/usePlayerManager";
+// ShapeMatching removed - using clean architecture instead
 
 interface Point {
   x: number;

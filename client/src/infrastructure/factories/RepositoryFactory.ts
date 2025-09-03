@@ -7,7 +7,7 @@ import { IPlayerRepository } from '../../domain/interfaces/repositories/IPlayerR
 import { IWorldRepository } from '../../domain/interfaces/repositories/IWorldRepository';
 import { InMemoryPlayerRepository } from '../persistence/InMemoryPlayerRepository';
 import { InMemoryWorldRepository } from '../persistence/InMemoryWorldRepository';
-import { LocalStorageAdapter } from '../adapters/LocalStorageAdapter';
+import { LocalStorageAdapter, StorageConfig } from '../adapters/LocalStorageAdapter';
 
 export type RepositoryType = 'memory' | 'localStorage' | 'database';
 

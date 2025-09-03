@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-import { useGame } from "@/lib/stores/useGame";
-import { useAudio } from "@/lib/stores/useAudio";
+// useGame and useAudio removed - using clean architecture instead
 import { Button } from "./button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./card";
 import { VolumeX, Volume2, RotateCw, Trophy } from "lucide-react";

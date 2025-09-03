@@ -1,27 +1,34 @@
 /**
  * Presentation Hook: Player Manager Integration
- * Provides React hooks for accessing the PlayerManager
+ * Provides React hooks for accessing player data through GameStateManager
  */
 
 import { useEffect, useRef } from 'react';
-import { PlayerManager } from '../managers/PlayerManager';
+import { GameStateManager } from '../managers/GameStateManager';
+import { AppBootstrap } from '../../application/AppBootstrap';
 
-let playerManagerInstance: PlayerManager | null = null;
+let gameStateManagerInstance: GameStateManager | null = null;
 
 export function usePlayerManager() {
-  const managerRef = useRef<PlayerManager | null>(null);
+  const managerRef = useRef<GameStateManager | null>(null);
 
   useEffect(() => {
     if (!managerRef.current) {
-      managerRef.current = new PlayerManager();
-      playerManagerInstance = managerRef.current;
+      // Initialize clean architecture bootstrap
+      const appBootstrap = AppBootstrap.createDevelopmentApp();
+      const gameStateService = appBootstrap.getGameStateService();
+      const animationService = appBootstrap.getAnimationService();
+      
+      // Create manager instance
+      managerRef.current = new GameStateManager(gameStateService, animationService);
+      gameStateManagerInstance = managerRef.current;
     }
   }, []);
 
   return managerRef.current;
 }
 
-// Hook for accessing the player store (backward compatibility)
+// Hook for accessing the player data from GameStateManager
 export function usePlayer() {
   const manager = usePlayerManager();
   
@@ -31,6 +38,7 @@ export function usePlayer() {
     console.log('usePlayer: No manager, returning default state');
     // Return default state while manager initializes
     return {
+      player: null,
       stats: {
         hp: 100,
         maxHp: 100,
@@ -45,7 +53,7 @@ export function usePlayer() {
       gold: 100,
       inventory: [],
       knownSpells: ['fire-bolt', 'ice-shard', 'shield-aura'],
-      position: { x: 0, y: 0 }, // Spawn at center of hub, near all NPCs
+      position: { x: 0, y: 20 }, // Spawn at center of hub, near all NPCs
       initializePlayer: () => {},
       updateStats: () => {},
       addGold: () => {},
@@ -68,6 +76,7 @@ export function usePlayer() {
   if (!store) {
     console.log('usePlayer: Store is null, returning default state');
     return {
+      player: null,
       stats: {
         hp: 100,
         maxHp: 100,
@@ -82,7 +91,7 @@ export function usePlayer() {
       gold: 100,
       inventory: [],
       knownSpells: ['fire-bolt', 'ice-shard', 'shield-aura'],
-      position: { x: 0, y: 0 }, // Spawn at center of hub, near all NPCs
+      position: { x: 0, y: 20 }, // Spawn at center of hub, near all NPCs
       initializePlayer: () => {},
       updateStats: () => {},
       addGold: () => {},
@@ -100,5 +109,46 @@ export function usePlayer() {
   
   const state = store.getState();
   console.log('usePlayer: Returning state from store:', state);
-  return state;
+  
+  // Extract player data from gameState
+  const player = state.gameState.player;
+  
+  return {
+    player,
+    stats: player ? {
+      hp: player.stats.hp,
+      maxHp: player.stats.maxHp,
+      mana: player.stats.mana,
+      maxMana: player.stats.maxMana,
+      attack: player.stats.attack,
+      defense: player.stats.defense,
+      castSpeed: 1.0
+    } : {
+      hp: 100,
+      maxHp: 100,
+      mana: 50,
+      maxMana: 50,
+      attack: 10,
+      defense: 5,
+      castSpeed: 1.0
+    },
+    level: player?.level || 1,
+    experience: player?.experience || 0,
+    gold: player?.gold || 100,
+    inventory: player?.inventory || [],
+    knownSpells: player?.knownSpells || ['fire-bolt', 'ice-shard', 'shield-aura'],
+    position: player?.position || { x: 0, y: 20 },
+    initializePlayer: state.initializeGame,
+    updateStats: () => {},
+    addGold: () => {},
+    spendGold: () => false,
+    addItem: () => {},
+    removeItem: () => false,
+    learnSpell: () => {},
+    updatePosition: () => {},
+    movePlayer: state.movePlayer,
+    resetToHubSpawn: () => {},
+    experienceProgress: 0,
+    canLevelUp: false
+  };
 }

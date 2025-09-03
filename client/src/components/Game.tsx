@@ -9,10 +9,9 @@ import Arena from "./Arena";
 import Shop from "./Shop";
 import { useGameState } from "../presentation/hooks/useGameStateManager";
 import { usePlayer } from "../presentation/hooks/usePlayerManager";
-import { GameEngine } from "../lib/gameEngine/GameEngine";
+// GameEngine removed - using clean architecture instead
 
 const Game: React.FC = () => {
-  const gameEngineRef = useRef<GameEngine | null>(null);
   const { currentLocation, isDrawingRune, initializeGame } = useGameState();
   const { initializePlayer, resetToHubSpawn } = usePlayer();
   const [showCharInfo, setShowCharInfo] = useState(false);
@@ -35,17 +34,18 @@ const Game: React.FC = () => {
   useEffect(() => {
     console.log('Game component: Initializing...');
     
-    // Initialize game engine
-    gameEngineRef.current = new GameEngine();
-    console.log('Game component: GameEngine created');
+    // GameEngine removed - using clean architecture instead
     
     // Initialize player with starting stats (backward compatibility)
     initializePlayer();
     console.log('Game component: Player initialized');
     
     // Initialize game through clean architecture
-    initializeGame();
-    console.log('Game component: Game initialized');
+    initializeGame().then(() => {
+      console.log('Game component: Game initialized successfully');
+    }).catch((error) => {
+      console.error('Game component: Failed to initialize game:', error);
+    });
     
     // Force a re-render to ensure PlayerManager is properly initialized
     setTimeout(() => {
@@ -75,7 +75,7 @@ const Game: React.FC = () => {
   return (
     <div className="relative w-full h-full">
       {/* Game Canvas */}
-      <GameCanvas gameEngine={gameEngineRef.current} />
+              <GameCanvas />
       
       {/* Location-specific content */}
       {renderLocationContent()}

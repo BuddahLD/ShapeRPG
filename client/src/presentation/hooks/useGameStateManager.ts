@@ -50,11 +50,20 @@ export function useGameState() {
       movePlayer: async () => {},
       clearError: () => {},
       currentLocation: 'LOC_HUB_FIGUREIUM',
-      isDrawingRune: false
+      isDrawingRune: false,
+      enemies: []
     };
   }
 
   // Use the Zustand hook pattern to get reactive state and actions
   const store = manager.getStore();
-  return store.getState();
+  const state = store.getState();
+  
+  // Extract data from gameState and provide backward compatibility
+  return {
+    ...state,
+    currentLocation: state.gameState.currentArea?.id || 'LOC_HUB_FIGUREIUM',
+    isDrawingRune: state.gameState.isDrawingRune,
+    enemies: state.gameState.nearbyEnemies || []
+  };
 }
