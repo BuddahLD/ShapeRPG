@@ -33,7 +33,7 @@ const GameHUD: React.FC<GameHUDProps> = ({ showCharInfo, setShowCharInfo, active
       <HPMPContainer 
         wrapContent={true}
         maxWidth="250px"
-        className="bg-white/5 border-white/20"
+        className="border-white/20"
       />
       <LocationIndicator />
       <PlayerProgressBar onLevelBarClick={handleLevelBarClick} />

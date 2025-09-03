@@ -96,7 +96,7 @@ const Game: React.FC = () => {
         maxWidth="200px"
         showLegend={false}
         showControls={false}
-        className="bg-white/5 border-white/20"
+        className="border-white/20"
       />
       
       {/* Location Indicator */}
