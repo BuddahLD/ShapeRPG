@@ -88,7 +88,9 @@ export const LocationIndicator: React.FC<LocationIndicatorProps> = ({
     switch (location) {
       case "LOC_HUB_FIGUREIUM": return "Hub";
       case "LOC_PEACEFUL_FIELDS": return "Fields";
-      default: return "Arena";
+      case "LOC_SHARDS": return "Shards";
+      case "LOC_NOWHERE": return "Nowhere";
+      default: return "Unknown";
     }
   };
 

@@ -31,11 +31,29 @@ export class ZoneDetectionService {
       const allAreas = await this.worldRepository.getAllAreas();
       
       // Determine current area based on position
-      const currentArea = WorldDomainService.findAreaForPosition(
+      let currentArea = WorldDomainService.findAreaForPosition(
         allAreas,
         request.playerPosition.x,
         request.playerPosition.y
       );
+
+      // If no area found, create a "Nowhere" area
+      if (!currentArea) {
+        currentArea = new WorldArea(
+          'LOC_NOWHERE' as any,
+          'Nowhere',
+          { minX: -Infinity, maxX: Infinity, minY: -Infinity, maxY: Infinity },
+          'exploration',
+          {
+            primary: '#6b7280',
+            secondary: '#9ca3af',
+            accent: '#d1d5db',
+            background: '#f9fafb'
+          },
+          false, // No enemy spawning in nowhere
+          '#6b7280'
+        );
+      }
 
       // Check if area has changed
       const areaChanged = this.lastDetectedArea?.id !== currentArea?.id;

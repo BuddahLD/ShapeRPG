@@ -6,7 +6,7 @@ import RuneDrawing from "./RuneDrawing";
 import { MinimapContainer } from "./ui/MinimapContainer";
 import { LocationIndicator } from "./ui/LocationIndicator";
 import Hub from "./Hub";
-import Arena from "./Arena";
+
 import Shop from "./Shop";
 import { useGameState } from "../presentation/hooks/useGameStateManager";
 import { usePlayer } from "../presentation/hooks/usePlayerManager";
@@ -67,8 +67,8 @@ const Game: React.FC = () => {
     switch (currentLocation) {
       case "LOC_HUB_FIGUREIUM":
         return <Hub />;
-      case "LOC_ARENA_1":
-        return <Arena />;
+      case "LOC_SHARDS":
+        return null; // Shards is a regular area, no special component needed
       default:
         return <Hub />;
     }

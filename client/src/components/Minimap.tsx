@@ -16,9 +16,9 @@ const Minimap: React.FC = () => {
   // World bounds for minimap scaling
   const worldBounds = {
     minX: -200,
-    maxX: 2600,
-    minY: -110,
-    maxY: 90
+    maxX: 1100,
+    minY: -450,
+    maxY: 450
   };
   
   const worldWidth = worldBounds.maxX - worldBounds.minX;
@@ -36,8 +36,8 @@ const Minimap: React.FC = () => {
   const getZoneColor = (x: number) => {
     if (x >= -200 && x <= 200) return "#8b5cf6"; // Hub - violet
     if (x >= 200 && x <= 600) return "#10b981"; // Fields - green  
-    if (x >= 600 && x <= 2600) return "#dc2626"; // Arena - red
-    return "#6b7280"; // Default
+    if (x >= 600 && x <= 1100) return "#dc2626"; // Shards - red
+    return "#6b7280"; // Nowhere - gray
   };
 
   
@@ -77,13 +77,13 @@ const Minimap: React.FC = () => {
                 backgroundColor: getZoneColor(400)
               }}
             />
-            {/* Arena zone */}
+            {/* Shards zone */}
             <div 
               className="absolute top-0 h-full opacity-30"
               style={{
                 left: `${(800 / worldWidth) * 100}%`,
-                width: `${(2000 / worldWidth) * 100}%`,
-                backgroundColor: getZoneColor(1600)
+                width: `${(500 / worldWidth) * 100}%`,
+                backgroundColor: getZoneColor(850)
               }}
             />
           </div>

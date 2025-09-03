@@ -103,9 +103,14 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
         bounds: { minX: 200, maxX: 600, minY: -150, maxY: 150 }
       },
       {
-        name: 'arena',
+        name: 'shards',
         color: '#dc2626',     // red
-        bounds: { minX: 600, maxX: 2600, minY: -150, maxY: 150 }
+        bounds: { minX: 600, maxX: 1100, minY: -450, maxY: 450 }
+      },
+      {
+        name: 'nowhere',
+        color: '#6b7280',     // gray
+        bounds: { minX: -Infinity, maxX: Infinity, minY: -Infinity, maxY: Infinity }
       }
     ];
     
@@ -115,6 +120,9 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     
     // Render zone backgrounds based on what's visible on screen
     zones.forEach(zone => {
+      // Skip the "nowhere" zone - it uses the default background
+      if (zone.name === 'nowhere') return;
+      
       const bounds = zone.bounds;
       
       // Calculate screen positions for zone boundaries
@@ -298,18 +306,23 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     const zoneColors = {
       hub: '#8b5cf6',      // violet
       fields: '#10b981',   // green
-      arena: '#dc2626'     // red
+      shards: '#dc2626',   // red
+      nowhere: '#6b7280'   // gray
     };
     
     // Zone boundaries
     const zoneBounds = {
       hub: { minX: -200, maxX: 200, minY: -150, maxY: 150 },
       fields: { minX: 200, maxX: 600, minY: -150, maxY: 150 },
-      arena: { minX: 600, maxX: 2600, minY: -150, maxY: 150 }
+      shards: { minX: 600, maxX: 1100, minY: -450, maxY: 450 },
+      nowhere: { minX: -Infinity, maxX: Infinity, minY: -Infinity, maxY: Infinity }
     };
     
     // Render zone boundary boxes
     Object.entries(zoneBounds).forEach(([zoneName, bounds]) => {
+      // Skip the "nowhere" zone - it has infinite bounds
+      if (zoneName === 'nowhere') return;
+      
       const color = zoneColors[zoneName as keyof typeof zoneColors];
       
       // Calculate screen positions for zone boundaries
@@ -356,12 +369,12 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
       ctx.stroke();
     }
     
-    // Fields → Arena transition at x=600
-    const fieldsArenaLine = centerX + (600 - playerPos.x);
-    if (fieldsArenaLine > -50 && fieldsArenaLine < canvas.width + 50) {
+    // Fields → Shards transition at x=600
+    const fieldsShardsLine = centerX + (600 - playerPos.x);
+    if (fieldsShardsLine > -50 && fieldsShardsLine < canvas.width + 50) {
       ctx.beginPath();
-      ctx.moveTo(fieldsArenaLine, 0);
-      ctx.lineTo(fieldsArenaLine, canvas.height);
+      ctx.moveTo(fieldsShardsLine, 0);
+      ctx.lineTo(fieldsShardsLine, canvas.height);
       ctx.stroke();
     }
     

@@ -97,22 +97,22 @@ export class InMemoryWorldRepository implements IWorldRepository {
       '#10b981'
     );
 
-    // Arena Area  
-    const arenaArea = new WorldArea(
-      'LOC_ARENA_1' as LocationId,
-      'Arena',
-      { minX: 600, maxX: 2600, minY: -150, maxY: 150 },
-      'combat',
+    // Shards Area  
+    const shardsArea = new WorldArea(
+      'LOC_SHARDS' as LocationId,
+      'Shards',
+      { minX: 600, maxX: 1100, minY: -450, maxY: 450 }, // width/4 (500), height*3 (900)
+      'exploration',
       {
         primary: '#fb7185',
         secondary: '#fda4af',
         accent: '#fecdd3',
         background: '#fff1f2'
       },
-      true, // Enemy spawning allowed
+      true, // Enemy spawning allowed (neutral mobs)
       '#dc2626'
     );
 
-    this.areas = [hubArea, fieldsArea, arenaArea];
+    this.areas = [hubArea, fieldsArea, shardsArea];
   }
 }
