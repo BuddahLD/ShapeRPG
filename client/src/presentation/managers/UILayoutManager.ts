@@ -52,8 +52,8 @@ export const LAYOUT_CONFIGS = {
   } as UILayoutConfig,
 
   locationIndicator: {
-    position: { top: '1rem', left: '50%', transform: 'translateX(-50%)' },
-    dimensions: { width: 'auto', height: '32px' },
+    position: { top: 'calc(1rem + 58px + 2px)', right: '1rem' },
+    dimensions: { width: '58px', height: '32px' },
     zIndex: 110,
     isVisible: true
   } as UILayoutConfig,
@@ -81,7 +81,7 @@ export const LAYOUT_CONFIGS = {
 
   minimap: {
     position: { top: '1rem', right: '1rem' },
-    dimensions: { width: '150px', height: '150px' },
+    dimensions: { width: 'fit-content', height: 'fit-content' },
     zIndex: 100,
     isVisible: true
   } as UILayoutConfig,

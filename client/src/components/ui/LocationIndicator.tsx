@@ -54,25 +54,33 @@ export const LocationIndicator: React.FC<LocationIndicatorProps> = ({
     ]
   });
 
-  // ATOMIC: Location change detection
+  // ATOMIC: Location change detection and initial display
   useEffect(() => {
-    if (currentLocation && currentLocation !== previousLocation) {
-      setPreviousLocation(currentLocation);
-      setShowLocationIndicator(true);
+    if (currentLocation) {
+      // Show on location change OR initial load
+      const isLocationChange = currentLocation !== previousLocation;
+      const isInitialLoad = previousLocation === null;
       
-      // Start the animation (if enabled)
-      if (showAnimation) {
-        startAnimation();
+      if (isLocationChange || isInitialLoad) {
+        setPreviousLocation(currentLocation);
+        setShowLocationIndicator(true);
+        
+        // Start the animation (if enabled)
+        if (showAnimation) {
+          startAnimation();
+        }
+        
+        // Hide after animation completes (only for location changes, not initial load)
+        if (isLocationChange) {
+          const hideTimer = setTimeout(() => {
+            setShowLocationIndicator(false);
+          }, duration);
+          
+          return () => clearTimeout(hideTimer);
+        }
       }
-      
-      // Hide after animation completes
-      const hideTimer = setTimeout(() => {
-        setShowLocationIndicator(false);
-      }, duration);
-      
-      return () => clearTimeout(hideTimer);
     }
-  }, [currentLocation, previousLocation, startAnimation]);
+  }, [currentLocation, previousLocation, startAnimation, showAnimation, duration]);
 
   if (!showLocationIndicator) return null;
 
@@ -95,6 +103,12 @@ export const LocationIndicator: React.FC<LocationIndicatorProps> = ({
       style={{ 
         ...styles,
         ...animationStyles,
+      }}
+      ref={(el) => {
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          console.log('LocationIndicator position:', { top: rect.top, left: rect.left, width: rect.width, height: rect.height });
+        }
       }}
       {...props}
     >

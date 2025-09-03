@@ -4,6 +4,7 @@ import GameHUD from "./GameHUD";
 import VirtualJoystick from "./VirtualJoystick";
 import RuneDrawing from "./RuneDrawing";
 import { MinimapContainer } from "./ui/MinimapContainer";
+import { LocationIndicator } from "./ui/LocationIndicator";
 import Hub from "./Hub";
 import Arena from "./Arena";
 import Shop from "./Shop";
@@ -54,10 +55,8 @@ const Game: React.FC = () => {
     }, 100);
     
     return () => {
-      if (gameEngineRef.current) {
-        gameEngineRef.current.destroy();
-        console.log('Game component: GameEngine destroyed');
-      }
+      // Cleanup handled by clean architecture
+      console.log('Game component: Cleanup completed');
     };
   }, [initializePlayer, initializeGame]);
 
@@ -91,13 +90,19 @@ const Game: React.FC = () => {
       {/* Virtual Joystick */}
       <VirtualJoystick isModalOpen={showCharInfo} />
       
-      {/* Minimap - Top Right with Content Wrapping */}
+      {/* Minimap */}
       <MinimapContainer 
         wrapContent={true}
         maxWidth="200px"
         showLegend={false}
         showControls={false}
         className="bg-white/5 border-white/20"
+      />
+      
+      {/* Location Indicator */}
+      <LocationIndicator 
+        variant="minimal"
+        showAnimation={true}
       />
       
       {/* Rune Drawing Overlay */}

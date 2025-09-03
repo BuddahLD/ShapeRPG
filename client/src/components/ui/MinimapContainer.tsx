@@ -44,8 +44,15 @@ export const MinimapContainer: React.FC<MinimapContainerProps> = ({
         ...styles,
         maxWidth,
         maxHeight,
-        width: 'fit-content',
-        height: 'fit-content'
+        width: styles.width || 'fit-content',
+        height: styles.height || 'fit-content'
+      }}
+      ref={(el) => {
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          console.log('MinimapContainer rendered width:', rect.width);
+          console.log('MinimapContainer rendered height:', rect.height);
+        }
       }}
       {...props}
     >
