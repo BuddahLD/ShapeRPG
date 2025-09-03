@@ -13,7 +13,7 @@ interface GameCanvasProps {
 const GameCanvas: React.FC<GameCanvasProps> = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number>();
-  const { currentLocation, enemies, isSlowMotion, gameState } = useGameState();
+  const { currentLocation, enemies, isSlowMotion, gameState, detectZoneChange } = useGameState();
   const { player, position } = usePlayer();
   
   // Local movement state - no store updates needed
@@ -29,6 +29,19 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     player: !!player 
   });
 
+  // Zone detection using proper clean architecture
+  const checkAndUpdateZone = useCallback(async () => {
+    const playerPos = localPlayerPosition.current;
+    if (!playerPos) return;
+
+    // Use the proper zone detection service
+    const zoneChanged = await detectZoneChange(playerPos);
+    
+    if (zoneChanged) {
+      console.log('Zone changed, new position:', playerPos);
+    }
+  }, [detectZoneChange]);
+
   const gameLoop = useCallback(() => {
     if (!canvasRef.current) {
       return;
@@ -43,6 +56,9 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     if (isMoving.current) {
       localPlayerPosition.current.x += movementVelocity.current.x;
       localPlayerPosition.current.y += movementVelocity.current.y;
+      
+      // Check for zone changes and update store position
+      checkAndUpdateZone();
     }
 
     // Clear canvas

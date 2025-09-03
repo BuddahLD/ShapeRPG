@@ -62,6 +62,10 @@ interface GameStateStore {
   updateGameState: (deltaTime: number) => Promise<void>;
   setDrawingRune: (isDrawing: boolean) => void;
   movePlayer: (deltaX: number, deltaY: number) => Promise<void>;
+  detectZoneChange: (playerPosition: { x: number; y: number }) => Promise<boolean>;
+  clearEnemies: () => Promise<void>;
+  spawnEnemies: () => Promise<void>;
+  setGamePhase: (phase: 'loading' | 'exploring' | 'combat' | 'rune-drawing' | 'paused') => void;
   clearError: () => void;
   
   // Getters for backward compatibility
@@ -194,6 +198,49 @@ export class GameStateManager {
         } catch (error) {
           console.warn('Failed to move player:', error);
         }
+      },
+
+      detectZoneChange: async (playerPosition: { x: number; y: number }) => {
+        try {
+          const zoneChanged = await this.gameStateService.detectZoneChange(playerPosition);
+          
+          if (zoneChanged) {
+            // Update the UI state to reflect the zone change
+            const uiGameState = this.adaptGameStateToUI(this.gameStateService.getCurrentGameState());
+            set({ gameState: uiGameState });
+          }
+          
+          return zoneChanged;
+        } catch (error) {
+          console.warn('Failed to detect zone change:', error);
+          return false;
+        }
+      },
+
+      clearEnemies: async () => {
+        try {
+          await this.gameStateService.clearEnemiesInCurrentArea();
+          const uiGameState = this.adaptGameStateToUI(this.gameStateService.getCurrentGameState());
+          set({ gameState: uiGameState });
+        } catch (error) {
+          console.warn('Failed to clear enemies:', error);
+        }
+      },
+
+      spawnEnemies: async () => {
+        try {
+          await this.gameStateService.spawnEnemiesInCurrentArea();
+          const uiGameState = this.adaptGameStateToUI(this.gameStateService.getCurrentGameState());
+          set({ gameState: uiGameState });
+        } catch (error) {
+          console.warn('Failed to spawn enemies:', error);
+        }
+      },
+
+      setGamePhase: (phase: 'loading' | 'exploring' | 'combat' | 'rune-drawing' | 'paused') => {
+        this.gameStateService.setGamePhase(phase);
+        const uiGameState = this.adaptGameStateToUI(this.gameStateService.getCurrentGameState());
+        set({ gameState: uiGameState });
       },
 
       clearError: () => {

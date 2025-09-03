@@ -4,7 +4,6 @@ import { usePlayer } from "../presentation/hooks/usePlayerManager";
 
 const Arena: React.FC = () => {
   const { 
-    setCurrentLocation, 
     spawnEnemies, 
     enemies, 
     clearEnemies,
@@ -27,7 +26,9 @@ const Arena: React.FC = () => {
   }, []);
 
   const handleReturnToHub = () => {
-    setCurrentLocation("LOC_HUB_FIGUREIUM");
+    // Location is determined by player position, so we need to move the player to the hub
+    // This should be handled by the player movement system
+    console.log('Return to hub requested - this should be handled by player movement');
   };
 
   const handleStartCombat = () => {

@@ -10,6 +10,7 @@ import { IPlayerRepository } from '../../domain/interfaces/repositories/IPlayerR
 import { IWorldRepository } from '../../domain/interfaces/repositories/IWorldRepository';
 import { PlayerMovementUseCase } from '../useCases/PlayerMovementUseCase';
 import { WorldExplorationUseCase } from '../useCases/WorldExplorationUseCase';
+import { ZoneDetectionService } from './ZoneDetectionService';
 
 export interface GameState {
   readonly player: Player | null;
@@ -51,12 +52,16 @@ export class GameStateService {
     gamePhase: 'loading'
   };
 
+  private readonly zoneDetectionService: ZoneDetectionService;
+
   constructor(
     private readonly playerRepository: IPlayerRepository,
     private readonly worldRepository: IWorldRepository,
     private readonly playerMovementUseCase: PlayerMovementUseCase,
     private readonly worldExplorationUseCase: WorldExplorationUseCase
-  ) {}
+  ) {
+    this.zoneDetectionService = new ZoneDetectionService(worldRepository);
+  }
 
   async initializeGame(request: InitializeGameRequest): Promise<InitializeGameResponse> {
     try {
@@ -269,5 +274,67 @@ export class GameStateService {
   ): Promise<void> {
     // Rune drawing state is managed externally
     // This method could handle timeouts or other rune-drawing logic
+  }
+
+  /**
+   * Detect zone changes based on player position
+   * This method should be called when the player position changes
+   */
+  async detectZoneChange(playerPosition: { x: number; y: number }): Promise<boolean> {
+    const detectionResult = await this.zoneDetectionService.detectZone({
+      playerPosition
+    });
+
+    if (detectionResult.success && detectionResult.areaChanged) {
+      // Update current area in game state
+      this.currentGameState = {
+        ...this.currentGameState,
+        currentArea: detectionResult.currentArea
+      };
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Clear enemies in the current area
+   */
+  async clearEnemiesInCurrentArea(): Promise<void> {
+    if (this.currentGameState.currentArea) {
+      await this.worldRepository.clearEnemiesInArea(this.currentGameState.currentArea.id);
+      
+      // Update game state
+      this.currentGameState = {
+        ...this.currentGameState,
+        nearbyEnemies: []
+      };
+    }
+  }
+
+  /**
+   * Spawn enemies in the current area
+   */
+  async spawnEnemiesInCurrentArea(): Promise<void> {
+    if (this.currentGameState.currentArea && this.currentGameState.currentArea.allowsEnemySpawning) {
+      // Get existing enemies in the area
+      const existingEnemies = await this.worldRepository.getEnemiesInArea(this.currentGameState.currentArea.id);
+      
+      // Update game state with enemies
+      this.currentGameState = {
+        ...this.currentGameState,
+        nearbyEnemies: existingEnemies
+      };
+    }
+  }
+
+  /**
+   * Set the game phase
+   */
+  setGamePhase(phase: 'loading' | 'exploring' | 'combat' | 'rune-drawing' | 'paused'): void {
+    this.currentGameState = {
+      ...this.currentGameState,
+      gamePhase: phase
+    };
   }
 }

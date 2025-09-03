@@ -110,6 +110,7 @@ Shapes RPG: Figureium is a minimalist 2D RPG built with React 18, TypeScript, an
 - **95% Requirement Clarity**: Only implement features/updates after 95% requirement clarity
 - **Regression Prevention**: Ensure 0% impact on existing app logic or UI when making changes
 - **Rules First**: Always read and follow rules before implementing anything
+- **No workarounds**: Always use robust solutions instead of workarounds. Fix core components if they contain bugs or extend them to cover cases we need. Think wider.
 
 ### Code Organization
 - **Feature-based Structure**: Organized by game features
