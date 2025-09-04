@@ -3,7 +3,7 @@
  * Renders enemies on the game canvas
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Enemy } from '../domain/entities/Enemy';
 import { EnemyManager } from '../application/services/EnemyManager';
 import { AppBootstrapService } from '../application/AppBootstrapService';
@@ -26,7 +26,9 @@ export const EnemyRenderer: React.FC<EnemyRendererProps> = ({
   useEffect(() => {
     console.log('EnemyRenderer: Initial spawn check for zone:', currentZone, 'player pos:', playerPosition);
     const spawnEvents = enemyManager.updateEnemySpawning(playerPosition, currentZone);
-    setEnemies(enemyManager.getAllEnemies());
+    const allEnemies = enemyManager.getAllEnemies();
+    console.log('EnemyRenderer: All enemies after spawn check:', allEnemies.length, allEnemies.map(e => ({ id: e.id, type: e.type, position: e.position })));
+    setEnemies(allEnemies);
     lastSpawnCheck.current = { x: playerPosition.x, y: playerPosition.y, zone: currentZone };
   }, []); // Only run once on mount
 

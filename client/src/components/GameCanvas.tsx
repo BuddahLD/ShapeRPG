@@ -407,6 +407,11 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     if (player?.position && localPlayerPosition.current.x === 0 && localPlayerPosition.current.y === 0) {
       localPlayerPosition.current = { ...player.position };
     }
+    
+    // Sync local position with actual player position from game state
+    if (player?.position) {
+      localPlayerPosition.current = { ...player.position };
+    }
 
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);

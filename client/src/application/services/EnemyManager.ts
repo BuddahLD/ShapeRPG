@@ -29,8 +29,8 @@ export class EnemyManager {
   private spawnConfigs: Map<string, EnemySpawnConfig> = new Map();
   private respawnTimers: Map<string, number> = new Map();
   private lastUpdateTime: number = 0;
-  private spawnDistance: number = 200; // Distance from player to spawn enemies
-  private despawnDistance: number = 300; // Distance from player to despawn enemies
+  private spawnDistance: number = 250; // Distance from player to spawn enemies
+  private despawnDistance: number = 350; // Distance from player to despawn enemies
 
   constructor() {
     this.initializeSpawnConfigs();
@@ -65,6 +65,7 @@ export class EnemyManager {
     // Check which enemies should be spawned
     potentialSpawns.forEach(spawnPoint => {
       const distance = this.calculateDistance(playerPosition, spawnPoint.position);
+      console.log(`EnemyManager: Checking spawn point ${spawnPoint.id} at ${spawnPoint.position.x},${spawnPoint.position.y}, distance: ${distance.toFixed(2)}, spawnDistance: ${this.spawnDistance}, alreadySpawned: ${this.enemies.has(spawnPoint.id)}`);
       
       // Spawn if within spawn distance and not already spawned
       if (distance <= this.spawnDistance && !this.enemies.has(spawnPoint.id)) {
@@ -81,6 +82,7 @@ export class EnemyManager {
           enemyId: enemy.id,
           data: { enemy }
         });
+        console.log(`EnemyManager: Spawned enemy ${enemy.id} at ${enemy.position.x},${enemy.position.y}`);
       }
     });
     
