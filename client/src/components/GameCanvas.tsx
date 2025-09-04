@@ -60,6 +60,11 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
       // Check for zone changes and update store position
       checkAndUpdateZone();
     }
+    
+    // Dispatch live position update for minimap (every frame, but minimap will throttle)
+    window.dispatchEvent(new CustomEvent('playerPositionUpdate', {
+      detail: { position: { ...localPlayerPosition.current } }
+    }));
 
     // Clear canvas
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);

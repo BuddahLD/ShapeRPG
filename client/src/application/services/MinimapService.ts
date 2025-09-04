@@ -26,7 +26,8 @@ export class MinimapService implements IMapService {
    */
   async getMapData(
     playerPosition: { x: number; y: number },
-    config: Partial<MapConfig> = {}
+    config: Partial<MapConfig> = {},
+    enemies: Enemy[] = []
   ): Promise<MapData> {
     const finalConfig = { ...this.defaultConfig, ...config };
     
@@ -47,8 +48,10 @@ export class MinimapService implements IMapService {
     
     console.log('MinimapService: Visible areas:', visibleAreas.map(a => a.id));
     
-    // Get nearby enemies (placeholder for now)
-    const nearbyEnemies: Enemy[] = [];
+    // Filter enemies that are within view bounds
+    const nearbyEnemies = enemies.filter(enemy => 
+      this.isPositionInBounds(enemy.position, viewBounds)
+    );
     
     // Create zone color map
     const zoneColors = this.createZoneColorMap(visibleAreas);

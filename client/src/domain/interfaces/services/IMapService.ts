@@ -40,7 +40,8 @@ export interface IMapService {
    */
   getMapData(
     playerPosition: { x: number; y: number },
-    config: Partial<MapConfig>
+    config: Partial<MapConfig>,
+    enemies?: Enemy[]
   ): Promise<MapData>;
 
   /**

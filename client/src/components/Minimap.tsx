@@ -12,6 +12,7 @@ const Minimap: React.FC = () => {
 
   const [minimapData, setMinimapData] = useState<MapData | null>(null);
   const [minimapEntities, setMinimapEntities] = useState<MapEntity[]>([]);
+  const [livePosition, setLivePosition] = useState<{ x: number; y: number } | null>(null);
 
   // Minimap dimensions - square matching HP/MP container height
   const mapSize = 52;
@@ -23,21 +24,38 @@ const Minimap: React.FC = () => {
     return bootstrap.getMinimapService();
   }, []);
 
-  // Update minimap data when player position changes (throttled)
+  // Listen to live position updates from GameCanvas with throttling
   useEffect(() => {
-    if (!position) return;
+    let lastUpdateTime = 0;
+    const updateInterval = 16; // ~60fps (16ms)
+    
+    const handlePositionUpdate = (event: CustomEvent) => {
+      const now = Date.now();
+      if (now - lastUpdateTime >= updateInterval) {
+        setLivePosition(event.detail.position);
+        lastUpdateTime = now;
+      }
+    };
 
-    console.log('Minimap: Position changed to:', position);
+    window.addEventListener('playerPositionUpdate', handlePositionUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('playerPositionUpdate', handlePositionUpdate as EventListener);
+    };
+  }, []);
+
+  // Update minimap data when position changes (immediate for live updates)
+  useEffect(() => {
+    const currentPosition = livePosition || position;
+    if (!currentPosition) return;
 
     const updateMinimap = async () => {
       try {
-        console.log('Minimap: Updating with position:', position);
-        const data = await minimapService.getMapData(position, {
+        const data = await minimapService.getMapData(currentPosition, {
           viewRadius,
           mapSize
-        });
+        }, enemies);
         
-        console.log('Minimap: Got data:', data);
         setMinimapData(data);
         
         // Get entities for minimap
@@ -48,13 +66,18 @@ const Minimap: React.FC = () => {
       }
     };
 
-    // Throttle updates to reduce performance impact
-    const timeoutId = setTimeout(updateMinimap, 100); // Update every 100ms max
-    
-    return () => clearTimeout(timeoutId);
-  }, [position, enemies, minimapService]);
+    // For live position updates, update immediately
+    if (livePosition) {
+      updateMinimap();
+    } else {
+      // For store position updates, throttle
+      const timeoutId = setTimeout(updateMinimap, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [livePosition, position, enemies, minimapService]);
 
-  if (!position || !minimapData) return null;
+  const currentPosition = livePosition || position;
+  if (!currentPosition || !minimapData) return null;
 
   // Convert world coordinates to minimap coordinates
   const worldToMinimap = (worldPos: { x: number; y: number }) => {
@@ -179,20 +202,27 @@ const Minimap: React.FC = () => {
 
   return (
     <div className="pointer-events-auto">
-      {/* Minimap Container */}
-      <div className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl">
-        {/* Minimap Display */}
+      {/* Minimap Container - 58x58 with 2px padding */}
+      <div 
+        className="backdrop-blur-md bg-white/20 border border-white/30 shadow-lg rounded-xl"
+        style={{ 
+          width: 58, 
+          height: 58,
+          padding: '2px'
+        }}
+      >
+        {/* Minimap Display - 52x52 inside container */}
         <div 
           className="relative border border-white/20 overflow-hidden"
           style={{ 
             width: mapSize, 
             height: mapSize, 
             backgroundColor: 'transparent',
-            borderRadius: '10px'
+            borderRadius: '8px'
           }}
         >
           {/* Zone backgrounds */}
-          <div className="absolute inset-0" style={{ borderRadius: '10px' }}>
+          <div className="absolute inset-0" style={{ borderRadius: '8px' }}>
             {renderZoneBackgrounds()}
           </div>
           

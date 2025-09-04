@@ -17,7 +17,7 @@ export interface VisualTheme {
   readonly background: string;
 }
 
-export type LocationId = 'LOC_HUB_FIGUREIUM' | 'LOC_PEACEFUL_FIELDS' | 'LOC_ARENA_1';
+export type LocationId = 'LOC_HUB_FIGUREIUM' | 'LOC_PEACEFUL_FIELDS' | 'LOC_ARENA_1' | 'LOC_SHARDS' | 'LOC_NOWHERE';
 export type GamePhase = 'hub' | 'combat' | 'exploration';
 
 export class WorldArea {
