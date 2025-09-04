@@ -8,6 +8,7 @@ export interface EnemyStats {
   readonly maxHp: number;
   readonly attack: number;
   readonly defense: number;
+  readonly magicResist: number;
   readonly size: number;
 }
 
@@ -16,11 +17,14 @@ export interface EnemyPosition {
   readonly y: number;
 }
 
-export type EnemyType = 'HEX_PEACEFUL' | 'TRI_ARENA' | 'TRI_SMALL' | 'TRI_MEDIUM' | 'TRI_ELITE';
+export type EnemyType = 'DUMMY' | 'HEX_PEACEFUL' | 'TRI_SMALL' | 'TRI_AGGRESSIVE' | 'TRI_MEDIUM' | 'TRI_ELITE';
+
+export type EnemyBehavior = 'PEACEFUL' | 'NEUTRAL' | 'AGGRESSIVE';
 
 export class Enemy {
   private readonly _id: string;
   private readonly _type: EnemyType;
+  private readonly _behavior: EnemyBehavior;
   private _position: EnemyPosition;
   private _stats: EnemyStats;
   private _isAttacking: boolean;
@@ -32,6 +36,7 @@ export class Enemy {
   constructor(
     id: string,
     type: EnemyType,
+    behavior: EnemyBehavior,
     position: EnemyPosition,
     stats: EnemyStats,
     attackCooldown: number = 2000,
@@ -39,6 +44,7 @@ export class Enemy {
   ) {
     this._id = id;
     this._type = type;
+    this._behavior = behavior;
     this._position = position;
     this._stats = stats;
     this._isAttacking = false;
@@ -51,6 +57,7 @@ export class Enemy {
   // Getters
   get id(): string { return this._id; }
   get type(): EnemyType { return this._type; }
+  get behavior(): EnemyBehavior { return this._behavior; }
   get position(): EnemyPosition { return this._position; }
   get stats(): EnemyStats { return this._stats; }
   get isAttacking(): boolean { return this._isAttacking; }
@@ -65,8 +72,9 @@ export class Enemy {
     return newEnemy;
   }
 
-  takeDamage(damage: number): Enemy {
-    const actualDamage = Math.max(1, damage - this._stats.defense);
+  takeDamage(damage: number, isMagical: boolean = false): Enemy {
+    const resistance = isMagical ? this._stats.magicResist : this._stats.defense;
+    const actualDamage = Math.max(1, damage - resistance);
     const newHp = Math.max(0, this._stats.hp - actualDamage);
     
     const newEnemy = this.clone();
@@ -132,9 +140,10 @@ export class Enemy {
   getExperienceValue(): number {
     const baseExp = this._stats.maxHp / 10;
     const typeMultipliers: Record<EnemyType, number> = {
+      'DUMMY': 0.0,
       'HEX_PEACEFUL': 1.0,
-      'TRI_ARENA': 1.2,
       'TRI_SMALL': 1.0,
+      'TRI_AGGRESSIVE': 1.2,
       'TRI_MEDIUM': 1.5,
       'TRI_ELITE': 2.0
     };
@@ -144,15 +153,37 @@ export class Enemy {
 
   getGoldValue(): number {
     const goldRanges: Record<EnemyType, [number, number]> = {
+      'DUMMY': [0, 0],
       'HEX_PEACEFUL': [2, 5],
-      'TRI_ARENA': [5, 10],
-      'TRI_SMALL': [5, 10],
-      'TRI_MEDIUM': [10, 20],
-      'TRI_ELITE': [20, 40]
+      'TRI_SMALL': [8, 12],
+      'TRI_AGGRESSIVE': [12, 18],
+      'TRI_MEDIUM': [18, 25],
+      'TRI_ELITE': [35, 50]
     };
     
     const range = goldRanges[this._type] || [1, 5];
     return Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0];
+  }
+
+  // Behavior checks
+  isPeaceful(): boolean {
+    return this._behavior === 'PEACEFUL';
+  }
+
+  isNeutral(): boolean {
+    return this._behavior === 'NEUTRAL';
+  }
+
+  isAggressive(): boolean {
+    return this._behavior === 'AGGRESSIVE';
+  }
+
+  willAttackPlayer(): boolean {
+    return this._behavior === 'AGGRESSIVE';
+  }
+
+  willRetaliate(): boolean {
+    return this._behavior === 'NEUTRAL' || this._behavior === 'AGGRESSIVE';
   }
 
   private clone(): Enemy {

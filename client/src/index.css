@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Enemy shape styles */
+.triangle {
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+.hexagon {
+  clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);
+}
+
+.circle {
+  border-radius: 50%;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

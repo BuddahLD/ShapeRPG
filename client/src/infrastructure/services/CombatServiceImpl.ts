@@ -1,26 +1,41 @@
 /**
  * Infrastructure: Combat Service Implementation
- * Concrete implementation of ICombatService
+ * Concrete implementation of ICombatService using Joe's balance formulas
  */
 
 import { Player } from '../../domain/entities/Player';
 import { Enemy } from '../../domain/entities/Enemy';
 import { Spell } from '../../domain/valueObjects/Spell';
 import { ICombatService, CombatResult, SpellCastResult } from '../../domain/interfaces/services/ICombatService';
+import { CombatService as CombatCalculator } from '../../application/services/CombatService';
 
 export class CombatServiceImpl implements ICombatService {
+  private combatCalculator = new CombatCalculator();
+
   playerAttackEnemy(player: Player, enemy: Enemy): CombatResult {
     if (!player.isAlive() || !enemy.isAlive()) {
       throw new Error('Combat participants must be alive');
     }
 
-    const damage = Math.max(1, player.stats.attack - enemy.stats.defense);
-    const damagedEnemy = enemy.takeDamage(damage);
+    // Convert Player stats to CombatService format
+    const playerStats = {
+      hp: player.stats.hp,
+      maxHp: player.stats.maxHp,
+      atk: player.stats.attack,
+      magicPower: player.stats.attack, // TODO: Add magicPower to Player stats
+      def: player.stats.defense,
+      magicResist: player.stats.defense, // TODO: Add magicResist to Player stats
+      critChance: 0.05, // TODO: Add critChance to Player stats
+      critMultiplier: 1.5 // TODO: Add critMultiplier to Player stats
+    };
+
+    const combatResult = this.combatCalculator.calculatePlayerPhysicalDamage(playerStats, enemy);
+    const damagedEnemy = enemy.takeDamage(combatResult.damage, false);
 
     return {
       attacker: player,
       target: damagedEnemy,
-      damage,
+      damage: combatResult.actualDamage,
       wasCounterattack: false
     };
   }
@@ -30,13 +45,25 @@ export class CombatServiceImpl implements ICombatService {
       throw new Error('Combat participants must be alive');
     }
 
-    const damage = Math.max(1, enemy.stats.attack - player.stats.defense);
-    const damagedPlayer = player.takeDamage(damage);
+    // Convert Player stats to CombatService format
+    const playerStats = {
+      hp: player.stats.hp,
+      maxHp: player.stats.maxHp,
+      atk: player.stats.attack,
+      magicPower: player.stats.attack, // TODO: Add magicPower to Player stats
+      def: player.stats.defense,
+      magicResist: player.stats.defense, // TODO: Add magicResist to Player stats
+      critChance: 0.05, // TODO: Add critChance to Player stats
+      critMultiplier: 1.5 // TODO: Add critMultiplier to Player stats
+    };
+
+    const combatResult = this.combatCalculator.calculateEnemyDamage(enemy, playerStats);
+    const damagedPlayer = player.takeDamage(combatResult.damage);
 
     return {
       attacker: enemy,
       target: damagedPlayer,
-      damage,
+      damage: combatResult.actualDamage,
       wasCounterattack: false
     };
   }
@@ -50,16 +77,35 @@ export class CombatServiceImpl implements ICombatService {
       throw new Error('Combat participants must be alive');
     }
 
-    // Counterattack deals 1.5x damage
-    const damage = Math.floor(player.stats.attack * 1.5);
-    const actualDamage = Math.max(1, damage - enemy.stats.defense);
-    
-    const damagedEnemy = enemy.takeDamage(actualDamage).endAttack();
+    // Convert Player stats to CombatService format
+    const playerStats = {
+      hp: player.stats.hp,
+      maxHp: player.stats.maxHp,
+      atk: player.stats.attack,
+      magicPower: player.stats.attack, // TODO: Add magicPower to Player stats
+      def: player.stats.defense,
+      magicResist: player.stats.defense, // TODO: Add magicResist to Player stats
+      critChance: 0.05, // TODO: Add critChance to Player stats
+      critMultiplier: 1.5 // TODO: Add critMultiplier to Player stats
+    };
+
+    const counterattackResult = this.combatCalculator.calculateCounterattack(
+      playerStats, 
+      enemy, 
+      enemy.counterWindow, 
+      enemy.attackCooldown
+    );
+
+    if (!counterattackResult.success) {
+      return null;
+    }
+
+    const damagedEnemy = enemy.takeDamage(counterattackResult.damage, false).endAttack();
 
     return {
       attacker: player,
       target: damagedEnemy,
-      damage: actualDamage,
+      damage: counterattackResult.damage,
       wasCounterattack: true
     };
   }

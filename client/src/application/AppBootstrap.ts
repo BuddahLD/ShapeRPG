@@ -12,6 +12,7 @@ import { CombatUseCase } from './useCases/CombatUseCase';
 import { GameStateService } from './services/GameStateService';
 import { AnimationService } from './services/AnimationService';
 import { MinimapService } from './services/MinimapService';
+import { EnemyManager } from './services/EnemyManager';
 
 export interface AppConfig {
   readonly environment: 'development' | 'production';
@@ -24,6 +25,7 @@ export class AppBootstrap {
   private gameStateService!: GameStateService;
   private animationService!: AnimationService;
   private minimapService!: MinimapService;
+  private enemyManager!: EnemyManager;
   // ZustandStateAdapter removed - using GameStateManager directly
   
   private constructor(private config: AppConfig) {
@@ -47,6 +49,10 @@ export class AppBootstrap {
 
   getMinimapService(): MinimapService {
     return this.minimapService;
+  }
+
+  getEnemyManager(): EnemyManager {
+    return this.enemyManager;
   }
 
   // ZustandStateAdapter removed - using GameStateManager directly
@@ -87,6 +93,8 @@ export class AppBootstrap {
     this.animationService = new AnimationService();
 
     this.minimapService = new MinimapService(repositories.worldRepository);
+
+    this.enemyManager = new EnemyManager();
 
     // ZustandStateAdapter removed - using GameStateManager directly
   }

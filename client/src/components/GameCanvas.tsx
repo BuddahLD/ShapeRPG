@@ -4,6 +4,7 @@ import { usePlayer } from "../presentation/hooks/usePlayerManager";
 // GameEngine removed - using clean architecture instead
 import { DesignSystem } from "../lib/services/DesignSystem";
 import { VisualEffects } from "../lib/services/VisualEffects";
+import { EnemyRenderer } from "./EnemyRenderer";
 // WorldAreaManager removed - using clean architecture game state instead
 
 interface GameCanvasProps {
@@ -442,11 +443,17 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
   }, [gameLoop]); // Removed player dependency to prevent position reset
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute top-0 left-0 w-full h-full touch-none"
-      style={{ touchAction: 'none' }}
-    />
+    <div className="relative w-full h-full">
+      <canvas
+        ref={canvasRef}
+        className="absolute top-0 left-0 w-full h-full touch-none"
+        style={{ touchAction: 'none' }}
+      />
+      <EnemyRenderer 
+        currentZone={currentLocation || 'LOC_HUB_FIGUREIUM'} 
+        playerPosition={{ x: localPlayerPosition.current.x, y: localPlayerPosition.current.y }} 
+      />
+    </div>
   );
 };
 

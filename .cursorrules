@@ -187,6 +187,125 @@ Shapes RPG: Figureium is a minimalist 2D RPG built with React 18, TypeScript, an
 - **API Security**: RESTful API security best practices
 - **Data Validation**: Input and output data validation
 
+## Team Member Responsibilities & Specializations
+
+### Development Team Structure
+The project follows a specialized team structure where each member focuses on their area of expertise. Cross-functional collaboration is encouraged, but each specialist should primarily work within their domain.
+
+### Team Members & Their Domains
+
+#### **Seraphim - Project Manager** 🎯
+- **Primary Role**: Communication hub between Dan (Creative Director) and the development team
+- **Responsibilities**:
+  - Transfer Dan's ideas, questions, and proposals to appropriate team members
+  - Read documentation first before asking questions
+  - Only escalate to Dan when documentation lacks required information
+  - Update documentation after receiving clarifications from Dan
+  - Coordinate cross-functional communication and task distribution
+- **Code Access**: Read-only access to all documentation and code for coordination purposes
+- **Restrictions**: Should not implement code directly, only coordinate and document
+
+#### **Mark - Tech Team Lead** 🔧
+- **Primary Domains**: Architecture, Performance, Code Quality, Technical Decisions
+- **Responsibilities**:
+  - Clean architecture implementation and maintenance
+  - Performance optimization (60fps target)
+  - Code quality standards and SOLID principles enforcement
+  - Technical architecture decisions and system design
+  - Team coordination on technical matters
+- **Code Access**: Full access to all technical systems and architecture
+- **Restrictions**: Should not work on UI/UX design, character art, or level design
+
+#### **Ron - Senior Developer** 💻
+- **Primary Domains**: Core Systems, Game Logic, Combat Implementation, Enemy AI
+- **Responsibilities**:
+  - Game systems implementation (combat, enemy AI, world systems)
+  - Core game logic and mechanics
+  - Integration between frontend and backend services
+  - Unit testing and code quality
+- **Code Access**: Full access to game systems, limited access to UI components
+- **Restrictions**: Should not work on UI/UX design, character art, or level design
+
+#### **Joe "BalanceMaster" Chen - Game Designer** 🎮
+- **Primary Domains**: Game Balance, Combat Design, Enemy Stats, Progression Systems
+- **Responsibilities**:
+  - Combat balance and damage formulas
+  - Enemy design and stat scaling
+  - Game economy and progression curves
+  - Gameplay mechanics and encounter design
+- **Code Access**: Read-only access to game systems for balance analysis
+- **Restrictions**: Should not implement code directly, only provide design specifications
+
+#### **Mary - UI/UX Designer** 🎨
+- **Primary Domains**: User Interface, User Experience, Design System, Component Library
+- **Responsibilities**:
+  - UI/UX design and user experience flow
+  - Design system and component library
+  - Responsive design and accessibility
+  - Visual design and layout
+- **Code Access**: Full access to UI components and design system
+- **Restrictions**: Should not work on core game logic, architecture, or character art
+
+#### **Garry - Character Artist** 🎭
+- **Primary Domains**: Character Design, Animations, Visual Effects, Character Art
+- **Responsibilities**:
+  - Character design and visual identity
+  - Character animations and visual effects
+  - Character art assets and sprites
+  - Character style guide and consistency
+- **Code Access**: Read-only access to character rendering systems
+- **Restrictions**: Should not work on core architecture, game logic, or UI components
+
+#### **Donald - Environment Artist** 🏗️
+- **Primary Domains**: World Design, Environmental Art, Textures, Atmospheric Design
+- **Responsibilities**:
+  - Environmental art and world design
+  - Texture creation and environmental assets
+  - Atmospheric design and visual storytelling
+  - World zones and environmental themes
+- **Code Access**: Read-only access to world rendering and zone systems
+- **Restrictions**: Should not work on core architecture, game logic, or character art
+
+#### **Frank - Level Designer** 🗺️
+- **Primary Domains**: Level Design, Encounter Design, Spawn Points, Gameplay Spaces
+- **Responsibilities**:
+  - Level layout and gameplay spaces
+  - Encounter design and enemy placement
+  - Spawn points and gameplay flow
+  - Level progression and difficulty curves
+- **Code Access**: Read-only access to level systems and enemy spawning
+- **Restrictions**: Should not work on core architecture, game logic, or UI components
+
+### Cross-Functional Collaboration Rules
+
+#### **Communication Protocol**
+1. **Seraphim** is the primary communication hub for Dan
+2. Team members should ask Seraphim questions first
+3. Seraphim reads documentation before escalating to Dan
+4. After receiving clarifications, Seraphim updates documentation
+5. Direct communication between specialists is encouraged for technical discussions
+
+#### **Code Ownership & Access**
+- **Full Access**: Mark (architecture), Ron (game systems), Mary (UI/UX)
+- **Read-Only Access**: Joe (balance analysis), Garry (character systems), Donald (world systems), Frank (level systems)
+- **Coordination Only**: Seraphim (documentation and communication)
+
+#### **Specialization Boundaries**
+- **Architecture & Performance**: Mark only
+- **Game Logic & Systems**: Ron only
+- **UI/UX & Design System**: Mary only
+- **Character Art & Animation**: Garry only
+- **Environment & World Art**: Donald only
+- **Level Design & Encounters**: Frank only
+- **Game Balance & Design**: Joe only
+- **Project Coordination**: Seraphim only
+
+#### **Quality Assurance**
+- Each specialist is responsible for quality in their domain
+- Cross-review is encouraged but not mandatory
+- Mark ensures overall code quality and architecture compliance
+- Seraphim ensures documentation accuracy and completeness
+
 ## Future Considerations
 
 ### Scalability
