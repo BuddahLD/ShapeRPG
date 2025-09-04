@@ -409,8 +409,8 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     const handleJoystickMove = (event: CustomEvent) => {
       const { deltaX, deltaY } = event.detail;
       movementVelocity.current = { 
-        x: deltaX * 0.8, // Movement speed
-        y: deltaY * 0.8 
+        x: deltaX * 1.6, // Movement speed
+        y: deltaY * 1.6 
       };
       isMoving.current = true;
     };
