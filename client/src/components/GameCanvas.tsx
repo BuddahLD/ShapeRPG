@@ -40,8 +40,9 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     
     if (zoneChanged) {
       console.log('Zone changed, new position:', playerPos);
+      console.log('Current player position from game state:', player?.position);
     }
-  }, [detectZoneChange]);
+  }, [detectZoneChange, player?.position]);
 
   const gameLoop = useCallback(() => {
     if (!canvasRef.current) {
@@ -407,11 +408,6 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     if (player?.position && localPlayerPosition.current.x === 0 && localPlayerPosition.current.y === 0) {
       localPlayerPosition.current = { ...player.position };
     }
-    
-    // Sync local position with actual player position from game state
-    if (player?.position) {
-      localPlayerPosition.current = { ...player.position };
-    }
 
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
@@ -456,8 +452,14 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
       />
       <EnemyRenderer 
         currentZone={currentLocation || 'LOC_HUB_FIGUREIUM'} 
-        playerPosition={{ x: localPlayerPosition.current.x, y: localPlayerPosition.current.y }} 
+        playerPosition={localPlayerPosition.current} 
       />
+      {/* Debug info */}
+      <div className="absolute top-4 left-4 text-white text-xs bg-black bg-opacity-50 p-2 rounded">
+        <div>Player: {player?.position ? `${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}` : 'null'}</div>
+        <div>Zone: {currentLocation}</div>
+        <div>Local: {localPlayerPosition.current.x.toFixed(1)}, {localPlayerPosition.current.y.toFixed(1)}</div>
+      </div>
     </div>
   );
 };

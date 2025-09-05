@@ -22,45 +22,23 @@ export const EnemyRenderer: React.FC<EnemyRendererProps> = ({
   const lastSpawnCheck = useRef({ x: 0, y: 0, zone: '' });
   const spawnCheckDistance = 50; // Only check spawns when player moves 50 units
 
-  // Initial spawn check
+  // Initial spawn check and zone change detection
   useEffect(() => {
-    console.log('EnemyRenderer: Initial spawn check for zone:', currentZone, 'player pos:', playerPosition);
-    const spawnEvents = enemyManager.updateEnemySpawning(playerPosition, currentZone);
-    const allEnemies = enemyManager.getAllEnemies();
-    console.log('EnemyRenderer: All enemies after spawn check:', allEnemies.length, allEnemies.map(e => ({ id: e.id, type: e.type, position: e.position })));
-    setEnemies(allEnemies);
-    lastSpawnCheck.current = { x: playerPosition.x, y: playerPosition.y, zone: currentZone };
-  }, []); // Only run once on mount
-
-  useEffect(() => {
-    // Calculate distance from last spawn check
-    const distance = Math.sqrt(
-      Math.pow(playerPosition.x - lastSpawnCheck.current.x, 2) + 
-      Math.pow(playerPosition.y - lastSpawnCheck.current.y, 2)
-    );
+    console.log('EnemyRenderer: Spawn check for zone:', currentZone, 'player pos:', playerPosition);
+    console.log('EnemyRenderer: Player position type:', typeof playerPosition, 'keys:', Object.keys(playerPosition));
     
-    // Only update spawns if zone changed or player moved significantly
-    const zoneChanged = currentZone !== lastSpawnCheck.current.zone;
-    const movedSignificantly = distance >= spawnCheckDistance;
-    
-    if (zoneChanged || movedSignificantly) {
-      console.log('EnemyRenderer: Updating spawns for zone:', currentZone, 'player pos:', playerPosition);
+    // Only proceed if player position is valid
+    if (playerPosition && typeof playerPosition.x === 'number' && typeof playerPosition.y === 'number') {
       const spawnEvents = enemyManager.updateEnemySpawning(playerPosition, currentZone);
-      setEnemies(enemyManager.getAllEnemies());
-      
-      // Handle spawn events
-      spawnEvents.forEach(event => {
-        if (event.type === 'SPAWN') {
-          console.log(`Enemy ${event.enemyId} spawned at position:`, event.data.enemy.position);
-        }
-      });
-      
-      console.log('Current enemies:', enemyManager.getAllEnemies().length);
-      
-      // Update last check position
+      const allEnemies = enemyManager.getAllEnemies();
+      console.log('EnemyRenderer: All enemies after spawn check:', allEnemies.length, allEnemies.map(e => ({ id: e.id, type: e.type, position: e.position })));
+      setEnemies(allEnemies);
       lastSpawnCheck.current = { x: playerPosition.x, y: playerPosition.y, zone: currentZone };
+    } else {
+      console.warn('EnemyRenderer: Invalid player position:', playerPosition);
     }
-  }, [currentZone, playerPosition, enemyManager]);
+  }, [currentZone, playerPosition.x, playerPosition.y]); // Run when zone or position changes
+
 
   useEffect(() => {
     // Update enemies every frame
@@ -86,9 +64,11 @@ export const EnemyRenderer: React.FC<EnemyRendererProps> = ({
     const { size } = enemy.stats;
     
     // Convert world coordinates to screen coordinates
-    // Assuming player is at center of screen
-    const screenX = x - playerPosition.x + window.innerWidth / 2;
-    const screenY = y - playerPosition.y + window.innerHeight / 2;
+    // Use the same coordinate system as GameCanvas NPCs (player at center)
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const screenX = centerX + (x - playerPosition.x);
+    const screenY = centerY + (y - playerPosition.y);
     
     // Only render if enemy is visible on screen (with some margin)
     const margin = 100;

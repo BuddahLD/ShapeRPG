@@ -177,8 +177,8 @@ export class GameStateManager {
           // Calculate new position based on current position + movement delta
           const currentPos = gameState.player.position;
           const newPosition = {
-            x: currentPos.x + (deltaX * 12) / 15, // Sensitivity 12, but movement speed 15x slower (compensated for 5fps vs 10fps)
-            y: currentPos.y + (deltaY * 12) / 15
+            x: currentPos.x + deltaX * 0.8, // Simple movement multiplier
+            y: currentPos.y + deltaY * 0.8
           };
 
           // Use the Player entity's moveTo method to create a new player instance
