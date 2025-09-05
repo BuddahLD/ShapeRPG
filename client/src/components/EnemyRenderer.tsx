@@ -24,26 +24,41 @@ export const EnemyRenderer: React.FC<EnemyRendererProps> = ({
 
   // Initial spawn check and zone change detection
   useEffect(() => {
-    console.log('EnemyRenderer: Spawn check for zone:', currentZone, 'player pos:', playerPosition);
+    console.log('EnemyRenderer: Spawn check triggered for zone:', currentZone, 'player pos:', playerPosition);
     console.log('EnemyRenderer: Player position type:', typeof playerPosition, 'keys:', Object.keys(playerPosition));
     
     // Only proceed if player position is valid
     if (playerPosition && typeof playerPosition.x === 'number' && typeof playerPosition.y === 'number') {
+      console.log('EnemyRenderer: Calling updateEnemySpawning with position:', playerPosition, 'zone:', currentZone);
       const spawnEvents = enemyManager.updateEnemySpawning(playerPosition, currentZone);
       const allEnemies = enemyManager.getAllEnemies();
+      console.log('EnemyRenderer: Spawn events:', spawnEvents.length, spawnEvents.map(e => e.type));
       console.log('EnemyRenderer: All enemies after spawn check:', allEnemies.length, allEnemies.map(e => ({ id: e.id, type: e.type, position: e.position })));
       setEnemies(allEnemies);
       lastSpawnCheck.current = { x: playerPosition.x, y: playerPosition.y, zone: currentZone };
     } else {
       console.warn('EnemyRenderer: Invalid player position:', playerPosition);
     }
-  }, [currentZone, playerPosition.x, playerPosition.y]); // Run when zone or position changes
+  }, [currentZone, playerPosition.x, playerPosition.y, enemyManager]); // Run when zone or position changes
 
 
   useEffect(() => {
-    // Update enemies every frame
+    // Update enemies every frame and check for new spawns
     const updateInterval = setInterval(() => {
+      // Update existing enemies
       const updateResult = enemyManager.updateEnemies(16, Date.now()); // 60fps
+      
+      // Check for new spawns every 100ms (10 times per second)
+      const now = Date.now();
+      if (!lastSpawnCheck.current.lastSpawnTime || now - lastSpawnCheck.current.lastSpawnTime > 100) {
+        console.log('EnemyRenderer: Periodic spawn check at', now);
+        const spawnEvents = enemyManager.updateEnemySpawning(playerPosition, currentZone);
+        if (spawnEvents.length > 0) {
+          console.log('EnemyRenderer: Periodic spawn events:', spawnEvents.length);
+        }
+        lastSpawnCheck.current.lastSpawnTime = now;
+      }
+      
       setEnemies(updateResult.enemies);
 
       // Handle enemy events
@@ -55,7 +70,7 @@ export const EnemyRenderer: React.FC<EnemyRendererProps> = ({
     }, 16);
 
     return () => clearInterval(updateInterval);
-  }, [enemyManager]);
+  }, [enemyManager, playerPosition, currentZone]);
 
   const renderEnemy = (enemy: Enemy) => {
     if (!enemy.isAlive()) return null;
@@ -70,10 +85,17 @@ export const EnemyRenderer: React.FC<EnemyRendererProps> = ({
     const screenX = centerX + (x - playerPosition.x);
     const screenY = centerY + (y - playerPosition.y);
     
-    // Only render if enemy is visible on screen (with some margin)
-    const margin = 100;
-    if (screenX < -margin || screenX > window.innerWidth + margin || 
-        screenY < -margin || screenY > window.innerHeight + margin) {
+    // RENDER DISTANCE OPTIONS:
+    // Option 1: Extended render distance (current) - prevents "fog of war" effect
+    // Option 2: Zone-based rendering - render all enemies in current zone
+    // Option 3: Dynamic render distance - based on spawn distance
+    
+    // Current: Extended render distance (screen + 50% on each side)
+    const renderMarginX = window.innerWidth * 0.5; // 50% of screen width on each side
+    const renderMarginY = window.innerHeight * 0.5; // 50% of screen height on each side
+    
+    if (screenX < -renderMarginX || screenX > window.innerWidth + renderMarginX || 
+        screenY < -renderMarginY || screenY > window.innerHeight + renderMarginY) {
       return null;
     }
     

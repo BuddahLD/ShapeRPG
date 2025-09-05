@@ -29,8 +29,8 @@ export class EnemyManager {
   private spawnConfigs: Map<string, EnemySpawnConfig> = new Map();
   private respawnTimers: Map<string, number> = new Map();
   private lastUpdateTime: number = 0;
-  private spawnDistance: number = 250; // Distance from player to spawn enemies
-  private despawnDistance: number = 350; // Distance from player to despawn enemies
+  private spawnDistance: number = 400; // Distance from player to spawn enemies (increased for better visibility)
+  private despawnDistance: number = 500; // Distance from player to despawn enemies
 
   constructor() {
     this.initializeSpawnConfigs();
@@ -56,16 +56,18 @@ export class EnemyManager {
   updateEnemySpawning(playerPosition: { x: number; y: number }, currentZone: string): EnemyEvent[] {
     const events: EnemyEvent[] = [];
     
-    // Clear enemies from other zones first
-    this.clearEnemiesFromOtherZones(currentZone);
+    // Clear enemies from other zones first (only if beyond despawn distance)
+    this.clearEnemiesFromOtherZones(currentZone, playerPosition);
     
-    // Get potential spawn points for current zone
-    const potentialSpawns = this.getPotentialSpawnPoints(currentZone);
+    // Get potential spawn points for ALL zones (not just current zone)
+    const allZones = ['LOC_HUB_FIGUREIUM', 'LOC_PEACEFUL_FIELDS', 'LOC_SHARDS'];
+    const allSpawnPoints = allZones.flatMap(zone => this.getPotentialSpawnPoints(zone));
     
-    // Check which enemies should be spawned
-    potentialSpawns.forEach(spawnPoint => {
+    // Check which enemies should be spawned from any zone
+    allSpawnPoints.forEach(spawnPoint => {
       const distance = this.calculateDistance(playerPosition, spawnPoint.position);
-      console.log(`EnemyManager: Checking spawn point ${spawnPoint.id} at ${spawnPoint.position.x},${spawnPoint.position.y}, distance: ${distance.toFixed(2)}, spawnDistance: ${this.spawnDistance}, alreadySpawned: ${this.enemies.has(spawnPoint.id)}`);
+      const spawnPointZone = this.getEnemyZone(spawnPoint.id);
+      console.log(`EnemyManager: Checking spawn point ${spawnPoint.id} from zone ${spawnPointZone} at ${spawnPoint.position.x},${spawnPoint.position.y}, distance: ${distance.toFixed(2)}, spawnDistance: ${this.spawnDistance}, alreadySpawned: ${this.enemies.has(spawnPoint.id)}`);
       
       // Spawn if within spawn distance and not already spawned
       if (distance <= this.spawnDistance && !this.enemies.has(spawnPoint.id)) {
@@ -82,7 +84,7 @@ export class EnemyManager {
           enemyId: enemy.id,
           data: { enemy }
         });
-        console.log(`EnemyManager: Spawned enemy ${enemy.id} at ${enemy.position.x},${enemy.position.y}`);
+        console.log(`EnemyManager: Spawned enemy ${enemy.id} from zone ${spawnPointZone} at ${enemy.position.x},${enemy.position.y}`);
       }
     });
     
@@ -107,16 +109,28 @@ export class EnemyManager {
   }
 
   /**
-   * Clear enemies from zones other than the current one
+   * Clear enemies from zones other than the current one, but only if they're beyond despawn distance
    */
-  private clearEnemiesFromOtherZones(currentZone: string): void {
+  private clearEnemiesFromOtherZones(currentZone: string, playerPosition?: { x: number; y: number }): void {
     const enemiesToRemove: string[] = [];
     
     this.enemies.forEach((enemy, enemyId) => {
       // Check if enemy belongs to a different zone
       const enemyZone = this.getEnemyZone(enemyId);
       if (enemyZone && enemyZone !== currentZone) {
-        enemiesToRemove.push(enemyId);
+        // Only remove if player position is provided and enemy is beyond despawn distance
+        if (playerPosition) {
+          const distance = this.calculateDistance(playerPosition, enemy.position);
+          if (distance > this.despawnDistance) {
+            enemiesToRemove.push(enemyId);
+            console.log(`EnemyManager: Removing enemy ${enemyId} from zone ${enemyZone} (distance: ${distance.toFixed(2)} > ${this.despawnDistance})`);
+          } else {
+            console.log(`EnemyManager: Keeping enemy ${enemyId} from zone ${enemyZone} (distance: ${distance.toFixed(2)} <= ${this.despawnDistance})`);
+          }
+        } else {
+          // If no player position, remove all enemies from other zones (fallback)
+          enemiesToRemove.push(enemyId);
+        }
       }
     });
     
