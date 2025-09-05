@@ -454,12 +454,6 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
         currentZone={currentLocation || 'LOC_HUB_FIGUREIUM'} 
         playerPosition={localPlayerPosition.current} 
       />
-      {/* Debug info */}
-      <div className="absolute top-4 left-4 text-white text-xs bg-black bg-opacity-50 p-2 rounded">
-        <div>Player: {player?.position ? `${player.position.x.toFixed(1)}, ${player.position.y.toFixed(1)}` : 'null'}</div>
-        <div>Zone: {currentLocation}</div>
-        <div>Local: {localPlayerPosition.current.x.toFixed(1)}, {localPlayerPosition.current.y.toFixed(1)}</div>
-      </div>
     </div>
   );
 };

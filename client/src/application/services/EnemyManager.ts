@@ -172,7 +172,7 @@ export class EnemyManager {
         spawnPoints.push({
           id: 'hub_dummy_1',
           type: 'DUMMY',
-          position: { x: -150, y: 150 }, // Bottom left corner
+          position: { x: -150, y: 120 }, // Bottom left corner, moved up 30px
           level: 1
         });
         break;
