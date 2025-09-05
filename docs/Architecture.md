@@ -15,6 +15,8 @@ Shapes RPG: Figureium is built as a full-stack web application with a custom 2D 
 - **60fps Game Loop**: Optimized rendering cycle
 - **Custom Shape Matching**: Rune recognition algorithms
 - **Time-scaled Updates**: Delta-time based animations
+- **Distance-Based Spawning**: Enemy spawn system with cross-zone persistence
+- **Performance Optimization**: Efficient distance calculations and memory management
 
 ### State Management
 - **Zustand**: Lightweight state management

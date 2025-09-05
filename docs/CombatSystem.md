@@ -102,17 +102,25 @@ interface IMovementBehavior {
 
 ## Enemy Spawning System
 
-### Zone-based Spawning
-- **Location**: Enemies spawn only in designated zones
-- **Persistence**: Enemies remain in world until defeated
-- **Respawn**: TODO - Implement respawn mechanics for cleared areas
-- **Density**: Configurable enemy density per zone
+### Distance-Based Spawning (Current Implementation)
+- **Spawn Distance**: 400 units from player
+- **Despawn Distance**: 500 units from player
+- **Cross-Zone Persistence**: Enemies persist across zone boundaries
+- **Performance**: Periodic spawn checks every 100ms
 
-### Initial Implementation: Shards Area
-- **Enemy Count**: 5 neutral melee enemies
-- **Enemy Type**: TRI_SMALL (easy difficulty)
-- **Spawn Pattern**: Scattered throughout shards area
-- **Behavior**: Neutral until attacked, then aggressive
+### Zone-Specific Spawn Points
+- **Hub**: 1 Dummy enemy for training
+- **Peaceful Fields**: 5 Hexagon Peaceful enemies
+- **Shards**: 4 Triangle Small + 1 Triangle Aggressive enemies
+- **Spawn Pattern**: Predefined positions per zone
+
+### Implementation Status
+- ✅ Distance-based spawning system
+- ✅ Cross-zone enemy persistence
+- ✅ Performance-optimized spawn checks
+- ✅ Event-driven enemy lifecycle
+- [ ] Respawn mechanics for cleared areas
+- [ ] Dynamic spawn density based on player level
 
 ## Enemy Stats and Equipment
 
@@ -194,12 +202,12 @@ The player attack system is already documented in GameDesign.md:
 ## Implementation Phases
 
 ### Phase 1: Basic Enemy System (MVP)
-- [ ] Create enemy entity system with stats (based on Joe's balance formulas)
-- [ ] Implement TRI_SMALL enemies (neutral, level 2-3) for shards area
-- [ ] Add static movement behavior (no equipment system yet)
-- [ ] Create enemy spawning system for shards area (5 enemies)
-- [ ] Implement basic combat damage calculation (ATK vs DEF, MagicPower vs MagicResist)
-- [ ] Add PC controls (WASD movement, mouse targeting)
+- [x] Create enemy entity system with stats (based on Joe's balance formulas)
+- [x] Implement TRI_SMALL enemies (neutral, level 2-3) for shards area
+- [x] Add static movement behavior (no equipment system yet)
+- [x] Create enemy spawning system for shards area (5 enemies)
+- [x] Implement basic combat damage calculation (ATK vs DEF, MagicPower vs MagicResist)
+- [x] Add PC controls (WASD movement, mouse targeting)
 
 ### Phase 2: Combat Mechanics
 - [ ] Implement counterattack system with timing windows (2s for TRI_SMALL)
