@@ -4,7 +4,7 @@ import { usePlayer } from "../presentation/hooks/usePlayerManager";
 // GameEngine removed - using clean architecture instead
 import { DesignSystem } from "../lib/services/DesignSystem";
 import { VisualEffects } from "../lib/services/VisualEffects";
-import { EnemyRenderer } from "./EnemyRenderer";
+import { MobRenderer } from "./MobRenderer";
 // WorldAreaManager removed - using clean architecture game state instead
 
 interface GameCanvasProps {
@@ -338,8 +338,8 @@ class GameEngine {
     const centerY = canvas.height / 2;
 
     this.gameState.enemies.forEach((enemy: any) => {
-      const screenX = centerX + (enemy.x - this.localPlayerPosition.x);
-      const screenY = centerY + (enemy.y - this.localPlayerPosition.y);
+      const screenX = centerX + (enemy.position.x - this.localPlayerPosition.x);
+      const screenY = centerY + (enemy.position.y - this.localPlayerPosition.y);
 
       // Only render if on screen
       if (screenX > -50 && screenX < canvas.width + 50 && 
@@ -636,7 +636,7 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
         className="absolute top-0 left-0 w-full h-full touch-none"
         style={{ touchAction: 'none' }}
       />
-      <EnemyRenderer 
+      <MobRenderer 
         currentZone={currentLocation || 'LOC_HUB_FIGUREIUM'} 
         playerPosition={getGameEngine().getPlayerPosition()} 
       />

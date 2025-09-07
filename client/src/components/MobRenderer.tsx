@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Enemy } from '../domain/entities/Enemy';
-import { EnemyManager } from '../application/services/EnemyManager';
+import { MobManager } from '../application/services/MobManager';
 import { AppBootstrapService } from '../application/AppBootstrapService';
 
 interface MobRendererProps {
@@ -18,7 +18,7 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
   playerPosition 
 }) => {
   const [mobs, setMobs] = useState<Enemy[]>([]);
-  const [mobManager] = useState(() => AppBootstrapService.getInstance().getEnemyManager());
+  const [mobManager] = useState(() => AppBootstrapService.getInstance().getMobManager());
   const lastSpawnCheck = useRef({ x: 0, y: 0, zone: '' });
   const spawnCheckDistance = 50; // Only check spawns when player moves 50 units
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -161,24 +161,24 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
     // Update mobs every 100ms (10fps) - much more reasonable
     const updateInterval = setInterval(() => {
       // Update existing mobs
-      const updateResult = mobManagerRef.current.updateEnemies(100, Date.now()); // 10fps
+        const updateResult = mobManagerRef.current.updateMobs(100, Date.now()); // 10fps
       
       // Check for new spawns every 1000ms (1 time per second) - much less frequent
       const now = Date.now();
       if (!lastSpawnCheck.current.lastSpawnTime || now - lastSpawnCheck.current.lastSpawnTime > 1000) {
-        const spawnEvents = mobManagerRef.current.updateEnemySpawning(playerPositionRef.current, currentZoneRef.current);
+        const spawnEvents = mobManagerRef.current.updateMobSpawning(playerPositionRef.current, currentZoneRef.current);
         if (spawnEvents.length > 0) {
           console.log('MobRenderer: Spawn events:', spawnEvents.length);
         }
         lastSpawnCheck.current.lastSpawnTime = now;
       }
       
-      setMobs(updateResult.enemies);
+        setMobs(updateResult.mobs);
 
       // Handle mob events
       updateResult.events.forEach(event => {
         if (event.type === 'DEATH') {
-          console.log(`Mob ${event.enemyId} died! XP: ${event.data.xp}, Gold: ${event.data.gold}`);
+          console.log(`Mob ${event.mobId} died! XP: ${event.data.xp}, Gold: ${event.data.gold}`);
         }
       });
     }, 100); // 10fps instead of 60fps

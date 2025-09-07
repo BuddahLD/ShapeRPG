@@ -1,15 +1,15 @@
 /**
- * Domain Factory: EnemyFactory
- * Creates enemy instances based on Joe's balance specifications
+ * Domain Factory: MobFactory
+ * Creates mob instances based on Joe's balance specifications
  */
 
 import { Enemy, EnemyType, EnemyBehavior, EnemyStats, EnemyPosition } from '../entities/Enemy';
 
-export class EnemyFactory {
+export class MobFactory {
   /**
-   * Create enemy based on type and level
+   * Create mob based on type and level
    */
-  static createEnemy(
+  static createMob(
     id: string,
     type: EnemyType,
     position: EnemyPosition,
@@ -100,56 +100,60 @@ export class EnemyFactory {
   }
 
   /**
-   * Create enemies for specific zones based on spawn configuration
+   * Create mobs for specific zones based on spawn configuration
    */
-  static createZoneEnemies(zoneId: string): Enemy[] {
+  static createZoneMobs(zoneId: string): Enemy[] {
     const spawnConfigs = {
       'LOC_HUB_FIGUREIUM': [
-        { type: 'DUMMY' as EnemyType, position: { x: 0, y: 0 }, level: 1 }
+        { type: 'DUMMY' as EnemyType, position: { x: -150, y: 120 }, level: 1 }
       ],
       'LOC_PEACEFUL_FIELDS': [
-        { type: 'HEX_PEACEFUL' as EnemyType, position: { x: 50, y: 50 }, level: 1 },
-        { type: 'HEX_PEACEFUL' as EnemyType, position: { x: -50, y: 50 }, level: 1 },
-        { type: 'HEX_PEACEFUL' as EnemyType, position: { x: 0, y: -50 }, level: 1 }
+        { type: 'HEX_PEACEFUL' as EnemyType, position: { x: 300, y: 50 }, level: 1 },
+        { type: 'HEX_PEACEFUL' as EnemyType, position: { x: 400, y: -50 }, level: 1 },
+        { type: 'HEX_PEACEFUL' as EnemyType, position: { x: 500, y: 0 }, level: 1 },
+        { type: 'HEX_PEACEFUL' as EnemyType, position: { x: 350, y: 100 }, level: 1 },
+        { type: 'HEX_PEACEFUL' as EnemyType, position: { x: 450, y: -100 }, level: 1 }
       ],
       'LOC_SHARDS': [
-        { type: 'TRI_SMALL' as EnemyType, position: { x: 100, y: 100 }, level: 2 },
-        { type: 'TRI_SMALL' as EnemyType, position: { x: -100, y: 100 }, level: 2 },
-        { type: 'TRI_AGGRESSIVE' as EnemyType, position: { x: 150, y: 150 }, level: 3 }
+        { type: 'TRI_SMALL' as EnemyType, position: { x: 700, y: 100 }, level: 2 },
+        { type: 'TRI_SMALL' as EnemyType, position: { x: 800, y: -100 }, level: 2 },
+        { type: 'TRI_AGGRESSIVE' as EnemyType, position: { x: 900, y: 200 }, level: 3 },
+        { type: 'TRI_SMALL' as EnemyType, position: { x: 750, y: -200 }, level: 2 },
+        { type: 'TRI_SMALL' as EnemyType, position: { x: 1000, y: 0 }, level: 2 }
       ]
     };
 
     const config = spawnConfigs[zoneId as keyof typeof spawnConfigs];
     if (!config) return [];
 
-    return config.map((enemyConfig, index) => 
-      this.createEnemy(
-        `${zoneId}_enemy_${index}`,
-        enemyConfig.type,
-        enemyConfig.position,
-        enemyConfig.level
+    return config.map((mobConfig, index) => 
+      this.createMob(
+        `${zoneId}_mob_${index}`,
+        mobConfig.type,
+        mobConfig.position,
+        mobConfig.level
       )
     );
   }
 
   /**
-   * Get enemy spawn configuration for a zone
+   * Get mob spawn configuration for a zone
    */
   static getZoneSpawnConfig(zoneId: string) {
     const configs = {
       'LOC_HUB_FIGUREIUM': {
-        maxEnemies: 1,
-        enemyTypes: ['DUMMY'],
+        maxMobs: 1,
+        mobTypes: ['DUMMY'],
         respawnTime: 0 // No respawn for training dummy
       },
       'LOC_PEACEFUL_FIELDS': {
-        maxEnemies: 3,
-        enemyTypes: ['HEX_PEACEFUL'],
+        maxMobs: 3,
+        mobTypes: ['HEX_PEACEFUL'],
         respawnTime: 30000 // 30 seconds
       },
       'LOC_SHARDS': {
-        maxEnemies: 3,
-        enemyTypes: ['TRI_SMALL', 'TRI_AGGRESSIVE'],
+        maxMobs: 3,
+        mobTypes: ['TRI_SMALL', 'TRI_AGGRESSIVE'],
         respawnTime: 45000 // 45 seconds
       }
     };

@@ -12,7 +12,7 @@ import { CombatUseCase } from './useCases/CombatUseCase';
 import { GameStateService } from './services/GameStateService';
 import { AnimationService } from './services/AnimationService';
 import { MinimapService } from './services/MinimapService';
-import { EnemyManager } from './services/EnemyManager';
+import { MobManager } from './services/MobManager';
 
 export interface AppConfig {
   readonly environment: 'development' | 'production';
@@ -25,7 +25,7 @@ export class AppBootstrap {
   private gameStateService!: GameStateService;
   private animationService!: AnimationService;
   private minimapService!: MinimapService;
-  private enemyManager!: EnemyManager;
+  private mobManager!: MobManager;
   // ZustandStateAdapter removed - using GameStateManager directly
   
   private constructor(private config: AppConfig) {
@@ -51,8 +51,8 @@ export class AppBootstrap {
     return this.minimapService;
   }
 
-  getEnemyManager(): EnemyManager {
-    return this.enemyManager;
+  getMobManager(): MobManager {
+    return this.mobManager;
   }
 
   // ZustandStateAdapter removed - using GameStateManager directly
@@ -94,7 +94,7 @@ export class AppBootstrap {
 
     this.minimapService = new MinimapService(repositories.worldRepository);
 
-    this.enemyManager = new EnemyManager();
+    this.mobManager = new MobManager();
 
     // ZustandStateAdapter removed - using GameStateManager directly
   }
