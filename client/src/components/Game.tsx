@@ -19,6 +19,7 @@ const Game: React.FC = () => {
   const [showCharInfo, setShowCharInfo] = useState(false);
   const [activeTab, setActiveTab] = useState<'stats' | 'spells' | 'inventory'>('inventory');
   const [isInitialized, setIsInitialized] = useState(false);
+  
 
   // Debug logging for modal state
   useEffect(() => {
@@ -119,6 +120,7 @@ const Game: React.FC = () => {
       
       {/* Rune Drawing Overlay */}
       {isDrawingRune && <RuneDrawing />}
+      
     </div>
   );
 };
