@@ -34,8 +34,9 @@ export class MinimapService implements IMapService {
     // Calculate view bounds around player
     const viewBounds = this.calculateViewBounds(playerPosition, finalConfig.zoomLevel);
     
-    console.log('MinimapService: Player position:', playerPosition);
-    console.log('MinimapService: View bounds:', viewBounds);
+    // Reduced logging - only log when areas change
+    // console.log('MinimapService: Player position:', playerPosition);
+    // console.log('MinimapService: View bounds:', viewBounds);
     
     // Get all world areas (cached for performance)
     if (!this.cachedAreas) {
@@ -46,7 +47,8 @@ export class MinimapService implements IMapService {
     // Find areas visible in current view
     const visibleAreas = this.getVisibleAreas(allAreas, viewBounds);
     
-    console.log('MinimapService: Visible areas:', visibleAreas.map(a => a.id));
+    // Reduced logging - only log when areas change
+    // console.log('MinimapService: Visible areas:', visibleAreas.map(a => a.id));
     
     // Filter enemies that are within view bounds
     const nearbyEnemies = enemies.filter(enemy => 

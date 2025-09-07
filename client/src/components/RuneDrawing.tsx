@@ -43,17 +43,21 @@ const RuneDrawing: React.FC = () => {
   const handleMove = useCallback((x: number, y: number) => {
     if (!isDrawing) return;
     
-    setPoints(prev => [...prev, { x, y }]);
-    
-    // Redraw canvas
-    if (canvasRef.current) {
-      const ctx = canvasRef.current.getContext("2d");
-      if (ctx) {
-        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-        drawPath(ctx, [...points, { x, y }]);
+    setPoints(prev => {
+      const newPoints = [...prev, { x, y }];
+      
+      // Redraw canvas with new points
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext("2d");
+        if (ctx) {
+          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          drawPath(ctx, newPoints);
+        }
       }
-    }
-  }, [isDrawing, points, drawPath]);
+      
+      return newPoints;
+    });
+  }, [isDrawing, drawPath]);
 
   const handleEnd = useCallback(() => {
     if (!isDrawing || points.length < 3) {

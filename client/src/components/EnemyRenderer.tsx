@@ -42,19 +42,28 @@ export const EnemyRenderer: React.FC<EnemyRendererProps> = ({
   }, [currentZone, playerPosition.x, playerPosition.y, enemyManager]); // Run when zone or position changes
 
 
+  // Use refs to avoid dependencies that cause re-renders
+  const enemyManagerRef = useRef(enemyManager);
+  const playerPositionRef = useRef(playerPosition);
+  const currentZoneRef = useRef(currentZone);
+  
+  // Update refs when values change (no re-render trigger)
+  enemyManagerRef.current = enemyManager;
+  playerPositionRef.current = playerPosition;
+  currentZoneRef.current = currentZone;
+
   useEffect(() => {
-    // Update enemies every frame and check for new spawns
+    // Update enemies every 100ms (10fps) - much more reasonable
     const updateInterval = setInterval(() => {
       // Update existing enemies
-      const updateResult = enemyManager.updateEnemies(16, Date.now()); // 60fps
+      const updateResult = enemyManagerRef.current.updateEnemies(100, Date.now()); // 10fps
       
-      // Check for new spawns every 100ms (10 times per second)
+      // Check for new spawns every 1000ms (1 time per second) - much less frequent
       const now = Date.now();
-      if (!lastSpawnCheck.current.lastSpawnTime || now - lastSpawnCheck.current.lastSpawnTime > 100) {
-        console.log('EnemyRenderer: Periodic spawn check at', now);
-        const spawnEvents = enemyManager.updateEnemySpawning(playerPosition, currentZone);
+      if (!lastSpawnCheck.current.lastSpawnTime || now - lastSpawnCheck.current.lastSpawnTime > 1000) {
+        const spawnEvents = enemyManagerRef.current.updateEnemySpawning(playerPositionRef.current, currentZoneRef.current);
         if (spawnEvents.length > 0) {
-          console.log('EnemyRenderer: Periodic spawn events:', spawnEvents.length);
+          console.log('EnemyRenderer: Spawn events:', spawnEvents.length);
         }
         lastSpawnCheck.current.lastSpawnTime = now;
       }
@@ -67,10 +76,10 @@ export const EnemyRenderer: React.FC<EnemyRendererProps> = ({
           console.log(`Enemy ${event.enemyId} died! XP: ${event.data.xp}, Gold: ${event.data.gold}`);
         }
       });
-    }, 16);
+    }, 100); // 10fps instead of 60fps
 
     return () => clearInterval(updateInterval);
-  }, [enemyManager, playerPosition, currentZone]);
+  }, []); // NO DEPENDENCIES - uses refs for current values
 
   const renderEnemy = (enemy: Enemy) => {
     if (!enemy.isAlive()) return null;

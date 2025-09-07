@@ -76,7 +76,14 @@ export const LocationIndicator: React.FC<LocationIndicatorProps> = ({
             setShowLocationIndicator(false);
           }, duration);
           
-          return () => clearTimeout(hideTimer);
+          // Store timer ref for cleanup
+          const timerRef = { current: hideTimer };
+          
+          return () => {
+            if (timerRef.current) {
+              clearTimeout(timerRef.current);
+            }
+          };
         }
       }
     }

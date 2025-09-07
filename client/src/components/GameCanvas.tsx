@@ -16,15 +16,14 @@ class GameEngine {
   private canvas: HTMLCanvasElement | null = null;
   private ctx: CanvasRenderingContext2D | null = null;
   private animationFrameId: number | null = null;
-  private isRunning = false;
+  private _isRunning = false;
   
   // Game state refs - updated from React but used independently
   private gameState = {
     isSlowMotion: false,
     player: null as any,
     currentLocation: 'LOC_HUB_FIGUREIUM',
-    enemies: [] as any[],
-    detectZoneChange: null as any
+    enemies: [] as any[]
   };
   
   // Local game state
@@ -50,10 +49,17 @@ class GameEngine {
 
   // Initialize the game engine
   init(canvas: HTMLCanvasElement) {
+    // Prevent multiple initializations
+    if (this._isRunning) {
+      console.log('GameEngine: Already running, skipping initialization');
+      return;
+    }
+    
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
-    this.isRunning = true;
+    this._isRunning = true;
     this.startGameLoop();
+    console.log('GameEngine: Initialized successfully');
   }
 
   // Update game state from React (called when React state changes)
@@ -63,7 +69,7 @@ class GameEngine {
 
   // Start the game loop
   private startGameLoop() {
-    if (!this.isRunning) return;
+    if (!this._isRunning) return;
     this.gameLoop();
   }
 
@@ -72,7 +78,7 @@ class GameEngine {
     const startTime = performance.now();
     
     try {
-      if (!this.canvas || !this.ctx || !this.isRunning) {
+      if (!this.canvas || !this.ctx || !this._isRunning) {
         return;
       }
 
@@ -92,6 +98,9 @@ class GameEngine {
       if (this.isMoving) {
         this.localPlayerPosition.x += this.movementVelocity.x;
         this.localPlayerPosition.y += this.movementVelocity.y;
+        
+        // Dispatch position update for minimap and other systems
+        this.dispatchPositionUpdate();
       }
 
       // Clear canvas
@@ -122,7 +131,7 @@ class GameEngine {
     }
 
     // Continue game loop
-    if (this.isRunning) {
+    if (this._isRunning) {
       this.animationFrameId = requestAnimationFrame(this.gameLoop);
     }
   };
@@ -185,8 +194,8 @@ class GameEngine {
         const renderBottom = Math.min(canvas.height, bottom);
         
         // Render zone background with low opacity for subtle effect
-        this.ctx.fillStyle = `${zone.color}20`; // 12.5% opacity
-        this.ctx.fillRect(renderLeft, renderTop, renderRight - renderLeft, renderBottom - renderTop);
+        this.ctx!.fillStyle = `${zone.color}20`; // 12.5% opacity
+        this.ctx!.fillRect(renderLeft, renderTop, renderRight - renderLeft, renderBottom - renderTop);
       }
     });
 
@@ -200,18 +209,18 @@ class GameEngine {
     
     // Vertical lines
     for (let x = offsetX; x < canvas.width; x += gridSize) {
-      this.ctx.beginPath();
-      this.ctx.moveTo(x, 0);
-      this.ctx.lineTo(x, canvas.height);
-      this.ctx.stroke();
+      this.ctx!.beginPath();
+      this.ctx!.moveTo(x, 0);
+      this.ctx!.lineTo(x, canvas.height);
+      this.ctx!.stroke();
     }
     
     // Horizontal lines
     for (let y = offsetY; y < canvas.height; y += gridSize) {
-      this.ctx.beginPath();
-      this.ctx.moveTo(0, y);
-      this.ctx.lineTo(canvas.width, y);
-      this.ctx.stroke();
+      this.ctx!.beginPath();
+      this.ctx!.moveTo(0, y);
+      this.ctx!.lineTo(canvas.width, y);
+      this.ctx!.stroke();
     }
   }
 
@@ -420,51 +429,51 @@ class GameEngine {
       // Only render if zone is visible on screen
       if (right > 0 && left < canvas.width && bottom > 0 && top < canvas.height) {
         // Zone boundary box
-        this.ctx.strokeStyle = `${color}80`; // 50% opacity
-        this.ctx.lineWidth = 2;
-        this.ctx.setLineDash([4, 8]);
+        this.ctx!.strokeStyle = `${color}80`; // 50% opacity
+        this.ctx!.lineWidth = 2;
+        this.ctx!.setLineDash([4, 8]);
         
-        this.ctx.beginPath();
-        this.ctx.rect(left, top, right - left, bottom - top);
-        this.ctx.stroke();
+        this.ctx!.beginPath();
+        this.ctx!.rect(left, top, right - left, bottom - top);
+        this.ctx!.stroke();
         
         // Zone corner markers
-        this.ctx.fillStyle = color;
-        this.ctx.setLineDash([]);
+        this.ctx!.fillStyle = color;
+        this.ctx!.setLineDash([]);
         
         // Corner squares (8x8 pixels)
         const cornerSize = 8;
-        this.ctx.fillRect(left - cornerSize/2, top - cornerSize/2, cornerSize, cornerSize);
-        this.ctx.fillRect(right - cornerSize/2, top - cornerSize/2, cornerSize, cornerSize);
-        this.ctx.fillRect(left - cornerSize/2, bottom - cornerSize/2, cornerSize, cornerSize);
-        this.ctx.fillRect(right - cornerSize/2, bottom - cornerSize/2, cornerSize, cornerSize);
+        this.ctx!.fillRect(left - cornerSize/2, top - cornerSize/2, cornerSize, cornerSize);
+        this.ctx!.fillRect(right - cornerSize/2, top - cornerSize/2, cornerSize, cornerSize);
+        this.ctx!.fillRect(left - cornerSize/2, bottom - cornerSize/2, cornerSize, cornerSize);
+        this.ctx!.fillRect(right - cornerSize/2, bottom - cornerSize/2, cornerSize, cornerSize);
       }
     });
     
     // Zone transition lines (enhanced)
-    this.ctx.strokeStyle = `rgba(255, 255, 255, 0.4)`;
-    this.ctx.lineWidth = 2;
-    this.ctx.setLineDash([12, 8]);
+    this.ctx!.strokeStyle = `rgba(255, 255, 255, 0.4)`;
+    this.ctx!.lineWidth = 2;
+    this.ctx!.setLineDash([12, 8]);
     
     // Hub → Fields transition at x=200
     const hubFieldsLine = centerX + (200 - this.localPlayerPosition.x);
     if (hubFieldsLine > -50 && hubFieldsLine < canvas.width + 50) {
-      this.ctx.beginPath();
-      this.ctx.moveTo(hubFieldsLine, 0);
-      this.ctx.lineTo(hubFieldsLine, canvas.height);
-      this.ctx.stroke();
+      this.ctx!.beginPath();
+      this.ctx!.moveTo(hubFieldsLine, 0);
+      this.ctx!.lineTo(hubFieldsLine, canvas.height);
+      this.ctx!.stroke();
     }
     
     // Fields → Shards transition at x=600
     const fieldsShardsLine = centerX + (600 - this.localPlayerPosition.x);
     if (fieldsShardsLine > -50 && fieldsShardsLine < canvas.width + 50) {
-      this.ctx.beginPath();
-      this.ctx.moveTo(fieldsShardsLine, 0);
-      this.ctx.lineTo(fieldsShardsLine, canvas.height);
-      this.ctx.stroke();
+      this.ctx!.beginPath();
+      this.ctx!.moveTo(fieldsShardsLine, 0);
+      this.ctx!.lineTo(fieldsShardsLine, canvas.height);
+      this.ctx!.stroke();
     }
     
-    this.ctx.setLineDash([]);
+    this.ctx!.setLineDash([]);
   }
 
   // Handle joystick movement
@@ -483,7 +492,7 @@ class GameEngine {
 
   // Stop the game engine
   stop() {
-    this.isRunning = false;
+    this._isRunning = false;
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
@@ -495,51 +504,85 @@ class GameEngine {
     return { ...this.stats };
   }
 
+  // Check if game engine is running
+  get isRunning() {
+    return this._isRunning;
+  }
+
   // Get current player position
   getPlayerPosition() {
     return { ...this.localPlayerPosition };
   }
+
+
+  // Dispatch position update for minimap and other systems
+  private dispatchPositionUpdate() {
+    try {
+      window.dispatchEvent(new CustomEvent('playerPositionUpdate', {
+        detail: { position: { ...this.localPlayerPosition } }
+      }));
+    } catch (error) {
+      console.warn('GameEngine: Position update dispatch failed', error);
+    }
+  }
 }
 
-// Global game engine instance
-const gameEngine = new GameEngine();
+// Global game engine instance - singleton pattern
+let gameEngine: GameEngine | null = null;
+
+const getGameEngine = () => {
+  if (!gameEngine) {
+    console.log('GameEngine: Creating new game engine instance');
+    gameEngine = new GameEngine();
+  }
+  return gameEngine;
+};
 
 const GameCanvas: React.FC<GameCanvasProps> = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { currentLocation, enemies, isSlowMotion, gameState, detectZoneChange } = useGameState();
   const { player, position } = usePlayer();
 
+  // Debug: Log when GameCanvas re-renders (only when drawing rune)
+  if (gameState.isDrawingRune) {
+    console.log('GameCanvas: Re-rendering for rune drawing', { 
+      isDrawingRune: gameState.isDrawingRune,
+      gamePhase: gameState.gamePhase
+    });
+  }
+
   // Update game engine state when React state changes
   useEffect(() => {
-    gameEngine.updateGameState({
+    getGameEngine().updateGameState({
       isSlowMotion,
       player,
       currentLocation,
-      enemies,
-      detectZoneChange
+      enemies
     });
-  }, [isSlowMotion, player, currentLocation, enemies, detectZoneChange]);
+  }, [isSlowMotion, player, currentLocation, enemies]);
 
-  // Initialize game engine when canvas is ready
+  // Initialize game engine when canvas is ready - only once
   useEffect(() => {
     if (canvasRef.current) {
-      gameEngine.init(canvasRef.current);
+      console.log('GameCanvas: Initializing game engine');
+      getGameEngine().init(canvasRef.current);
     }
 
     return () => {
-      gameEngine.stop();
+      console.log('GameCanvas: Cleaning up game engine');
+      getGameEngine().stop();
     };
-  }, []);
+  }, []); // Empty dependency array - only run once
 
   // Handle joystick events
   useEffect(() => {
     const handleJoystickMove = (event: CustomEvent) => {
       const { deltaX, deltaY } = event.detail;
-      gameEngine.handleJoystickMove(deltaX, deltaY);
+      getGameEngine().handleJoystickMove(deltaX, deltaY);
     };
 
     const handleJoystickStop = () => {
-      gameEngine.handleJoystickStop();
+      getGameEngine().handleJoystickStop();
     };
 
     window.addEventListener('joystickMove', handleJoystickMove as EventListener);
@@ -550,6 +593,28 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
       window.removeEventListener('joystickStop', handleJoystickStop);
     };
   }, []);
+
+  // Handle position updates for zone detection (separate from game engine)
+  useEffect(() => {
+    const handlePositionUpdate = async (event: CustomEvent) => {
+      const { position } = event.detail;
+      if (position && detectZoneChange) {
+        try {
+          const zoneChanged = await detectZoneChange(position);
+          if (zoneChanged) {
+            console.log('Zone changed to new position:', position);
+          }
+        } catch (error) {
+          console.warn('Zone detection failed:', error);
+        }
+      }
+    };
+
+    window.addEventListener('playerPositionUpdate', handlePositionUpdate as unknown as EventListener);
+    return () => {
+      window.removeEventListener('playerPositionUpdate', handlePositionUpdate as unknown as EventListener);
+    };
+  }, [detectZoneChange]);
 
   // Handle canvas resize
   useEffect(() => {
@@ -573,7 +638,7 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
       />
       <EnemyRenderer 
         currentZone={currentLocation || 'LOC_HUB_FIGUREIUM'} 
-        playerPosition={gameEngine.getPlayerPosition()} 
+        playerPosition={getGameEngine().getPlayerPosition()} 
       />
     </div>
   );

@@ -111,8 +111,21 @@ export class GameStateManager {
           const result = await this.gameStateService.initializeGame({ playerId });
           
           if (result.success) {
-            const uiGameState = this.adaptGameStateToUI(result.gameState);
-            set({ gameState: uiGameState });
+            // Update only the specific fields that changed - no full re-render
+            const newGameState = result.gameState;
+            set(state => ({
+              gameState: {
+                ...state.gameState,
+                player: this.adaptPlayerToUI(newGameState.player),
+                currentArea: newGameState.currentArea ? this.adaptAreaToUI(newGameState.currentArea) : null,
+                isInCombat: newGameState.isInCombat,
+                isDrawingRune: newGameState.isDrawingRune,
+                gamePhase: newGameState.gamePhase,
+                nearbyEnemies: this.adaptEnemiesToUI(newGameState.nearbyEnemies || []),
+                isLoading: false,
+                error: null
+              }
+            }));
           } else {
             set(state => ({
               gameState: { 
@@ -144,8 +157,19 @@ export class GameStateManager {
           });
 
           if (result.success) {
-            const uiGameState = this.adaptGameStateToUI(result.gameState);
-            set({ gameState: uiGameState });
+            // Update only the specific fields that changed - no full re-render
+            const newGameState = result.gameState;
+            set(state => ({
+              gameState: {
+                ...state.gameState,
+                player: this.adaptPlayerToUI(newGameState.player),
+                currentArea: newGameState.currentArea ? this.adaptAreaToUI(newGameState.currentArea) : state.gameState.currentArea,
+                isInCombat: newGameState.isInCombat,
+                isDrawingRune: newGameState.isDrawingRune,
+                gamePhase: newGameState.gamePhase,
+                nearbyEnemies: this.adaptEnemiesToUI(newGameState.nearbyEnemies || [])
+              }
+            }));
           }
         } catch (error) {
           console.warn('Failed to update game state:', error);
@@ -154,9 +178,15 @@ export class GameStateManager {
 
       setDrawingRune: (isDrawing: boolean) => {
         this.gameStateService.setDrawingRune(isDrawing);
-        const updatedGameState = this.gameStateService.getCurrentGameState();
-        const uiGameState = this.adaptGameStateToUI(updatedGameState);
-        set({ gameState: uiGameState });
+        // Update only the specific fields that changed - no full re-render
+        set(state => ({
+          gameState: {
+            ...state.gameState,
+            isDrawingRune: isDrawing,
+            gamePhase: isDrawing ? 'rune-drawing' : 
+                      state.gameState.isInCombat ? 'combat' : 'exploring'
+          }
+        }));
       },
 
       movePlayer: async (deltaX: number, deltaY: number) => {
@@ -187,9 +217,13 @@ export class GameStateManager {
           // Update the GameStateService with the new player
           this.gameStateService.updatePlayer(updatedPlayer);
 
-          // Update the UI state
-          const uiGameState = this.adaptGameStateToUI(this.gameStateService.getCurrentGameState());
-          set({ gameState: uiGameState });
+          // Update only the player position - no full re-render
+          set(state => ({
+            gameState: {
+              ...state.gameState,
+              player: this.adaptPlayerToUI(updatedPlayer)
+            }
+          }));
 
           // Reduced logging for performance
           if (Math.random() < 0.01) { // Log only 1% of movements
@@ -205,9 +239,13 @@ export class GameStateManager {
           const zoneChanged = await this.gameStateService.detectZoneChange(playerPosition);
           
           if (zoneChanged) {
-            // Update the UI state to reflect the zone change
-            const uiGameState = this.adaptGameStateToUI(this.gameStateService.getCurrentGameState());
-            set({ gameState: uiGameState });
+            // Update only the currentArea without triggering full re-render
+            set(state => ({
+              gameState: {
+                ...state.gameState,
+                currentArea: this.adaptAreaToUI(this.gameStateService.getCurrentGameState().currentArea!)
+              }
+            }));
           }
           
           return zoneChanged;
@@ -220,8 +258,13 @@ export class GameStateManager {
       clearEnemies: async () => {
         try {
           await this.gameStateService.clearEnemiesInCurrentArea();
-          const uiGameState = this.adaptGameStateToUI(this.gameStateService.getCurrentGameState());
-          set({ gameState: uiGameState });
+          // Update only enemies - no full re-render
+          set(state => ({
+            gameState: {
+              ...state.gameState,
+              nearbyEnemies: []
+            }
+          }));
         } catch (error) {
           console.warn('Failed to clear enemies:', error);
         }
@@ -230,8 +273,14 @@ export class GameStateManager {
       spawnEnemies: async () => {
         try {
           await this.gameStateService.spawnEnemiesInCurrentArea();
-          const uiGameState = this.adaptGameStateToUI(this.gameStateService.getCurrentGameState());
-          set({ gameState: uiGameState });
+          // Update only enemies - no full re-render
+          const currentGameState = this.gameStateService.getCurrentGameState();
+          set(state => ({
+            gameState: {
+              ...state.gameState,
+              nearbyEnemies: this.adaptEnemiesToUI(currentGameState.nearbyEnemies || [])
+            }
+          }));
         } catch (error) {
           console.warn('Failed to spawn enemies:', error);
         }
@@ -239,8 +288,13 @@ export class GameStateManager {
 
       setGamePhase: (phase: 'loading' | 'exploring' | 'combat' | 'rune-drawing' | 'paused') => {
         this.gameStateService.setGamePhase(phase);
-        const uiGameState = this.adaptGameStateToUI(this.gameStateService.getCurrentGameState());
-        set({ gameState: uiGameState });
+        // Update only gamePhase - no full re-render
+        set(state => ({
+          gameState: {
+            ...state.gameState,
+            gamePhase: phase
+          }
+        }));
       },
 
       clearError: () => {
@@ -301,5 +355,10 @@ export class GameStateManager {
       visualTheme: area.visualTheme,
       backgroundGradient: area.backgroundGradient
     };
+  }
+
+  private adaptEnemiesToUI(enemies: any[]): any[] {
+    // Simple pass-through for now - enemies are already in UI format
+    return enemies;
   }
 }

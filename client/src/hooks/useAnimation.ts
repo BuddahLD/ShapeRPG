@@ -26,14 +26,17 @@ export function useAnimation(target: AnimationTarget): UseAnimationReturn {
       setIsAnimating(Object.keys(newStyles).length > 0);
     });
 
-    // Set up animation update loop
-    updateIntervalRef.current = window.setInterval(() => {
+    // Set up animation update loop - use requestAnimationFrame instead of setInterval
+    const updateLoop = () => {
       animationManager.update();
-    }, 16); // ~60fps
+      updateIntervalRef.current = requestAnimationFrame(updateLoop);
+    };
+    
+    updateIntervalRef.current = requestAnimationFrame(updateLoop);
 
     return () => {
       if (updateIntervalRef.current) {
-        clearInterval(updateIntervalRef.current);
+        cancelAnimationFrame(updateIntervalRef.current);
       }
     };
   }, [target.id]);

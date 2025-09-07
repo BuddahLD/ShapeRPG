@@ -67,7 +67,8 @@ export class EnemyManager {
     allSpawnPoints.forEach(spawnPoint => {
       const distance = this.calculateDistance(playerPosition, spawnPoint.position);
       const spawnPointZone = this.getEnemyZone(spawnPoint.id);
-      console.log(`EnemyManager: Checking spawn point ${spawnPoint.id} from zone ${spawnPointZone} at ${spawnPoint.position.x},${spawnPoint.position.y}, distance: ${distance.toFixed(2)}, spawnDistance: ${this.spawnDistance}, alreadySpawned: ${this.enemies.has(spawnPoint.id)}`);
+      // Reduced logging - only log when actually spawning
+      // console.log(`EnemyManager: Checking spawn point ${spawnPoint.id} from zone ${spawnPointZone} at ${spawnPoint.position.x},${spawnPoint.position.y}, distance: ${distance.toFixed(2)}, spawnDistance: ${this.spawnDistance}, alreadySpawned: ${this.enemies.has(spawnPoint.id)}`);
       
       // Spawn if within spawn distance and not already spawned
       if (distance <= this.spawnDistance && !this.enemies.has(spawnPoint.id)) {
@@ -125,7 +126,8 @@ export class EnemyManager {
             enemiesToRemove.push(enemyId);
             console.log(`EnemyManager: Removing enemy ${enemyId} from zone ${enemyZone} (distance: ${distance.toFixed(2)} > ${this.despawnDistance})`);
           } else {
-            console.log(`EnemyManager: Keeping enemy ${enemyId} from zone ${enemyZone} (distance: ${distance.toFixed(2)} <= ${this.despawnDistance})`);
+            // Reduced logging - only log when despawning
+            // console.log(`EnemyManager: Keeping enemy ${enemyId} from zone ${enemyZone} (distance: ${distance.toFixed(2)} <= ${this.despawnDistance})`);
           }
         } else {
           // If no player position, remove all enemies from other zones (fallback)
