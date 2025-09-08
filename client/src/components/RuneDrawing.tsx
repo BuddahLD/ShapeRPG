@@ -10,14 +10,19 @@ interface Point {
 
 const RuneDrawing: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(true); // Start drawing immediately
   const [points, setPoints] = useState<Point[]>([]);
+  const [hasStartedDrawing, setHasStartedDrawing] = useState(false);
   const { setDrawingRune, castSpell } = useGameState();
   const { player } = usePlayer();
 
   const drawPath = useCallback((ctx: CanvasRenderingContext2D, points: Point[]) => {
     if (points.length < 2) return;
 
+    // Save the current context state
+    ctx.save();
+    
+    // Set drawing properties
     ctx.strokeStyle = "#00ffff";
     ctx.lineWidth = 4;
     ctx.lineCap = "round";
@@ -33,15 +38,46 @@ const RuneDrawing: React.FC = () => {
     }
     
     ctx.stroke();
+    
+    // Restore the context state to prevent affecting other drawings
+    ctx.restore();
   }, []);
 
   const handleStart = useCallback((x: number, y: number) => {
-    setIsDrawing(true);
-    setPoints([{ x, y }]);
-  }, []);
+    if (!hasStartedDrawing) {
+      setHasStartedDrawing(true);
+      setPoints([{ x, y }]);
+      
+      // Redraw canvas with initial point
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext("2d");
+        if (ctx) {
+          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          // Redraw background
+          ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+          ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          
+          // Redraw instruction text
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "24px Inter";
+          ctx.textAlign = "center";
+          ctx.fillText("Draw a rune to cast a spell", canvasRef.current.width / 2, 50);
+          
+          ctx.font = "16px Inter";
+          ctx.fillText("Release button to cast", canvasRef.current.width / 2, 80);
+          
+          // Draw initial point
+          ctx.fillStyle = "#00ffff";
+          ctx.beginPath();
+          ctx.arc(x, y, 2, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+      }
+    }
+  }, [hasStartedDrawing]);
 
   const handleMove = useCallback((x: number, y: number) => {
-    if (!isDrawing) return;
+    if (!isDrawing || !hasStartedDrawing) return;
     
     setPoints(prev => {
       const newPoints = [...prev, { x, y }];
@@ -51,39 +87,57 @@ const RuneDrawing: React.FC = () => {
         const ctx = canvasRef.current.getContext("2d");
         if (ctx) {
           ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          
+          // Redraw background
+          ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+          ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          
+          // Redraw instruction text
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "24px Inter";
+          ctx.textAlign = "center";
+          ctx.fillText("Draw a rune to cast a spell", canvasRef.current.width / 2, 50);
+          
+          ctx.font = "16px Inter";
+          ctx.fillText("Touch anywhere to start drawing", canvasRef.current.width / 2, 80);
+          ctx.fillText("Release button to cast", canvasRef.current.width / 2, 100);
+          
+          // Draw the path
           drawPath(ctx, newPoints);
         }
       }
       
       return newPoints;
     });
-  }, [isDrawing, drawPath]);
+  }, [isDrawing, hasStartedDrawing, drawPath]);
 
   const handleEnd = useCallback(() => {
-    if (!isDrawing || points.length < 3) {
+    if (!isDrawing || !hasStartedDrawing) {
       setDrawingRune(false);
       return;
     }
 
     setIsDrawing(false);
 
-    // Analyze the drawn shape
-    const shapeMatching = new ShapeMatching();
-    const matchResult = shapeMatching.matchShape(points, player?.spells || []);
+    // Only cast spell if we have enough points
+    if (points.length >= 3) {
+      // Analyze the drawn shape
+      const shapeMatching = new ShapeMatching();
+      const matchResult = shapeMatching.matchShape(points, player?.spells || []);
+      
+      // Cast spell or apply debuff based on match
+      castSpell(matchResult);
+    }
     
-    // Cast spell or apply debuff based on match
-    castSpell(matchResult);
-    
-    // Clear drawing after a short delay
-    setTimeout(() => {
-      setDrawingRune(false);
-      setPoints([]);
-    }, 500);
-  }, [isDrawing, points, castSpell, setDrawingRune, player]);
+    // Clear drawing immediately
+    setDrawingRune(false);
+    setPoints([]);
+    setHasStartedDrawing(false);
+  }, [isDrawing, hasStartedDrawing, points, castSpell, setDrawingRune, player]);
 
-  // Touch events
+  // Touch events (these are now handled by global events, but keeping for fallback)
   const handleTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault();
+    // Don't prevent default here since we're using global events
     const touch = e.touches[0];
     const rect = canvasRef.current?.getBoundingClientRect();
     if (rect) {
@@ -92,7 +146,7 @@ const RuneDrawing: React.FC = () => {
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault();
+    // Don't prevent default here since we're using global events
     const touch = e.touches[0];
     const rect = canvasRef.current?.getBoundingClientRect();
     if (rect) {
@@ -101,13 +155,13 @@ const RuneDrawing: React.FC = () => {
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    e.preventDefault();
+    // Don't prevent default here since we're using global events
     handleEnd();
   };
 
   // Mouse events for desktop testing
   const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
+    // Don't prevent default here since we're using global events
     const rect = canvasRef.current?.getBoundingClientRect();
     if (rect) {
       handleStart(e.clientX - rect.left, e.clientY - rect.top);
@@ -126,16 +180,45 @@ const RuneDrawing: React.FC = () => {
   };
 
   useEffect(() => {
+    const handleGlobalMouseDown = (e: MouseEvent) => {
+      if (isDrawing && !hasStartedDrawing) {
+        // Don't prevent default to avoid conflicts
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (rect) {
+          handleStart(e.clientX - rect.left, e.clientY - rect.top);
+        }
+      }
+    };
+
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (isDrawing && hasStartedDrawing) {
+        // Don't prevent default to avoid conflicts
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (rect) {
+          handleMove(e.clientX - rect.left, e.clientY - rect.top);
+        }
+      }
+    };
+
+    const handleGlobalMouseUp = (e: MouseEvent) => {
+      if (isDrawing && hasStartedDrawing) {
+        // Don't prevent default to avoid conflicts
+        handleEnd();
+      }
+    };
+
     if (isDrawing) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('mousedown', handleGlobalMouseDown);
+      window.addEventListener('mousemove', handleGlobalMouseMove);
+      window.addEventListener('mouseup', handleGlobalMouseUp);
       
       return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('mousedown', handleGlobalMouseDown);
+        window.removeEventListener('mousemove', handleGlobalMouseMove);
+        window.removeEventListener('mouseup', handleGlobalMouseUp);
       };
     }
-  }, [isDrawing]);
+  }, [isDrawing, hasStartedDrawing, handleStart, handleMove, handleEnd]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -157,9 +240,80 @@ const RuneDrawing: React.FC = () => {
       ctx.fillText("Draw a rune to cast a spell", canvas.width / 2, 50);
       
       ctx.font = "16px Inter";
-      ctx.fillText("Release to cast", canvas.width / 2, 80);
+      ctx.fillText("Touch anywhere to start drawing", canvas.width / 2, 80);
+      
+      if (hasStartedDrawing) {
+        ctx.fillText("Release button to cast", canvas.width / 2, 100);
+      }
     }
+  }, [hasStartedDrawing]);
+
+  // Listen for rune button press events - just set the drawing state, don't start drawing yet
+  useEffect(() => {
+    const handleRuneButtonPress = (e: CustomEvent) => {
+      // Don't start drawing immediately, wait for user to touch the screen
+      // The drawing will start when they actually touch the canvas
+    };
+
+    window.addEventListener('runeButtonPress', handleRuneButtonPress as EventListener);
+    
+    return () => {
+      window.removeEventListener('runeButtonPress', handleRuneButtonPress as EventListener);
+    };
   }, []);
+
+  // Global touch event listeners for drawing
+  useEffect(() => {
+    const handleGlobalTouchStart = (e: TouchEvent) => {
+      if (isDrawing && !hasStartedDrawing) {
+        // Don't prevent default to avoid passive event errors
+        const touch = e.touches[0];
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (rect) {
+          handleStart(touch.clientX - rect.left, touch.clientY - rect.top);
+        }
+      }
+    };
+
+    const handleGlobalTouchMove = (e: TouchEvent) => {
+      if (isDrawing && hasStartedDrawing) {
+        // Don't prevent default to avoid passive event errors
+        const touch = e.touches[0];
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (rect) {
+          handleMove(touch.clientX - rect.left, touch.clientY - rect.top);
+        }
+      }
+    };
+
+    const handleGlobalTouchEnd = (e: TouchEvent) => {
+      if (isDrawing && hasStartedDrawing) {
+        // Don't prevent default to avoid passive event errors
+        handleEnd();
+      }
+    };
+
+    if (isDrawing) {
+      window.addEventListener('touchstart', handleGlobalTouchStart, { passive: true });
+      window.addEventListener('touchmove', handleGlobalTouchMove, { passive: true });
+      window.addEventListener('touchend', handleGlobalTouchEnd, { passive: true });
+      
+      return () => {
+        window.removeEventListener('touchstart', handleGlobalTouchStart);
+        window.removeEventListener('touchmove', handleGlobalTouchMove);
+        window.removeEventListener('touchend', handleGlobalTouchEnd);
+      };
+    }
+  }, [isDrawing, hasStartedDrawing, handleStart, handleMove, handleEnd]);
+
+  // Cleanup when component unmounts
+  useEffect(() => {
+    return () => {
+      setDrawingRune(false);
+      setPoints([]);
+      setHasStartedDrawing(false);
+    };
+  }, [setDrawingRune]);
 
   return (
     <div className="fixed inset-0 z-30">
