@@ -32,6 +32,11 @@ class GameEngine {
   private isMoving = false;
   private movePlayerFunction: ((deltaX: number, deltaY: number) => Promise<void>) | null = null;
   
+  // Viewport scaling state
+  private displayWidth = 0;
+  private displayHeight = 0;
+  private devicePixelRatio = 1;
+  
   // Performance monitoring
   private stats = {
     frameCount: 0,
@@ -58,6 +63,10 @@ class GameEngine {
     
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
+    
+    // Set up proper viewport scaling
+    this.resizeCanvas(canvas);
+    
     this._isRunning = true;
     this.startGameLoop();
     console.log('GameEngine: Initialized successfully');
@@ -114,8 +123,8 @@ class GameEngine {
         this.dispatchPositionUpdate();
       }
 
-      // Clear canvas
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      // Clear canvas using display dimensions
+      this.ctx.clearRect(0, 0, this.displayWidth, this.displayHeight);
 
       // Render game elements
       this.renderBackground();
@@ -151,9 +160,9 @@ class GameEngine {
   private renderBackground() {
     if (!this.ctx || !this.canvas) return;
     
-    const canvas = this.canvas;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+    // Use display dimensions for coordinate calculations
+    const centerX = this.displayWidth / 2;
+    const centerY = this.displayHeight / 2;
     
     // Zone colors and bounds (matching zone indicators)
     const zones = [
@@ -181,7 +190,7 @@ class GameEngine {
     
     // Clear canvas with default background
     this.ctx.fillStyle = '#1a1a2e';
-    this.ctx.fillRect(0, 0, canvas.width, canvas.height);
+    this.ctx.fillRect(0, 0, this.displayWidth, this.displayHeight);
     
     // Render zone backgrounds based on what's visible on screen
     zones.forEach(zone => {
@@ -197,12 +206,12 @@ class GameEngine {
       const bottom = centerY + (bounds.maxY - this.localPlayerPosition.y);
       
       // Only render if zone is visible on screen
-      if (right > 0 && left < canvas.width && bottom > 0 && top < canvas.height) {
+      if (right > 0 && left < this.displayWidth && bottom > 0 && top < this.displayHeight) {
         // Clamp to screen bounds
         const renderLeft = Math.max(0, left);
-        const renderRight = Math.min(canvas.width, right);
+        const renderRight = Math.min(this.displayWidth, right);
         const renderTop = Math.max(0, top);
-        const renderBottom = Math.min(canvas.height, bottom);
+        const renderBottom = Math.min(this.displayHeight, bottom);
         
         // Render zone background with low opacity for subtle effect
         this.ctx!.fillStyle = `${zone.color}20`; // 12.5% opacity
@@ -219,18 +228,18 @@ class GameEngine {
     const offsetY = (-this.localPlayerPosition.y % gridSize) + gridSize;
     
     // Vertical lines
-    for (let x = offsetX; x < canvas.width; x += gridSize) {
+    for (let x = offsetX; x < this.displayWidth; x += gridSize) {
       this.ctx!.beginPath();
       this.ctx!.moveTo(x, 0);
-      this.ctx!.lineTo(x, canvas.height);
+      this.ctx!.lineTo(x, this.displayHeight);
       this.ctx!.stroke();
     }
     
     // Horizontal lines
-    for (let y = offsetY; y < canvas.height; y += gridSize) {
+    for (let y = offsetY; y < this.displayHeight; y += gridSize) {
       this.ctx!.beginPath();
       this.ctx!.moveTo(0, y);
-      this.ctx!.lineTo(canvas.width, y);
+      this.ctx!.lineTo(this.displayWidth, y);
       this.ctx!.stroke();
     }
   }
@@ -238,9 +247,9 @@ class GameEngine {
   private renderPlayer() {
     if (!this.ctx || !this.canvas) return;
     
-    const canvas = this.canvas;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+    // Use display dimensions for coordinate calculations
+    const centerX = this.displayWidth / 2;
+    const centerY = this.displayHeight / 2;
 
     // Player is always rendered at center (camera follows player)
     const size = 30;
@@ -276,9 +285,9 @@ class GameEngine {
   private renderNPCs() {
     if (!this.ctx || !this.canvas) return;
     
-    const canvas = this.canvas;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+    // Use display dimensions for coordinate calculations
+    const centerX = this.displayWidth / 2;
+    const centerY = this.displayHeight / 2;
 
     // Define NPCs with their world coordinates
     const npcs = [
@@ -292,8 +301,8 @@ class GameEngine {
       const screenY = centerY + (npc.y - this.localPlayerPosition.y);
 
       // Only render if on screen
-      if (screenX > -30 && screenX < canvas.width + 30 && 
-          screenY > -30 && screenY < canvas.height + 30) {
+      if (screenX > -30 && screenX < this.displayWidth + 30 && 
+          screenY > -30 && screenY < this.displayHeight + 30) {
         
         // Draw NPC with modern styling
         this.renderNPC(screenX, screenY, npc.color, npc.label, 22);
@@ -344,17 +353,17 @@ class GameEngine {
   private renderMobs() {
     if (!this.ctx || !this.canvas || !this.gameState.mobs) return;
     
-    const canvas = this.canvas;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+    // Use display dimensions for coordinate calculations
+    const centerX = this.displayWidth / 2;
+    const centerY = this.displayHeight / 2;
 
     this.gameState.mobs.forEach((mob: any) => {
       const screenX = centerX + (mob.position.x - this.localPlayerPosition.x);
       const screenY = centerY + (mob.position.y - this.localPlayerPosition.y);
 
       // Only render if on screen
-      if (screenX > -50 && screenX < canvas.width + 50 && 
-          screenY > -50 && screenY < canvas.height + 50) {
+      if (screenX > -50 && screenX < this.displayWidth + 50 && 
+          screenY > -50 && screenY < this.displayHeight + 50) {
         
         const size = mob.size || 20;
         this.renderMob(screenX, screenY, mob.type, size);
@@ -404,9 +413,9 @@ class GameEngine {
   private renderZoneIndicators() {
     if (!this.ctx || !this.canvas) return;
     
-    const canvas = this.canvas;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+    // Use display dimensions for coordinate calculations
+    const centerX = this.displayWidth / 2;
+    const centerY = this.displayHeight / 2;
     
     // Zone colors (matching minimap)
     const zoneColors = {
@@ -438,7 +447,7 @@ class GameEngine {
       const bottom = centerY + (bounds.maxY - this.localPlayerPosition.y);
       
       // Only render if zone is visible on screen
-      if (right > 0 && left < canvas.width && bottom > 0 && top < canvas.height) {
+      if (right > 0 && left < this.displayWidth && bottom > 0 && top < this.displayHeight) {
         // Zone boundary box
         this.ctx!.strokeStyle = `${color}80`; // 50% opacity
         this.ctx!.lineWidth = 2;
@@ -468,19 +477,19 @@ class GameEngine {
     
     // Hub → Fields transition at x=200
     const hubFieldsLine = centerX + (200 - this.localPlayerPosition.x);
-    if (hubFieldsLine > -50 && hubFieldsLine < canvas.width + 50) {
+    if (hubFieldsLine > -50 && hubFieldsLine < this.displayWidth + 50) {
       this.ctx!.beginPath();
       this.ctx!.moveTo(hubFieldsLine, 0);
-      this.ctx!.lineTo(hubFieldsLine, canvas.height);
+      this.ctx!.lineTo(hubFieldsLine, this.displayHeight);
       this.ctx!.stroke();
     }
     
     // Fields → Shards transition at x=600
     const fieldsShardsLine = centerX + (600 - this.localPlayerPosition.x);
-    if (fieldsShardsLine > -50 && fieldsShardsLine < canvas.width + 50) {
+    if (fieldsShardsLine > -50 && fieldsShardsLine < this.displayWidth + 50) {
       this.ctx!.beginPath();
       this.ctx!.moveTo(fieldsShardsLine, 0);
-      this.ctx!.lineTo(fieldsShardsLine, canvas.height);
+      this.ctx!.lineTo(fieldsShardsLine, this.displayHeight);
       this.ctx!.stroke();
     }
     
@@ -490,6 +499,38 @@ class GameEngine {
   // Set the movePlayer function from React
   setMovePlayerFunction(movePlayer: (deltaX: number, deltaY: number) => Promise<void>) {
     this.movePlayerFunction = movePlayer;
+  }
+
+  // Resize canvas with proper viewport scaling (based on game engine best practices)
+  resizeCanvas(canvas: HTMLCanvasElement) {
+    if (!canvas) return;
+
+    // Get device pixel ratio for high-DPI displays
+    this.devicePixelRatio = window.devicePixelRatio || 1;
+    
+    // Get display size
+    this.displayWidth = window.innerWidth;
+    this.displayHeight = window.innerHeight;
+    
+    // Set canvas display size (CSS pixels)
+    canvas.style.width = `${this.displayWidth}px`;
+    canvas.style.height = `${this.displayHeight}px`;
+    
+    // Set canvas internal resolution (actual pixels)
+    // This ensures crisp rendering on high-DPI displays
+    canvas.width = this.displayWidth * this.devicePixelRatio;
+    canvas.height = this.displayHeight * this.devicePixelRatio;
+    
+    // Scale the drawing context to match device pixel ratio
+    if (this.ctx) {
+      this.ctx.scale(this.devicePixelRatio, this.devicePixelRatio);
+    }
+    
+    console.log('GameEngine: Canvas resized', {
+      displaySize: { width: this.displayWidth, height: this.displayHeight },
+      internalSize: { width: canvas.width, height: canvas.height },
+      devicePixelRatio: this.devicePixelRatio
+    });
   }
 
   // Handle joystick movement
@@ -504,6 +545,11 @@ class GameEngine {
   handleJoystickStop() {
     this.movementVelocity = { x: 0, y: 0 };
     this.isMoving = false;
+  }
+
+  // Get current player position
+  getPlayerPosition() {
+    return { ...this.localPlayerPosition };
   }
 
   // Stop the game engine
@@ -523,11 +569,6 @@ class GameEngine {
   // Check if game engine is running
   get isRunning() {
     return this._isRunning;
-  }
-
-  // Get current player position
-  getPlayerPosition() {
-    return { ...this.localPlayerPosition };
   }
 
 
@@ -639,14 +680,18 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
     };
   }, [detectZoneChange]);
 
-  // Handle canvas resize
+  // Handle canvas resize with proper viewport scaling
   useEffect(() => {
     const handleResize = () => {
       if (canvasRef.current) {
-        canvasRef.current.width = window.innerWidth;
-        canvasRef.current.height = window.innerHeight;
+        getGameEngine().resizeCanvas(canvasRef.current);
       }
     };
+
+    // Initial resize
+    if (canvasRef.current) {
+      getGameEngine().resizeCanvas(canvasRef.current);
+    }
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
