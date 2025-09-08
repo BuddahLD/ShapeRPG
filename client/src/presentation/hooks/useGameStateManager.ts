@@ -46,6 +46,6 @@ export function useGameState() {
     ...state,
     currentLocation: state.gameState.currentArea?.id || 'LOC_HUB_FIGUREIUM',
     isDrawingRune: state.gameState.isDrawingRune,
-    enemies: state.gameState.nearbyEnemies || []
+    mobs: state.gameState.nearbyMobs || []
   };
 }

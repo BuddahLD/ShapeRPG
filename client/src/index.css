@@ -73,17 +73,21 @@
     -moz-osx-font-smoothing: grayscale;
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    width: 100vw;
-    height: 100vh;
     margin: 0;
     padding: 0;
-    overflow-x: hidden;
+    overflow: hidden;
+    /* Prevent scaling and stretching */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Prevent zoom on double tap */
+    touch-action: manipulation;
   }
 
   #root {
-    width: 100%;
-    height: 100%;
-    position: relative;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
     top: 0;
     left: 0;
     z-index: 1;
@@ -92,11 +96,16 @@
 
 @layer components {
   .app-container {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     color: white;
     overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   /* Mob shape classes */

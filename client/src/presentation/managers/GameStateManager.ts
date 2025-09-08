@@ -116,12 +116,12 @@ export class GameStateManager {
             set(state => ({
               gameState: {
                 ...state.gameState,
-                player: this.adaptPlayerToUI(newGameState.player),
+                player: newGameState.player ? this.adaptPlayerToUI(newGameState.player) : null,
                 currentArea: newGameState.currentArea ? this.adaptAreaToUI(newGameState.currentArea) : null,
                 isInCombat: newGameState.isInCombat,
                 isDrawingRune: newGameState.isDrawingRune,
                 gamePhase: newGameState.gamePhase,
-                nearbyEnemies: this.adaptEnemiesToUI(newGameState.nearbyEnemies || []),
+                nearbyMobs: this.adaptMobsToUI(newGameState.nearbyMobs || []),
                 isLoading: false,
                 error: null
               }
@@ -162,12 +162,12 @@ export class GameStateManager {
             set(state => ({
               gameState: {
                 ...state.gameState,
-                player: this.adaptPlayerToUI(newGameState.player),
+                player: newGameState.player ? this.adaptPlayerToUI(newGameState.player) : null,
                 currentArea: newGameState.currentArea ? this.adaptAreaToUI(newGameState.currentArea) : state.gameState.currentArea,
                 isInCombat: newGameState.isInCombat,
                 isDrawingRune: newGameState.isDrawingRune,
                 gamePhase: newGameState.gamePhase,
-                nearbyEnemies: this.adaptEnemiesToUI(newGameState.nearbyEnemies || [])
+                nearbyMobs: this.adaptMobsToUI(newGameState.nearbyMobs || [])
               }
             }));
           }
@@ -262,7 +262,7 @@ export class GameStateManager {
           set(state => ({
             gameState: {
               ...state.gameState,
-              nearbyEnemies: []
+              nearbyMobs: []
             }
           }));
         } catch (error) {
@@ -272,13 +272,13 @@ export class GameStateManager {
 
       spawnEnemies: async () => {
         try {
-          await this.gameStateService.spawnEnemiesInCurrentArea();
+          await this.gameStateService.spawnMobsInCurrentArea();
           // Update only enemies - no full re-render
           const currentGameState = this.gameStateService.getCurrentGameState();
           set(state => ({
             gameState: {
               ...state.gameState,
-              nearbyEnemies: this.adaptEnemiesToUI(currentGameState.nearbyEnemies || [])
+              nearbyMobs: this.adaptMobsToUI(currentGameState.nearbyMobs || [])
             }
           }));
         } catch (error) {
@@ -357,8 +357,8 @@ export class GameStateManager {
     };
   }
 
-  private adaptEnemiesToUI(enemies: any[]): any[] {
-    // Simple pass-through for now - enemies are already in UI format
-    return enemies;
+  private adaptMobsToUI(mobs: any[]): any[] {
+    // Simple pass-through for now - mobs are already in UI format
+    return mobs;
   }
 }

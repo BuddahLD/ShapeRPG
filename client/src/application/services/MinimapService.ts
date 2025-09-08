@@ -62,7 +62,7 @@ export class MinimapService implements IMapService {
       playerPosition,
       viewBounds,
       visibleAreas,
-      nearbyEnemies,
+      nearbyMobs,
       zoneColors
     };
   }

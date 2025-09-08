@@ -23,13 +23,14 @@ class GameEngine {
     isSlowMotion: false,
     player: null as any,
     currentLocation: 'LOC_HUB_FIGUREIUM',
-    enemies: [] as any[]
+    mobs: [] as any[]
   };
   
   // Local game state
   private localPlayerPosition = { x: 0, y: 0 };
   private movementVelocity = { x: 0, y: 0 };
   private isMoving = false;
+  private movePlayerFunction: ((deltaX: number, deltaY: number) => Promise<void>) | null = null;
   
   // Performance monitoring
   private stats = {
@@ -82,6 +83,11 @@ class GameEngine {
         return;
       }
 
+      // Ensure game state is properly initialized
+      if (!this.gameState.mobs) {
+        this.gameState.mobs = [];
+      }
+
       // Update frame statistics
       this.stats.frameCount++;
       const deltaTime = startTime - this.stats.lastFrameTime;
@@ -99,6 +105,11 @@ class GameEngine {
         this.localPlayerPosition.x += this.movementVelocity.x;
         this.localPlayerPosition.y += this.movementVelocity.y;
         
+        // Update the actual game state through the movePlayer function
+        if (this.movePlayerFunction) {
+          this.movePlayerFunction(this.movementVelocity.x, this.movementVelocity.y);
+        }
+        
         // Dispatch position update for minimap and other systems
         this.dispatchPositionUpdate();
       }
@@ -110,7 +121,7 @@ class GameEngine {
       this.renderBackground();
       this.renderNPCs();
       this.renderPlayer();
-      this.renderEnemies();
+      this.renderMobs();
       this.renderZoneIndicators();
 
       // Reset error count on successful frame
@@ -330,8 +341,8 @@ class GameEngine {
     this.ctx.fillText(emoji, x, y);
   }
 
-  private renderEnemies() {
-    if (!this.ctx || !this.canvas) return;
+  private renderMobs() {
+    if (!this.ctx || !this.canvas || !this.gameState.mobs) return;
     
     const canvas = this.canvas;
     const centerX = canvas.width / 2;
@@ -476,6 +487,11 @@ class GameEngine {
     this.ctx!.setLineDash([]);
   }
 
+  // Set the movePlayer function from React
+  setMovePlayerFunction(movePlayer: (deltaX: number, deltaY: number) => Promise<void>) {
+    this.movePlayerFunction = movePlayer;
+  }
+
   // Handle joystick movement
   handleJoystickMove(deltaX: number, deltaY: number) {
     this.movementVelocity = { 
@@ -541,7 +557,7 @@ const getGameEngine = () => {
 const GameCanvas: React.FC<GameCanvasProps> = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { currentLocation, enemies, isSlowMotion, gameState, detectZoneChange } = useGameState();
-  const { player, position } = usePlayer();
+  const { player, position, movePlayer } = usePlayer();
 
   // Debug: Log when GameCanvas re-renders (only when drawing rune)
   if (gameState.isDrawingRune) {
@@ -557,9 +573,16 @@ const GameCanvas: React.FC<GameCanvasProps> = () => {
       isSlowMotion,
       player,
       currentLocation,
-      enemies
+      mobs: enemies
     });
   }, [isSlowMotion, player, currentLocation, enemies]);
+
+  // Set the movePlayer function in the game engine
+  useEffect(() => {
+    if (movePlayer) {
+      getGameEngine().setMovePlayerFunction(movePlayer);
+    }
+  }, [movePlayer]);
 
   // Initialize game engine when canvas is ready - only once
   useEffect(() => {

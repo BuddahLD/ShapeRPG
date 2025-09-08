@@ -46,7 +46,7 @@ export class GameStateService {
   private currentGameState: GameState = {
     player: null,
     currentArea: null,
-    nearbyEnemies: [],
+    nearbyMobs: [],
     isInCombat: false,
     isDrawingRune: false,
     gamePhase: 'loading'

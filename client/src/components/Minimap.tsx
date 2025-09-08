@@ -8,7 +8,7 @@ import { AppBootstrapService } from "../application/AppBootstrapService";
 
 const Minimap: React.FC = () => {
   const { position } = usePlayer();
-  const { enemies } = useGameState();
+  const { mobs } = useGameState();
 
   const [minimapData, setMinimapData] = useState<MapData | null>(null);
   const [minimapEntities, setMinimapEntities] = useState<MapEntity[]>([]);
@@ -54,12 +54,12 @@ const Minimap: React.FC = () => {
         const data = await minimapService.getMapData(currentPosition, {
           viewRadius,
           mapSize
-        }, enemies);
+        }, mobs);
         
         setMinimapData(data);
         
         // Get entities for minimap
-        const entities = minimapService.getMapEntities(data, enemies);
+        const entities = minimapService.getMapEntities(data, mobs);
         setMinimapEntities(entities);
       } catch (error) {
         console.warn('Failed to update minimap:', error);
@@ -74,7 +74,7 @@ const Minimap: React.FC = () => {
       const timeoutId = setTimeout(updateMinimap, 100);
       return () => clearTimeout(timeoutId);
     }
-  }, [livePosition, position, enemies, minimapService]);
+  }, [livePosition, position, mobs, minimapService]);
 
   const currentPosition = livePosition || position;
   if (!currentPosition || !minimapData) return null;
