@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Enemy } from '../domain/entities/Enemy';
+import { Mob } from '../domain/entities/Mob';
 import { MobManager } from '../application/services/MobManager';
 import { AppBootstrapService } from '../application/AppBootstrapService';
 
@@ -17,7 +17,7 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
   currentZone, 
   playerPosition 
 }) => {
-  const [mobs, setMobs] = useState<Enemy[]>([]);
+  const [mobs, setMobs] = useState<Mob[]>([]);
   const [mobManager] = useState(() => AppBootstrapService.getInstance().getMobManager());
   const lastSpawnCheck = useRef({ x: 0, y: 0, zone: '' });
   const spawnCheckDistance = 50; // Only check spawns when player moves 50 units
@@ -31,8 +31,8 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
     // Only proceed if player position is valid
     if (playerPosition && typeof playerPosition.x === 'number' && typeof playerPosition.y === 'number') {
       console.log('MobRenderer: Calling updateMobSpawning with position:', playerPosition, 'zone:', currentZone);
-      const spawnEvents = mobManager.updateEnemySpawning(playerPosition, currentZone);
-      const allMobs = mobManager.getAllEnemies();
+      const spawnEvents = mobManager.updateMobSpawning(playerPosition, currentZone);
+      const allMobs = mobManager.getAllMobs();
       console.log('MobRenderer: Spawn events:', spawnEvents.length, spawnEvents.map(e => e.type));
       console.log('MobRenderer: All mobs after spawn check:', allMobs.length, allMobs.map(e => ({ id: e.id, type: e.type, position: e.position })));
       setMobs(allMobs);
@@ -186,12 +186,12 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
     return () => clearInterval(updateInterval);
   }, []); // NO DEPENDENCIES - uses refs for current values
 
-  // Old renderEnemy function removed - now using canvas-based rendering
-  const renderEnemy = (enemy: Enemy) => {
-    if (!enemy.isAlive()) return null;
+  // Old renderMob function removed - now using canvas-based rendering
+  const renderMob = (mob: Mob) => {
+    if (!mob.isAlive()) return null;
 
-    const { x, y } = enemy.position;
-    const { size } = enemy.stats;
+    const { x, y } = mob.position;
+    const { size } = mob.stats;
     
     // Convert world coordinates to screen coordinates
     // Use the same coordinate system as GameCanvas NPCs (player at center)
@@ -214,11 +214,11 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
       return null;
     }
     
-    // Determine enemy color based on type and behavior
+    // Determine mob color based on type and behavior
     let color = '#666';
     let shape = 'triangle'; // Default to triangle, never square
     
-    switch (enemy.type) {
+    switch (mob.type) {
       case 'DUMMY':
         color = '#999';
         shape = 'circle'; // Dummy is a circle
@@ -246,7 +246,7 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
     }
 
     // Add attack indicator
-    const isAttacking = enemy.isAttacking;
+    const isAttacking = mob.isAttacking;
     const attackIndicator = isAttacking ? (
       <div
         className="absolute border-2 border-red-500 rounded-full animate-pulse"
@@ -261,8 +261,8 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
     ) : null;
 
     return (
-      <div key={enemy.id} className="absolute">
-        {/* Enemy body */}
+      <div key={mob.id} className="absolute">
+        {/* Mob body */}
         <div
           className={`absolute ${shape === 'triangle' ? 'triangle' : shape === 'hexagon' ? 'hexagon' : 'circle'}`}
           style={{
@@ -277,7 +277,7 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
         />
         
         {/* HP bar */}
-        {enemy.stats.hp < enemy.stats.maxHp && (
+        {mob.stats.hp < mob.stats.maxHp && (
           <div
             className="absolute bg-red-500"
             style={{
@@ -291,7 +291,7 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
             <div
               className="bg-green-500 h-full"
               style={{
-                width: `${(enemy.stats.hp / enemy.stats.maxHp) * 100}%`
+                width: `${(mob.stats.hp / mob.stats.maxHp) * 100}%`
               }}
             />
           </div>
@@ -301,7 +301,7 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
         {attackIndicator}
 
         {/* Counterattack window indicator */}
-        {enemy.canBeCounterattacked() && (
+        {mob.canBeCounterattacked() && (
           <div
             className="absolute border-2 border-yellow-400 rounded-full animate-ping"
             style={{
@@ -310,7 +310,7 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
               left: screenX - size/2 - 15,
               top: screenY - size/2 - 15,
               pointerEvents: 'none',
-              animationDuration: `${enemy.counterWindow}ms`
+              animationDuration: `${mob.counterWindow}ms`
             }}
           />
         )}

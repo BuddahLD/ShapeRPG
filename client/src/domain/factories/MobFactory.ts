@@ -3,7 +3,7 @@
  * Creates mob instances based on Joe's balance specifications
  */
 
-import { Enemy, EnemyType, EnemyBehavior, EnemyStats, EnemyPosition } from '../entities/Enemy';
+import { Mob, MobType, MobBehavior, MobStats, MobPosition } from '../entities/Mob';
 
 export class MobFactory {
   /**
@@ -11,60 +11,60 @@ export class MobFactory {
    */
   static createMob(
     id: string,
-    type: EnemyType,
-    position: EnemyPosition,
+    type: MobType,
+    position: MobPosition,
     level: number = 1
-  ): Enemy {
-    const enemyConfig = this.getEnemyConfig(type, level);
+  ): Mob {
+    const mobConfig = this.getMobConfig(type, level);
     
-    return new Enemy(
+    return new Mob(
       id,
       type,
-      enemyConfig.behavior,
+      mobConfig.behavior,
       position,
-      enemyConfig.stats,
-      enemyConfig.attackCooldown,
-      enemyConfig.attackWindowDuration
+      mobConfig.stats,
+      mobConfig.attackCooldown,
+      mobConfig.attackWindowDuration
     );
   }
 
   /**
-   * Get enemy configuration based on Joe's balance specifications
+   * Get mob configuration based on Joe's balance specifications
    */
-  private static getEnemyConfig(type: EnemyType, level: number) {
+  private static getMobConfig(type: MobType, level: number) {
     const configs = {
       'DUMMY': {
-        behavior: 'PEACEFUL' as EnemyBehavior,
+        behavior: 'PEACEFUL' as MobBehavior,
         baseStats: { hp: 50, maxHp: 50, attack: 0, defense: 0, magicResist: 0, size: 20 },
         attackCooldown: 0,
         attackWindowDuration: 0
       },
       'HEX_PEACEFUL': {
-        behavior: 'PEACEFUL' as EnemyBehavior,
+        behavior: 'PEACEFUL' as MobBehavior,
         baseStats: { hp: 15, maxHp: 15, attack: 0, defense: 0, magicResist: 0, size: 15 },
         attackCooldown: 0,
         attackWindowDuration: 0
       },
       'TRI_SMALL': {
-        behavior: 'NEUTRAL' as EnemyBehavior,
+        behavior: 'NEUTRAL' as MobBehavior,
         baseStats: { hp: 25, maxHp: 25, attack: 4, defense: 1, magicResist: 0, size: 18 },
         attackCooldown: 3000,
         attackWindowDuration: 2000
       },
       'TRI_AGGRESSIVE': {
-        behavior: 'AGGRESSIVE' as EnemyBehavior,
+        behavior: 'AGGRESSIVE' as MobBehavior,
         baseStats: { hp: 35, maxHp: 35, attack: 6, defense: 2, magicResist: 1, size: 20 },
         attackCooldown: 2500,
         attackWindowDuration: 1800
       },
       'TRI_MEDIUM': {
-        behavior: 'NEUTRAL' as EnemyBehavior,
+        behavior: 'NEUTRAL' as MobBehavior,
         baseStats: { hp: 45, maxHp: 45, attack: 7, defense: 2, magicResist: 1, size: 22 },
         attackCooldown: 2000,
         attackWindowDuration: 1500
       },
       'TRI_ELITE': {
-        behavior: 'AGGRESSIVE' as EnemyBehavior,
+        behavior: 'AGGRESSIVE' as MobBehavior,
         baseStats: { hp: 80, maxHp: 80, attack: 12, defense: 4, magicResist: 2, size: 25 },
         attackCooldown: 1500,
         attackWindowDuration: 1000
@@ -83,9 +83,9 @@ export class MobFactory {
   }
 
   /**
-   * Scale enemy stats based on level using Joe's formulas
+   * Scale mob stats based on level using Joe's formulas
    */
-  private static scaleStats(baseStats: EnemyStats, level: number): EnemyStats {
+  private static scaleStats(baseStats: MobStats, level: number): MobStats {
     if (level <= 1) return baseStats;
 
     return {
@@ -102,24 +102,24 @@ export class MobFactory {
   /**
    * Create mobs for specific zones based on spawn configuration
    */
-  static createZoneMobs(zoneId: string): Enemy[] {
+  static createZoneMobs(zoneId: string): Mob[] {
     const spawnConfigs = {
       'LOC_HUB_FIGUREIUM': [
-        { type: 'DUMMY' as EnemyType, position: { x: -150, y: 120 }, level: 1 }
+        { type: 'DUMMY' as MobType, position: { x: -150, y: 120 }, level: 1 }
       ],
       'LOC_PEACEFUL_FIELDS': [
-        { type: 'HEX_PEACEFUL' as EnemyType, position: { x: 300, y: 50 }, level: 1 },
-        { type: 'HEX_PEACEFUL' as EnemyType, position: { x: 400, y: -50 }, level: 1 },
-        { type: 'HEX_PEACEFUL' as EnemyType, position: { x: 500, y: 0 }, level: 1 },
-        { type: 'HEX_PEACEFUL' as EnemyType, position: { x: 350, y: 100 }, level: 1 },
-        { type: 'HEX_PEACEFUL' as EnemyType, position: { x: 450, y: -100 }, level: 1 }
+        { type: 'HEX_PEACEFUL' as MobType, position: { x: 300, y: 50 }, level: 1 },
+        { type: 'HEX_PEACEFUL' as MobType, position: { x: 400, y: -50 }, level: 1 },
+        { type: 'HEX_PEACEFUL' as MobType, position: { x: 500, y: 0 }, level: 1 },
+        { type: 'HEX_PEACEFUL' as MobType, position: { x: 350, y: 100 }, level: 1 },
+        { type: 'HEX_PEACEFUL' as MobType, position: { x: 450, y: -100 }, level: 1 }
       ],
       'LOC_SHARDS': [
-        { type: 'TRI_SMALL' as EnemyType, position: { x: 700, y: 100 }, level: 2 },
-        { type: 'TRI_SMALL' as EnemyType, position: { x: 800, y: -100 }, level: 2 },
-        { type: 'TRI_AGGRESSIVE' as EnemyType, position: { x: 900, y: 200 }, level: 3 },
-        { type: 'TRI_SMALL' as EnemyType, position: { x: 750, y: -200 }, level: 2 },
-        { type: 'TRI_SMALL' as EnemyType, position: { x: 1000, y: 0 }, level: 2 }
+        { type: 'TRI_SMALL' as MobType, position: { x: 700, y: 100 }, level: 2 },
+        { type: 'TRI_SMALL' as MobType, position: { x: 800, y: -100 }, level: 2 },
+        { type: 'TRI_AGGRESSIVE' as MobType, position: { x: 900, y: 200 }, level: 3 },
+        { type: 'TRI_SMALL' as MobType, position: { x: 750, y: -200 }, level: 2 },
+        { type: 'TRI_SMALL' as MobType, position: { x: 1000, y: 0 }, level: 2 }
       ]
     };
 

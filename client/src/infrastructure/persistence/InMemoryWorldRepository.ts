@@ -4,12 +4,12 @@
  */
 
 import { WorldArea, LocationId } from '../../domain/valueObjects/WorldArea';
-import { Enemy } from '../../domain/entities/Enemy';
+import { Mob } from '../../domain/entities/Mob';
 import { IWorldRepository } from '../../domain/interfaces/repositories/IWorldRepository';
 
 export class InMemoryWorldRepository implements IWorldRepository {
   private areas: WorldArea[] = [];
-  private enemies = new Map<string, Enemy[]>(); // areaId -> enemies
+  private mobs = new Map<string, Mob[]>(); // areaId -> mobs
 
   constructor() {
     this.initializeDefaultAreas();
@@ -23,31 +23,31 @@ export class InMemoryWorldRepository implements IWorldRepository {
     return this.areas.find(area => area.id === id) || null;
   }
 
-  async saveEnemies(enemies: Enemy[]): Promise<void> {
-    // Group enemies by their current area
-    const enemiesByArea = new Map<string, Enemy[]>();
+  async saveMobs(mobs: Mob[]): Promise<void> {
+    // Group mobs by their current area
+    const mobsByArea = new Map<string, Mob[]>();
     
-    for (const enemy of enemies) {
-      const area = this.findAreaForPosition(enemy.position.x, enemy.position.y);
+    for (const mob of mobs) {
+      const area = this.findAreaForPosition(mob.position.x, mob.position.y);
       if (area) {
-        const areaEnemies = enemiesByArea.get(area.id) || [];
-        areaEnemies.push(enemy);
-        enemiesByArea.set(area.id, areaEnemies);
+        const areaMobs = mobsByArea.get(area.id) || [];
+        areaMobs.push(mob);
+        mobsByArea.set(area.id, areaMobs);
       }
     }
 
-    // Update stored enemies
-    enemiesByArea.forEach((areaEnemies, areaId) => {
-      this.enemies.set(areaId, areaEnemies);
+    // Update stored mobs
+    mobsByArea.forEach((areaMobs, areaId) => {
+      this.mobs.set(areaId, areaMobs);
     });
   }
 
-  async getEnemiesInArea(areaId: string): Promise<Enemy[]> {
-    return this.enemies.get(areaId) || [];
+  async getMobsInArea(areaId: string): Promise<Mob[]> {
+    return this.mobs.get(areaId) || [];
   }
 
-  async clearEnemiesInArea(areaId: string): Promise<void> {
-    this.enemies.delete(areaId);
+  async clearMobsInArea(areaId: string): Promise<void> {
+    this.mobs.delete(areaId);
   }
 
   // Additional methods
@@ -77,7 +77,7 @@ export class InMemoryWorldRepository implements IWorldRepository {
         accent: '#ddd6fe',
         background: '#faf5ff'
       },
-      false, // No enemy spawning
+      false, // No mob spawning
       '#8b5cf6'
     );
 
@@ -93,7 +93,7 @@ export class InMemoryWorldRepository implements IWorldRepository {
         accent: '#a7f3d0',
         background: '#f0fdf4'
       },
-      false, // No enemy spawning in peaceful fields
+      false, // No mob spawning in peaceful fields
       '#10b981'
     );
 
@@ -109,7 +109,7 @@ export class InMemoryWorldRepository implements IWorldRepository {
         accent: '#fecdd3',
         background: '#fff1f2'
       },
-      true, // Enemy spawning allowed (neutral mobs)
+      true, // Mob spawning allowed (neutral mobs)
       '#dc2626'
     );
 

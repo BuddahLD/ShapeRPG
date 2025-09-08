@@ -8,7 +8,7 @@ import { GameStateService, GameState } from '../../application/services/GameStat
 import { AnimationService } from '../../application/services/AnimationService';
 import { Player } from '../../domain/entities/Player';
 import { WorldArea } from '../../domain/valueObjects/WorldArea';
-import { Enemy } from '../../domain/entities/Enemy';
+import { Mob } from '../../domain/entities/Mob';
 
 // UI Models for presentation layer
 export interface UIPlayerModel {

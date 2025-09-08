@@ -4,7 +4,7 @@
  */
 
 import { Player } from '../../domain/entities/Player';
-import { Enemy } from '../../domain/entities/Enemy';
+import { Mob } from '../../domain/entities/Mob';
 import { WorldArea } from '../../domain/valueObjects/WorldArea';
 import { IPlayerRepository } from '../../domain/interfaces/repositories/IPlayerRepository';
 import { IWorldRepository } from '../../domain/interfaces/repositories/IWorldRepository';
@@ -15,7 +15,7 @@ import { ZoneDetectionService } from './ZoneDetectionService';
 export interface GameState {
   readonly player: Player | null;
   readonly currentArea: WorldArea | null;
-  readonly nearbyEnemies: Enemy[];
+  readonly nearbyMobs: Mob[];
   readonly isInCombat: boolean;
   readonly isDrawingRune: boolean;
   readonly gamePhase: 'loading' | 'exploring' | 'combat' | 'rune-drawing' | 'paused';
@@ -91,7 +91,7 @@ export class GameStateService {
       this.currentGameState = {
         player,
         currentArea,
-        nearbyEnemies: [],
+        nearbyMobs: [],
         isInCombat: false,
         isDrawingRune: false,
         gamePhase: 'exploring'
@@ -226,9 +226,9 @@ export class GameStateService {
     }
 
     // Check for combat initiation
-    if (explorationResult.currentArea?.allowsEnemySpawning && this.currentGameState.nearbyEnemies.length > 0) {
-      const hasLivingEnemies = this.currentGameState.nearbyEnemies.some(enemy => enemy.isAlive());
-      if (hasLivingEnemies) {
+    if (explorationResult.currentArea?.allowsMobSpawning && this.currentGameState.nearbyMobs.length > 0) {
+      const hasLivingMobs = this.currentGameState.nearbyMobs.some(mob => mob.isAlive());
+      if (hasLivingMobs) {
         this.currentGameState = {
           ...this.currentGameState,
           isInCombat: true,
@@ -244,24 +244,24 @@ export class GameStateService {
     deltaTime: number, 
     stateChanges: string[]
   ): Promise<void> {
-    // Update enemy states
-    const updatedEnemies = this.currentGameState.nearbyEnemies.map(enemy => 
-      enemy.updateCounterWindow(deltaTime)
+    // Update mob states
+    const updatedMobs = this.currentGameState.nearbyMobs.map(mob => 
+      mob.updateCounterWindow(deltaTime)
     );
 
     this.currentGameState = {
       ...this.currentGameState,
-      nearbyEnemies: updatedEnemies
+      nearbyMobs: updatedMobs
     };
 
     // Check if combat should end
-    const hasLivingEnemies = updatedEnemies.some(enemy => enemy.isAlive());
-    if (!hasLivingEnemies) {
+    const hasLivingMobs = updatedMobs.some(mob => mob.isAlive());
+    if (!hasLivingMobs) {
       this.currentGameState = {
         ...this.currentGameState,
         isInCombat: false,
         gamePhase: 'exploring',
-        nearbyEnemies: []
+        nearbyMobs: []
       };
       stateChanges.push('Combat ended');
     }
@@ -307,23 +307,23 @@ export class GameStateService {
       // Update game state
       this.currentGameState = {
         ...this.currentGameState,
-        nearbyEnemies: []
+        nearbyMobs: []
       };
     }
   }
 
   /**
-   * Spawn enemies in the current area
+   * Spawn mobs in the current area
    */
-  async spawnEnemiesInCurrentArea(): Promise<void> {
-    if (this.currentGameState.currentArea && this.currentGameState.currentArea.allowsEnemySpawning) {
-      // Get existing enemies in the area
-      const existingEnemies = await this.worldRepository.getEnemiesInArea(this.currentGameState.currentArea.id);
+  async spawnMobsInCurrentArea(): Promise<void> {
+    if (this.currentGameState.currentArea && this.currentGameState.currentArea.allowsMobSpawning) {
+      // Get existing mobs in the area
+      const existingMobs = await this.worldRepository.getMobsInArea(this.currentGameState.currentArea.id);
       
-      // Update game state with enemies
+      // Update game state with mobs
       this.currentGameState = {
         ...this.currentGameState,
-        nearbyEnemies: existingEnemies
+        nearbyMobs: existingMobs
       };
     }
   }

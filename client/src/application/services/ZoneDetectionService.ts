@@ -50,7 +50,7 @@ export class ZoneDetectionService {
             accent: '#d1d5db',
             background: '#f9fafb'
           },
-          false, // No enemy spawning in nowhere
+          false, // No mob spawning in nowhere
           '#6b7280'
         );
       }

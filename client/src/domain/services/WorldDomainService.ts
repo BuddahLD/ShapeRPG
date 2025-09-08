@@ -4,7 +4,7 @@
  */
 
 import { WorldArea, LocationId } from '../valueObjects/WorldArea';
-import { Enemy, EnemyPosition } from '../entities/Enemy';
+import { Mob, MobPosition } from '../entities/Mob';
 
 export class WorldDomainService {
   /**
@@ -17,7 +17,7 @@ export class WorldDomainService {
   /**
    * Calculate distance between two positions
    */
-  static calculateDistance(pos1: EnemyPosition, pos2: EnemyPosition): number {
+  static calculateDistance(pos1: MobPosition, pos2: MobPosition): number {
     const dx = pos1.x - pos2.x;
     const dy = pos1.y - pos2.y;
     return Math.sqrt(dx * dx + dy * dy);
@@ -44,11 +44,11 @@ export class WorldDomainService {
   }
 
   /**
-   * Calculate the optimal spawn position for an enemy in an area
+   * Calculate the optimal spawn position for a mob in an area
    */
-  static calculateEnemySpawnPosition(area: WorldArea, playerPosition: EnemyPosition): EnemyPosition {
-    if (!area.allowsEnemySpawning) {
-      throw new Error(`Cannot spawn enemies in safe zone: ${area.name}`);
+  static calculateMobSpawnPosition(area: WorldArea, playerPosition: MobPosition): MobPosition {
+    if (!area.allowsMobSpawning) {
+      throw new Error(`Cannot spawn mobs in safe zone: ${area.name}`);
     }
 
     const center = area.getCenter();
@@ -79,7 +79,7 @@ export class WorldDomainService {
   /**
    * Check if a position is within a safe movement distance from area boundaries
    */
-  static isPositionSafeInArea(area: WorldArea, position: EnemyPosition, safetyMargin: number = 10): boolean {
+  static isPositionSafeInArea(area: WorldArea, position: MobPosition, safetyMargin: number = 10): boolean {
     const bounds = area.bounds;
     return position.x >= bounds.minX + safetyMargin &&
            position.x <= bounds.maxX - safetyMargin &&
@@ -99,7 +99,7 @@ export class WorldDomainService {
   /**
    * Calculate the transition point between two adjacent areas
    */
-  static getAreaTransitionPoint(fromArea: WorldArea, toArea: WorldArea): EnemyPosition | null {
+  static getAreaTransitionPoint(fromArea: WorldArea, toArea: WorldArea): MobPosition | null {
     if (!this.areAreasAdjacent(fromArea, toArea)) {
       return null;
     }

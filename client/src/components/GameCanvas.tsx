@@ -337,28 +337,28 @@ class GameEngine {
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
-    this.gameState.enemies.forEach((enemy: any) => {
-      const screenX = centerX + (enemy.position.x - this.localPlayerPosition.x);
-      const screenY = centerY + (enemy.position.y - this.localPlayerPosition.y);
+    this.gameState.mobs.forEach((mob: any) => {
+      const screenX = centerX + (mob.position.x - this.localPlayerPosition.x);
+      const screenY = centerY + (mob.position.y - this.localPlayerPosition.y);
 
       // Only render if on screen
       if (screenX > -50 && screenX < canvas.width + 50 && 
           screenY > -50 && screenY < canvas.height + 50) {
         
-        const size = enemy.size || 20;
-        this.renderEnemy(screenX, screenY, enemy.type, size);
+        const size = mob.size || 20;
+        this.renderMob(screenX, screenY, mob.type, size);
       }
     });
   }
 
-  private renderEnemy(x: number, y: number, type: string, size: number) {
+  private renderMob(x: number, y: number, type: string, size: number) {
     if (!this.ctx) return;
     
     // Add floating animation
     const floatOffset = Math.sin(Date.now() * 0.003 + x * 0.01) * 2;
     
     if (type === 'HEX_PEACEFUL') {
-      // Hexagonal enemy
+      // Hexagonal mob
       this.ctx.fillStyle = '#ff6b6b';
       this.ctx.strokeStyle = '#ffffff';
       this.ctx.lineWidth = 2;
@@ -375,7 +375,7 @@ class GameEngine {
       this.ctx.fill();
       this.ctx.stroke();
     } else {
-      // Triangular enemy
+      // Triangular mob
       this.ctx.fillStyle = '#ff4757';
       this.ctx.strokeStyle = '#ffffff';
       this.ctx.lineWidth = 2;

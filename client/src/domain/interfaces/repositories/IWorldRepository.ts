@@ -4,12 +4,12 @@
  */
 
 import { WorldArea } from '../../valueObjects/WorldArea';
-import { Enemy } from '../../entities/Enemy';
+import { Mob } from '../../entities/Mob';
 
 export interface IWorldRepository {
   getAllAreas(): Promise<WorldArea[]>;
   getAreaById(id: string): Promise<WorldArea | null>;
-  saveEnemies(enemies: Enemy[]): Promise<void>;
-  getEnemiesInArea(areaId: string): Promise<Enemy[]>;
-  clearEnemiesInArea(areaId: string): Promise<void>;
+  saveMobs(mobs: Mob[]): Promise<void>;
+  getMobsInArea(areaId: string): Promise<Mob[]>;
+  clearMobsInArea(areaId: string): Promise<void>;
 }

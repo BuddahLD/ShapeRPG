@@ -58,8 +58,8 @@ export class VisualEffects {
     ctx.restore();
   }
 
-  // Draw enemy with zone-appropriate styling
-  static drawEnemy(
+  // Draw mob with zone-appropriate styling
+  static drawMob(
     ctx: CanvasRenderingContext2D, 
     x: number, 
     y: number, 

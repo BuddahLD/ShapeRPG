@@ -4,7 +4,7 @@
  */
 
 import { WorldArea } from '../../valueObjects/WorldArea';
-import { Enemy } from '../../entities/Enemy';
+import { Mob } from '../../entities/Mob';
 
 export interface MapConfig {
   readonly viewRadius: number;
@@ -21,14 +21,14 @@ export interface MapData {
     maxY: number;
   };
   readonly visibleAreas: WorldArea[];
-  readonly nearbyEnemies: Enemy[];
+  readonly nearbyMobs: Mob[];
   readonly zoneColors: Map<string, string>;
 }
 
 export interface MapEntity {
   readonly id: string;
   readonly position: { x: number; y: number };
-  readonly type: 'player' | 'enemy' | 'npc' | 'item' | 'waypoint';
+  readonly type: 'player' | 'mob' | 'npc' | 'item' | 'waypoint';
   readonly color: string;
   readonly size: number;
   readonly label?: string;
@@ -41,7 +41,7 @@ export interface IMapService {
   getMapData(
     playerPosition: { x: number; y: number },
     config: Partial<MapConfig>,
-    enemies?: Enemy[]
+    mobs?: Mob[]
   ): Promise<MapData>;
 
   /**
@@ -58,7 +58,7 @@ export interface IMapService {
    */
   getMapEntities(
     mapData: MapData,
-    enemies: Enemy[]
+    mobs: Mob[]
   ): MapEntity[];
 
   /**

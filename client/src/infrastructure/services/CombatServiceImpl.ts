@@ -4,7 +4,7 @@
  */
 
 import { Player } from '../../domain/entities/Player';
-import { Enemy } from '../../domain/entities/Enemy';
+import { Mob } from '../../domain/entities/Mob';
 import { Spell } from '../../domain/valueObjects/Spell';
 import { ICombatService, CombatResult, SpellCastResult } from '../../domain/interfaces/services/ICombatService';
 import { CombatService as CombatCalculator } from '../../application/services/CombatService';
@@ -12,8 +12,8 @@ import { CombatService as CombatCalculator } from '../../application/services/Co
 export class CombatServiceImpl implements ICombatService {
   private combatCalculator = new CombatCalculator();
 
-  playerAttackEnemy(player: Player, enemy: Enemy): CombatResult {
-    if (!player.isAlive() || !enemy.isAlive()) {
+  playerAttackMob(player: Player, mob: Mob): CombatResult {
+    if (!player.isAlive() || !mob.isAlive()) {
       throw new Error('Combat participants must be alive');
     }
 
@@ -29,19 +29,19 @@ export class CombatServiceImpl implements ICombatService {
       critMultiplier: 1.5 // TODO: Add critMultiplier to Player stats
     };
 
-    const combatResult = this.combatCalculator.calculatePlayerPhysicalDamage(playerStats, enemy);
-    const damagedEnemy = enemy.takeDamage(combatResult.damage, false);
+    const combatResult = this.combatCalculator.calculatePlayerPhysicalDamage(playerStats, mob);
+    const damagedMob = mob.takeDamage(combatResult.damage, false);
 
     return {
       attacker: player,
-      target: damagedEnemy,
+      target: damagedMob,
       damage: combatResult.actualDamage,
       wasCounterattack: false
     };
   }
 
-  enemyAttackPlayer(enemy: Enemy, player: Player): CombatResult {
-    if (!enemy.isAlive() || !player.isAlive()) {
+  mobAttackPlayer(mob: Mob, player: Player): CombatResult {
+    if (!mob.isAlive() || !player.isAlive()) {
       throw new Error('Combat participants must be alive');
     }
 
@@ -57,23 +57,23 @@ export class CombatServiceImpl implements ICombatService {
       critMultiplier: 1.5 // TODO: Add critMultiplier to Player stats
     };
 
-    const combatResult = this.combatCalculator.calculateEnemyDamage(enemy, playerStats);
+    const combatResult = this.combatCalculator.calculateMobDamage(mob, playerStats);
     const damagedPlayer = player.takeDamage(combatResult.damage);
 
     return {
-      attacker: enemy,
+      attacker: mob,
       target: damagedPlayer,
       damage: combatResult.actualDamage,
       wasCounterattack: false
     };
   }
 
-  performCounterattack(player: Player, enemy: Enemy): CombatResult | null {
-    if (!enemy.canBeCounterattacked()) {
+  performCounterattack(player: Player, mob: Mob): CombatResult | null {
+    if (!mob.canBeCounterattacked()) {
       return null;
     }
 
-    if (!player.isAlive() || !enemy.isAlive()) {
+    if (!player.isAlive() || !mob.isAlive()) {
       throw new Error('Combat participants must be alive');
     }
 
@@ -91,26 +91,26 @@ export class CombatServiceImpl implements ICombatService {
 
     const counterattackResult = this.combatCalculator.calculateCounterattack(
       playerStats, 
-      enemy, 
-      enemy.counterWindow, 
-      enemy.attackCooldown
+      mob, 
+      mob.counterWindow, 
+      mob.attackCooldown
     );
 
     if (!counterattackResult.success) {
       return null;
     }
 
-    const damagedEnemy = enemy.takeDamage(counterattackResult.damage, false).endAttack();
+    const damagedMob = mob.takeDamage(counterattackResult.damage, false).endAttack();
 
     return {
       attacker: player,
-      target: damagedEnemy,
+      target: damagedMob,
       damage: counterattackResult.damage,
       wasCounterattack: true
     };
   }
 
-  castSpell(caster: Player, target: Player | Enemy, spell: Spell, accuracy: number): SpellCastResult {
+  castSpell(caster: Player, target: Player | Mob, spell: Spell, accuracy: number): SpellCastResult {
     if (!caster.isAlive()) {
       throw new Error('Caster must be alive');
     }
@@ -147,7 +147,7 @@ export class CombatServiceImpl implements ICombatService {
     switch (modifiedSpell.effect.type) {
       case 'damage':
       case 'damage+slow':
-        if (target instanceof Enemy) {
+        if (target instanceof Mob) {
           updatedTarget = target.takeDamage(modifiedSpell.effect.amount);
         }
         break;
@@ -174,7 +174,7 @@ export class CombatServiceImpl implements ICombatService {
   }
 
   // Additional combat utilities
-  calculateDamage(attacker: Player | Enemy, target: Player | Enemy, baseMultiplier: number = 1.0): number {
+  calculateDamage(attacker: Player | Mob, target: Player | Mob, baseMultiplier: number = 1.0): number {
     const attackerStats = attacker instanceof Player ? attacker.stats : attacker.stats;
     const targetStats = target instanceof Player ? target.stats : target.stats;
     
@@ -182,7 +182,7 @@ export class CombatServiceImpl implements ICombatService {
     return Math.max(1, baseDamage - targetStats.defense);
   }
 
-  isInCombatRange(attacker: Player | Enemy, target: Player | Enemy, range: number = 100): boolean {
+  isInCombatRange(attacker: Player | Mob, target: Player | Mob, range: number = 100): boolean {
     const attackerPos = attacker instanceof Player ? attacker.position : attacker.position;
     const targetPos = target instanceof Player ? target.position : target.position;
 

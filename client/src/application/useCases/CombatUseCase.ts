@@ -4,36 +4,36 @@
  */
 
 import { Player } from '../../domain/entities/Player';
-import { Enemy } from '../../domain/entities/Enemy';
+import { Mob } from '../../domain/entities/Mob';
 import { IPlayerRepository } from '../../domain/interfaces/repositories/IPlayerRepository';
 import { ICombatService, CombatResult } from '../../domain/interfaces/services/ICombatService';
 
-export interface AttackEnemyRequest {
+export interface AttackMobRequest {
   readonly playerId: string;
-  readonly enemyId: string;
+  readonly mobId: string;
   readonly isCounterattack?: boolean;
 }
 
-export interface AttackEnemyResponse {
+export interface AttackMobResponse {
   readonly success: boolean;
   readonly combatResult: CombatResult | null;
   readonly playerLeveledUp: boolean;
-  readonly enemyDefeated: boolean;
+  readonly mobDefeated: boolean;
   readonly updatedPlayer: Player;
-  readonly updatedEnemy: Enemy | null;
+  readonly updatedMob: Mob | null;
 }
 
-export interface EnemyAttackPlayerRequest {
+export interface MobAttackPlayerRequest {
   readonly playerId: string;
-  readonly enemyId: string;
+  readonly mobId: string;
 }
 
-export interface EnemyAttackPlayerResponse {
+export interface MobAttackPlayerResponse {
   readonly success: boolean;
   readonly combatResult: CombatResult | null;
   readonly playerDefeated: boolean;
   readonly updatedPlayer: Player;
-  readonly updatedEnemy: Enemy;
+  readonly updatedMob: Mob;
 }
 
 export class CombatUseCase {
@@ -42,7 +42,7 @@ export class CombatUseCase {
     private readonly combatService: ICombatService
   ) {}
 
-  async attackEnemy(request: AttackEnemyRequest): Promise<AttackEnemyResponse> {
+  async attackMob(request: AttackMobRequest): Promise<AttackMobResponse> {
     const player = await this.playerRepository.findById(request.playerId);
     if (!player) {
       throw new Error(`Player not found: ${request.playerId}`);
@@ -52,13 +52,13 @@ export class CombatUseCase {
       throw new Error('Player is not alive');
     }
 
-    // Note: Enemy would come from an enemy repository in a complete implementation
-    // For now, assuming enemy is passed or retrieved from somewhere
-    // This is where we'd inject an IEnemyRepository
-    throw new Error('Enemy repository not implemented yet');
+    // Note: Mob would come from a mob repository in a complete implementation
+    // For now, assuming mob is passed or retrieved from somewhere
+    // This is where we'd inject an IMobRepository
+    throw new Error('Mob repository not implemented yet');
   }
 
-  async enemyAttackPlayer(request: EnemyAttackPlayerRequest): Promise<EnemyAttackPlayerResponse> {
+  async mobAttackPlayer(request: MobAttackPlayerRequest): Promise<MobAttackPlayerResponse> {
     const player = await this.playerRepository.findById(request.playerId);
     if (!player) {
       throw new Error(`Player not found: ${request.playerId}`);
@@ -68,11 +68,11 @@ export class CombatUseCase {
       throw new Error('Player is not alive');
     }
 
-    // Note: Enemy would come from an enemy repository in a complete implementation
-    throw new Error('Enemy repository not implemented yet');
+    // Note: Mob would come from a mob repository in a complete implementation
+    throw new Error('Mob repository not implemented yet');
   }
 
-  async performCounterattack(request: AttackEnemyRequest): Promise<AttackEnemyResponse> {
+  async performCounterattack(request: AttackMobRequest): Promise<AttackMobResponse> {
     const player = await this.playerRepository.findById(request.playerId);
     if (!player) {
       throw new Error(`Player not found: ${request.playerId}`);
@@ -82,22 +82,22 @@ export class CombatUseCase {
       throw new Error('Player is not alive');
     }
 
-    // Note: Enemy would come from an enemy repository in a complete implementation
-    throw new Error('Enemy repository not implemented yet');
+    // Note: Mob would come from a mob repository in a complete implementation
+    throw new Error('Mob repository not implemented yet');
   }
 
   private async handleCombatResult(
     combatResult: CombatResult,
-    enemy: Enemy
-  ): Promise<{ playerLeveledUp: boolean; enemyDefeated: boolean; updatedPlayer: Player }> {
+    mob: Mob
+  ): Promise<{ playerLeveledUp: boolean; mobDefeated: boolean; updatedPlayer: Player }> {
     let updatedPlayer = combatResult.attacker as Player;
     let playerLeveledUp = false;
-    const enemyDefeated = !enemy.isAlive();
+    const mobDefeated = !mob.isAlive();
 
-    if (enemyDefeated) {
+    if (mobDefeated) {
       // Award experience and gold
-      const expGain = enemy.getExperienceValue();
-      const goldGain = enemy.getGoldValue();
+      const expGain = mob.getExperienceValue();
+      const goldGain = mob.getGoldValue();
 
       const expResult = updatedPlayer.addExperience(expGain);
       updatedPlayer = expResult.player.addGold(goldGain);
@@ -107,6 +107,6 @@ export class CombatUseCase {
     // Save updated player
     await this.playerRepository.save(updatedPlayer);
 
-    return { playerLeveledUp, enemyDefeated, updatedPlayer };
+    return { playerLeveledUp, mobDefeated, updatedPlayer };
   }
 }

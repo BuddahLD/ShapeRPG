@@ -26,7 +26,7 @@ export class WorldArea {
   private readonly _bounds: AreaBounds;
   private readonly _gamePhase: GamePhase;
   private readonly _visualTheme: VisualTheme;
-  private readonly _allowsEnemySpawning: boolean;
+  private readonly _allowsMobSpawning: boolean;
   private readonly _backgroundGradient: string;
 
   constructor(
@@ -35,7 +35,7 @@ export class WorldArea {
     bounds: AreaBounds,
     gamePhase: GamePhase,
     visualTheme: VisualTheme,
-    allowsEnemySpawning: boolean = false,
+    allowsMobSpawning: boolean = false,
     backgroundGradient: string = '#000000'
   ) {
     // Domain validation
@@ -48,7 +48,7 @@ export class WorldArea {
     this._bounds = bounds;
     this._gamePhase = gamePhase;
     this._visualTheme = visualTheme;
-    this._allowsEnemySpawning = allowsEnemySpawning;
+    this._allowsMobSpawning = allowsMobSpawning;
     this._backgroundGradient = backgroundGradient;
   }
 
@@ -58,7 +58,7 @@ export class WorldArea {
   get bounds(): AreaBounds { return this._bounds; }
   get gamePhase(): GamePhase { return this._gamePhase; }
   get visualTheme(): VisualTheme { return this._visualTheme; }
-  get allowsEnemySpawning(): boolean { return this._allowsEnemySpawning; }
+  get allowsMobSpawning(): boolean { return this._allowsMobSpawning; }
   get backgroundGradient(): string { return this._backgroundGradient; }
 
   // Domain Operations
@@ -99,7 +99,7 @@ export class WorldArea {
   }
 
   isSafeZone(): boolean {
-    return !this._allowsEnemySpawning;
+    return !this._allowsMobSpawning;
   }
 
   equals(other: WorldArea): boolean {

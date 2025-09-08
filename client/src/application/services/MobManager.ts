@@ -3,18 +3,18 @@
  * Manages mob spawning, lifecycle, and zone-based mob management
  */
 
-import { Enemy, EnemyType, EnemyPosition } from '../../domain/entities/Enemy';
+import { Mob, MobType, MobPosition } from '../../domain/entities/Mob';
 import { MobFactory } from '../../domain/factories/MobFactory';
 
 export interface MobSpawnConfig {
   zoneId: string;
   maxMobs: number;
-  mobTypes: EnemyType[];
+  mobTypes: MobType[];
   respawnTime: number;
 }
 
 export interface MobUpdateResult {
-  mobs: Enemy[];
+  mobs: Mob[];
   events: MobEvent[];
 }
 
@@ -25,7 +25,7 @@ export interface MobEvent {
 }
 
 export class MobManager {
-  private mobs: Map<string, Enemy> = new Map();
+  private mobs: Map<string, Mob> = new Map();
   private spawnConfigs: Map<string, MobSpawnConfig> = new Map();
   private respawnTimers: Map<string, number> = new Map();
   private lastUpdateTime: number = 0;
@@ -158,13 +158,13 @@ export class MobManager {
    */
   private getPotentialSpawnPoints(zoneId: string): Array<{
     id: string;
-    type: import('../../domain/entities/Enemy').EnemyType;
+    type: import('../../domain/entities/Mob').MobType;
     position: { x: number; y: number };
     level: number;
   }> {
     const spawnPoints: Array<{
       id: string;
-      type: import('../../domain/entities/Enemy').EnemyType;
+      type: import('../../domain/entities/Mob').MobType;
       position: { x: number; y: number };
       level: number;
     }> = [];
@@ -217,7 +217,7 @@ export class MobManager {
   /**
    * Get all enemies in a specific zone
    */
-  getMobsInZone(zoneId: string): Enemy[] {
+  getMobsInZone(zoneId: string): Mob[] {
     return Array.from(this.mobs.values()).filter(mob => 
       mob.id.startsWith(zoneId)
     );
@@ -226,14 +226,14 @@ export class MobManager {
   /**
    * Get all active mobs
    */
-  getAllMobs(): Enemy[] {
+  getAllMobs(): Mob[] {
     return Array.from(this.mobs.values());
   }
 
   /**
    * Get mob by ID
    */
-  getMob(mobId: string): Enemy | undefined {
+  getMob(mobId: string): Mob | undefined {
     return this.mobs.get(mobId);
   }
 
@@ -242,7 +242,7 @@ export class MobManager {
    */
   updateMobs(deltaTime: number, currentTime: number): MobUpdateResult {
     const events: MobEvent[] = [];
-    const updatedMobs: Enemy[] = [];
+    const updatedMobs: Mob[] = [];
 
     // Update all mobs
     this.mobs.forEach((mob, mobId) => {
@@ -358,7 +358,7 @@ export class MobManager {
   /**
    * Get mobs within range of a position
    */
-  getMobsInRange(position: EnemyPosition, range: number): Enemy[] {
+  getMobsInRange(position: MobPosition, range: number): Mob[] {
     return Array.from(this.mobs.values()).filter(mob => 
       mob.isAlive() && mob.getDistanceToPosition(position) <= range
     );
@@ -367,7 +367,7 @@ export class MobManager {
   /**
    * Get mobs that can attack the player
    */
-  getAggressiveMobsInRange(position: EnemyPosition, range: number): Enemy[] {
+  getAggressiveMobsInRange(position: MobPosition, range: number): Mob[] {
     return this.getMobsInRange(position, range).filter(mob => 
       mob.willAttackPlayer()
     );
@@ -376,7 +376,7 @@ export class MobManager {
   /**
    * Schedule mob respawn
    */
-  private scheduleRespawn(mobId: string, deadMob: Enemy): void {
+  private scheduleRespawn(mobId: string, deadMob: Mob): void {
     const zoneId = mobId.split('_')[0] + '_' + mobId.split('_')[1];
     const config = this.spawnConfigs.get(zoneId);
     

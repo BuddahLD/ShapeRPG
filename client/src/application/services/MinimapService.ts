@@ -4,7 +4,7 @@
  */
 
 import { WorldArea } from '../../domain/valueObjects/WorldArea';
-import { Enemy } from '../../domain/entities/Enemy';
+import { Mob } from '../../domain/entities/Mob';
 import { IWorldRepository } from '../../domain/interfaces/repositories/IWorldRepository';
 import { IMapService, MapConfig, MapData, MapEntity } from '../../domain/interfaces/services/IMapService';
 
@@ -27,7 +27,7 @@ export class MinimapService implements IMapService {
   async getMapData(
     playerPosition: { x: number; y: number },
     config: Partial<MapConfig> = {},
-    enemies: Enemy[] = []
+    mobs: Mob[] = []
   ): Promise<MapData> {
     const finalConfig = { ...this.defaultConfig, ...config };
     
@@ -51,8 +51,8 @@ export class MinimapService implements IMapService {
     // console.log('MinimapService: Visible areas:', visibleAreas.map(a => a.id));
     
     // Filter enemies that are within view bounds
-    const nearbyEnemies = enemies.filter(enemy => 
-      this.isPositionInBounds(enemy.position, viewBounds)
+    const nearbyMobs = mobs.filter(mob => 
+      this.isPositionInBounds(mob.position, viewBounds)
     );
     
     // Create zone color map
@@ -89,7 +89,7 @@ export class MinimapService implements IMapService {
    */
   getMapEntities(
     mapData: MapData,
-    enemies: Enemy[] = []
+    mobs: Mob[] = []
   ): MapEntity[] {
     const entities: MapEntity[] = [];
     
@@ -102,14 +102,14 @@ export class MinimapService implements IMapService {
       size: 2
     });
     
-    // Add nearby enemies
-    enemies.forEach(enemy => {
-      if (this.isPositionInBounds(enemy.position, mapData.viewBounds)) {
+    // Add nearby mobs
+    mobs.forEach(mob => {
+      if (this.isPositionInBounds(mob.position, mapData.viewBounds)) {
         entities.push({
-          id: enemy.id,
-          position: enemy.position,
-          type: 'enemy',
-          color: '#ef4444', // Red for enemies
+          id: mob.id,
+          position: mob.position,
+          type: 'mob',
+          color: '#ef4444', // Red for mobs
           size: 1
         });
       }

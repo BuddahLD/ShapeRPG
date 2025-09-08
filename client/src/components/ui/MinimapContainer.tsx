@@ -70,7 +70,7 @@ export const MinimapContainer: React.FC<MinimapContainerProps> = ({
             </div>
             <div className="flex items-center space-x-1">
               <div className="w-1 h-1 bg-red-400 rounded-full"></div>
-              <span>Enemy</span>
+              <span>Mob</span>
             </div>
           </div>
         </div>

@@ -4,7 +4,7 @@
  */
 
 import { Player } from '../../domain/entities/Player';
-import { Enemy } from '../../domain/entities/Enemy';
+import { Mob } from '../../domain/entities/Mob';
 import { Spell } from '../../domain/valueObjects/Spell';
 import { IPlayerRepository } from '../../domain/interfaces/repositories/IPlayerRepository';
 import { ICombatService, SpellCastResult } from '../../domain/interfaces/services/ICombatService';
@@ -20,7 +20,7 @@ export interface CastSpellResponse {
   readonly success: boolean;
   readonly castResult: SpellCastResult | null;
   readonly updatedPlayer: Player;
-  readonly updatedTarget: Player | Enemy | null;
+  readonly updatedTarget: Player | Mob | null;
   readonly errorMessage?: string;
 }
 
@@ -183,10 +183,10 @@ export class SpellCastingUseCase {
     return null;
   }
 
-  private async getTarget(targetId: string | undefined, playerId: string): Promise<Player | Enemy | null> {
+  private async getTarget(targetId: string | undefined, playerId: string): Promise<Player | Mob | null> {
     if (!targetId) return null;
     
-    // This would check both player and enemy repositories
+    // This would check both player and mob repositories
     // For now, return null to indicate incomplete implementation
     return null;
   }
