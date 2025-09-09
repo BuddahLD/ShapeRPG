@@ -293,44 +293,47 @@ class GameEngine {
     const centerX = this.displayWidth / 2;
     const centerY = this.displayHeight / 2;
 
-    // Define NPCs with their world coordinates - positioned at the top of hub with proper padding
-    const hubTopPadding = 20; // Adequate padding from hub boundary to be fully inside
-    const npcs = [
-      { id: "weapon_shop", x: -20, y: -150 + hubTopPadding + 6, color: '#8b5cf6', label: "⚔️" },
-      { id: "armor_shop", x: 40, y: -150 + hubTopPadding + 6, color: '#10b981', label: "🛡️" },
-      { id: "trainer", x: 100, y: -150 + hubTopPadding + 6, color: '#f59e0b', label: "📚" },
-    ];
+              // Define NPCs with their world coordinates - positioned at the top of hub with proper padding
+              const hubTopPadding = 20; // Adequate padding from hub boundary to be fully inside
+              const npcs = [
+                {
+                  id: "weapon_shop",
+                  x: -20,
+                  y: -150 + hubTopPadding + 6 + 16,
+                  color: '#8b5cf6',
+                  icon: "sword",
+                  label: "WEAPONS",
+                  gradient: ['#8b5cf6', '#a855f7', '#c084fc']
+                },
+                {
+                  id: "armor_shop",
+                  x: 40,
+                  y: -150 + hubTopPadding + 6 + 16,
+                  color: '#10b981',
+                  icon: "shield",
+                  label: "ARMOR",
+                  gradient: ['#10b981', '#34d399', '#6ee7b7']
+                },
+                {
+                  id: "trainer",
+                  x: 100,
+                  y: -150 + hubTopPadding + 6 + 16,
+                  color: '#f59e0b',
+                  icon: "book",
+                  label: "TRAINER",
+                  gradient: ['#f59e0b', '#fbbf24', '#fcd34d']
+                },
+              ];
 
     npcs.forEach(npc => {
       const screenX = centerX + (npc.x - this.localPlayerPosition.x);
       const screenY = centerY + (npc.y - this.localPlayerPosition.y);
 
       // Only render if on screen
-      if (screenX > -30 && screenX < this.displayWidth + 30 && 
-          screenY > -30 && screenY < this.displayHeight + 30) {
+      if (screenX > -50 && screenX < this.displayWidth + 50 && 
+          screenY > -50 && screenY < this.displayHeight + 50) {
         
-        // Draw NPC with modern styling (reduced diameter by 0.7)
-        this.renderNPC(screenX, screenY, npc.color, npc.label, 22 * 0.7);
-
-        // Draw label below
-        this.ctx!.save();
-        this.ctx!.fillStyle = '#ffffff';
-        this.ctx!.font = '12px Inter, sans-serif';
-        this.ctx!.textAlign = 'center';
-        this.ctx!.textBaseline = 'top';
-        this.ctx!.strokeStyle = '#000000';
-        this.ctx!.lineWidth = 3;
-        
-        const labels = {
-          "weapon_shop": "Weapons",
-          "armor_shop": "Armor", 
-          "trainer": "Trainer"
-        };
-        
-        const label = labels[npc.id as keyof typeof labels];
-        this.ctx!.strokeText(label, screenX, screenY + 30);
-        this.ctx!.fillText(label, screenX, screenY + 30);
-        this.ctx!.restore();
+        this.renderBeautifulNPC(screenX, screenY, npc);
       }
     });
   }
@@ -353,6 +356,195 @@ class GameEngine {
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
     this.ctx.fillText(emoji, x, y);
+  }
+
+  private renderBeautifulNPC(screenX: number, screenY: number, npc: any) {
+    if (!this.ctx) return;
+
+    const size = 32; // Increased size for better visibility
+    const glowSize = size + 16;
+    
+    this.ctx.save();
+
+    // 1. Outer glow effect
+    const glowGradient = this.ctx.createRadialGradient(
+      screenX, screenY, 0,
+      screenX, screenY, glowSize / 2
+    );
+    glowGradient.addColorStop(0, `${npc.color}40`);
+    glowGradient.addColorStop(0.7, `${npc.color}20`);
+    glowGradient.addColorStop(1, `${npc.color}00`);
+    
+    this.ctx.fillStyle = glowGradient;
+    this.ctx.beginPath();
+    this.ctx.arc(screenX, screenY, glowSize / 2, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    // 2. Main circle with gradient
+    const mainGradient = this.ctx.createRadialGradient(
+      screenX - size * 0.2, screenY - size * 0.2, 0,
+      screenX, screenY, size / 2
+    );
+    mainGradient.addColorStop(0, npc.gradient[2]); // Light
+    mainGradient.addColorStop(0.6, npc.gradient[1]); // Medium
+    mainGradient.addColorStop(1, npc.gradient[0]); // Dark
+
+    this.ctx.fillStyle = mainGradient;
+    this.ctx.beginPath();
+    this.ctx.arc(screenX, screenY, size / 2, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    // 3. Inner highlight circle
+    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    this.ctx.beginPath();
+    this.ctx.arc(screenX - size * 0.15, screenY - size * 0.15, size * 0.25, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    // 4. Border with subtle shadow
+    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    this.ctx.lineWidth = 2;
+    this.ctx.beginPath();
+    this.ctx.arc(screenX, screenY, size / 2, 0, Math.PI * 2);
+    this.ctx.stroke();
+
+    // 5. Modern icon rendering
+    this.renderModernIcon(screenX, screenY, npc.icon, size);
+
+    // 6. Arc text that hugs the top of NPC circle
+    this.renderArcText(screenX, screenY, npc.label, size, npc.x);
+
+    this.ctx.restore();
+  }
+
+  private renderModernIcon(x: number, y: number, iconType: string, size: number) {
+    if (!this.ctx) return;
+
+    const iconSize = size * 0.4; // Icon size relative to circle
+    const strokeWidth = 2;
+    
+    this.ctx.save();
+    this.ctx.strokeStyle = '#ffffff';
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.lineWidth = strokeWidth;
+    this.ctx.lineCap = 'round';
+    this.ctx.lineJoin = 'round';
+
+    switch (iconType) {
+      case 'sword':
+        // Modern sword icon
+        this.ctx.beginPath();
+        // Blade
+        this.ctx.moveTo(x, y - iconSize * 0.8);
+        this.ctx.lineTo(x, y + iconSize * 0.3);
+        // Crossguard
+        this.ctx.moveTo(x - iconSize * 0.3, y + iconSize * 0.1);
+        this.ctx.lineTo(x + iconSize * 0.3, y + iconSize * 0.1);
+        // Handle
+        this.ctx.moveTo(x, y + iconSize * 0.3);
+        this.ctx.lineTo(x, y + iconSize * 0.6);
+        // Pommel
+        this.ctx.arc(x, y + iconSize * 0.6, iconSize * 0.1, 0, Math.PI * 2);
+        this.ctx.stroke();
+        break;
+
+      case 'shield':
+        // Modern shield icon
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, y - iconSize * 0.7);
+        this.ctx.quadraticCurveTo(x + iconSize * 0.4, y - iconSize * 0.3, x + iconSize * 0.3, y + iconSize * 0.2);
+        this.ctx.quadraticCurveTo(x + iconSize * 0.2, y + iconSize * 0.6, x, y + iconSize * 0.7);
+        this.ctx.quadraticCurveTo(x - iconSize * 0.2, y + iconSize * 0.6, x - iconSize * 0.3, y + iconSize * 0.2);
+        this.ctx.quadraticCurveTo(x - iconSize * 0.4, y - iconSize * 0.3, x, y - iconSize * 0.7);
+        this.ctx.closePath();
+        this.ctx.stroke();
+        
+        // Shield cross
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, y - iconSize * 0.2);
+        this.ctx.lineTo(x, y + iconSize * 0.2);
+        this.ctx.moveTo(x - iconSize * 0.15, y);
+        this.ctx.lineTo(x + iconSize * 0.15, y);
+        this.ctx.stroke();
+        break;
+
+      case 'book':
+        // Modern book icon
+        this.ctx.beginPath();
+        // Book cover
+        this.ctx.rect(x - iconSize * 0.4, y - iconSize * 0.5, iconSize * 0.8, iconSize);
+        this.ctx.stroke();
+        
+        // Book pages
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - iconSize * 0.3, y - iconSize * 0.4);
+        this.ctx.lineTo(x + iconSize * 0.3, y - iconSize * 0.4);
+        this.ctx.moveTo(x - iconSize * 0.3, y - iconSize * 0.2);
+        this.ctx.lineTo(x + iconSize * 0.3, y - iconSize * 0.2);
+        this.ctx.moveTo(x - iconSize * 0.3, y);
+        this.ctx.lineTo(x + iconSize * 0.3, y);
+        this.ctx.moveTo(x - iconSize * 0.3, y + iconSize * 0.2);
+        this.ctx.lineTo(x + iconSize * 0.3, y + iconSize * 0.2);
+        this.ctx.stroke();
+        
+        // Book spine
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - iconSize * 0.4, y - iconSize * 0.5);
+        this.ctx.lineTo(x - iconSize * 0.4, y + iconSize * 0.5);
+        this.ctx.stroke();
+        break;
+    }
+
+    this.ctx.restore();
+  }
+
+  private renderArcText(centerX: number, centerY: number, text: string, circleSize: number, npcX: number) {
+    if (!this.ctx) return;
+
+    this.ctx.save();
+    
+    // Calculate arc parameters - letters standing on the circle
+    const radius = circleSize / 2 + 2; // Letters sit 2px above the circle edge
+    const letterSpacing = 0.35; // Fixed letter spacing in radians (about 20 degrees)
+    const textLength = text.length;
+    
+    // Calculate total arc span and center it
+    const totalArcSpan = letterSpacing * (textLength - 1);
+    const startAngle = -Math.PI/2 - (totalArcSpan / 2); // Start from top-left
+    const endAngle = -Math.PI/2 + (totalArcSpan / 2); // End at top-right
+    
+    // Set text properties with modern font (8px size with proper letter spacing)
+    this.ctx.font = 'bold 8px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'bottom'; // Align to bottom so letters "stand" on circle
+    
+    // Render each character along the arc with fixed spacing
+    for (let i = 0; i < textLength; i++) {
+      const angle = startAngle + (letterSpacing * i);
+      const charX = centerX + Math.cos(angle) * radius;
+      const charY = centerY + Math.sin(angle) * radius;
+      
+      // Rotate each character to be perpendicular to the circle
+      this.ctx.save();
+      this.ctx.translate(charX, charY);
+      this.ctx.rotate(angle + Math.PI/2); // Rotate to be perpendicular to radius
+      
+      // Character shadow for depth
+      this.ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      this.ctx.fillText(text[i], 1, 1);
+      
+      // Main character with gradient
+      const charGradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 8);
+      charGradient.addColorStop(0, '#ffffff');
+      charGradient.addColorStop(0.7, '#f8fafc');
+      charGradient.addColorStop(1, '#e2e8f0');
+      
+      this.ctx.fillStyle = charGradient;
+      this.ctx.fillText(text[i], 0, 0);
+      
+      this.ctx.restore();
+    }
+    
+    this.ctx.restore();
   }
 
   private renderMobs() {
