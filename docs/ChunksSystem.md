@@ -24,15 +24,17 @@ The Shapes RPG: Figureium game implements a chunks-based world system for effici
 
 #### 2. **World Area System (Active)**
 - **Location:** `client/src/domain/valueObjects/WorldArea.ts`
+- **Single Source of Truth:** `client/src/domain/services/ZoneConfigurationService.ts`
 - **Current Areas:**
   - **Hub Area:** `-200 to 200` (x), `-150 to 150` (y)
   - **Peaceful Fields:** `200 to 600` (x), `-150 to 150` (y)
-  - **Arena:** `600 to 2600` (x), `-150 to 150` (y)
+  - **Shards Area:** `600 to 1100` (x), `-450 to 450` (y)
 - **Features:**
   - Area bounds validation
   - Visual themes per area
   - Enemy spawning rules per area
   - Game phase definitions (hub, combat, exploration)
+  - Centralized zone configuration management
 
 #### 3. **World Domain Service (Active)**
 - **Location:** `client/src/domain/services/WorldDomainService.ts`

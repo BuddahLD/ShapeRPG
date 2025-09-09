@@ -5,6 +5,8 @@
 
 import { Mob, MobType, MobPosition } from '../../domain/entities/Mob';
 import { MobFactory } from '../../domain/factories/MobFactory';
+import { DummyMovementUseCase } from '../useCases/DummyMovementUseCase';
+import { ZoneConfigurationService } from '../../domain/services/ZoneConfigurationService';
 
 export interface MobSpawnConfig {
   zoneId: string;
@@ -31,9 +33,11 @@ export class MobManager {
   private lastUpdateTime: number = 0;
   private spawnDistance: number = 400; // Distance from player to spawn mobs (increased for better visibility)
   private despawnDistance: number = 500; // Distance from player to despawn mobs
+  private dummyMovementUseCase: DummyMovementUseCase;
 
   constructor() {
     this.initializeSpawnConfigs();
+    this.dummyMovementUseCase = new DummyMovementUseCase();
   }
 
   /**
@@ -72,12 +76,29 @@ export class MobManager {
       
       // Spawn if within spawn distance and not already spawned
       if (distance <= this.spawnDistance && !this.mobs.has(spawnPoint.id)) {
-        const mob = MobFactory.createMob(
-          spawnPoint.id,
-          spawnPoint.type,
-          spawnPoint.position,
-          spawnPoint.level
-        );
+        let mob;
+        
+        // Use movement-enabled factory for dummies with movement
+        if (spawnPoint.type === 'DUMMY' && (spawnPoint as any).hasMovement) {
+          // Get safe movement range from single source of truth
+          const hubSafeRange = ZoneConfigurationService.getHubSafeMovementRange();
+          const movementRange = (hubSafeRange.maxY - hubSafeRange.minY) / 2; // 80 units from center
+          
+          mob = MobFactory.createDummyWithMovement(
+            spawnPoint.id,
+            spawnPoint.position,
+            spawnPoint.level,
+            0.1, // movement speed (divided by 5)
+            movementRange // 80 units from center (total range 160)
+          );
+        } else {
+          mob = MobFactory.createMob(
+            spawnPoint.id,
+            spawnPoint.type,
+            spawnPoint.position,
+            spawnPoint.level
+          );
+        }
         
         this.mobs.set(mob.id, mob);
         events.push({
@@ -85,7 +106,7 @@ export class MobManager {
           mobId: mob.id,
           data: { mob }
         });
-        console.log(`MobManager: Spawned mob ${mob.id} from zone ${spawnPointZone} at ${mob.position.x},${mob.position.y}`);
+        console.log(`MobManager: Spawned mob ${mob.id} from zone ${spawnPointZone} at ${mob.position.x},${mob.position.y}, hasMovement: ${mob.hasMovementBehavior()}`);
       }
     });
     
@@ -161,21 +182,26 @@ export class MobManager {
     type: import('../../domain/entities/Mob').MobType;
     position: { x: number; y: number };
     level: number;
+    hasMovement?: boolean;
   }> {
     const spawnPoints: Array<{
       id: string;
       type: import('../../domain/entities/Mob').MobType;
       position: { x: number; y: number };
       level: number;
+      hasMovement?: boolean;
     }> = [];
 
     switch (zoneId) {
       case 'LOC_HUB_FIGUREIUM':
+        // Get safe movement range from single source of truth
+        const hubSafeRange = ZoneConfigurationService.getHubSafeMovementRange();
         spawnPoints.push({
           id: 'hub_dummy_1',
           type: 'DUMMY',
-          position: { x: -150, y: 120 }, // Bottom left corner, moved up 30px
-          level: 1
+          position: { x: -150, y: hubSafeRange.centerY }, // Center of safe movement range
+          level: 1,
+          hasMovement: true // Enable movement for dummy
         });
         break;
         
@@ -419,6 +445,61 @@ export class MobManager {
         this.respawnTimers.set(mobId, newTimeLeft);
       }
     });
+  }
+
+  /**
+   * Update dummy movement for all dummy mobs
+   * Called from game loop to handle up-down movement
+   */
+  updateDummyMovement(deltaTime: number): MobUpdateResult {
+    const events: MobEvent[] = [];
+    const updatedMobs: Mob[] = [];
+
+    this.mobs.forEach((mob, mobId) => {
+      if (mob.isDummy() && mob.hasMovementBehavior()) {
+        const movementResult = this.dummyMovementUseCase.execute({
+          mob,
+          deltaTime
+        });
+
+        if (movementResult.success) {
+          this.mobs.set(mobId, movementResult.updatedMob);
+          updatedMobs.push(movementResult.updatedMob);
+
+          // Log direction changes and cycle information for debugging
+          if (movementResult.hasChangedDirection) {
+            console.log(`Dummy ${mobId} changed direction at position:`, movementResult.updatedMob.position);
+            console.log(`Cycle phase: ${movementResult.cyclePhase.toFixed(2)}, Direction: ${movementResult.cycleDirection > 0 ? 'UP' : 'DOWN'}`);
+          }
+        }
+      }
+    });
+
+    return {
+      mobs: Array.from(this.mobs.values()),
+      events
+    };
+  }
+
+  /**
+   * Initialize movement state for a dummy mob
+   * Should be called when spawning a dummy mob
+   */
+  initializeDummyMovement(mobId: string, centerY: number, movementSpeed?: number, movementRange?: number): boolean {
+    const mob = this.mobs.get(mobId);
+    if (!mob || !mob.isDummy()) {
+      return false;
+    }
+
+    const updatedMob = this.dummyMovementUseCase.initializeMovementState(
+      mob,
+      centerY,
+      movementSpeed,
+      movementRange
+    );
+
+    this.mobs.set(mobId, updatedMob);
+    return true;
   }
 
   /**

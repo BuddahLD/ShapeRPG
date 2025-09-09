@@ -269,6 +269,8 @@ The Shapes RPG: Figureium development team consists of 9 core members, each brin
 - **Peaceful Fields**: x: 200 to 600, y: -150 to 150 (exploration zone)
 - **Shards Area**: x: 600 to 1100, y: -450 to 450 (combat zone)
 
+**Note**: All zone boundaries are centrally managed in `ZoneConfigurationService.ts` as the single source of truth.
+
 ### Current Focus:
 - Creating additional environmental textures and assets
 - Designing visual effects for zone transitions

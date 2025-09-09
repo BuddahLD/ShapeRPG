@@ -3,6 +3,8 @@
  * Core business logic for mob entities - no external dependencies
  */
 
+import { MovementState } from '../services/DummyMovementService';
+
 export interface MobStats {
   readonly hp: number;
   readonly maxHp: number;
@@ -32,6 +34,7 @@ export class Mob {
   private _lastAttackTime: number;
   private readonly _attackCooldown: number;
   private readonly _attackWindowDuration: number;
+  private _movementState: MovementState | null;
 
   constructor(
     id: string,
@@ -40,7 +43,8 @@ export class Mob {
     position: MobPosition,
     stats: MobStats,
     attackCooldown: number = 2000,
-    attackWindowDuration: number = 1000
+    attackWindowDuration: number = 1000,
+    movementState: MovementState | null = null
   ) {
     this._id = id;
     this._type = type;
@@ -52,6 +56,7 @@ export class Mob {
     this._lastAttackTime = 0;
     this._attackCooldown = attackCooldown;
     this._attackWindowDuration = attackWindowDuration;
+    this._movementState = movementState;
   }
 
   // Getters
@@ -64,6 +69,7 @@ export class Mob {
   get counterWindow(): number { return this._counterWindow; }
   get lastAttackTime(): number { return this._lastAttackTime; }
   get attackCooldown(): number { return this._attackCooldown; }
+  get movementState(): MovementState | null { return this._movementState; }
 
   // Domain Operations
   moveTo(newPosition: MobPosition): Mob {
@@ -186,9 +192,34 @@ export class Mob {
     return this._behavior === 'NEUTRAL' || this._behavior === 'AGGRESSIVE';
   }
 
+  // Movement-related methods
+  hasMovementBehavior(): boolean {
+    return this._movementState !== null;
+  }
+
+  isDummy(): boolean {
+    return this._type === 'DUMMY';
+  }
+
+  updateMovementState(newState: MovementState): Mob {
+    const newMob = this.clone();
+    newMob._movementState = newState;
+    return newMob;
+  }
+
+  clearMovementState(): Mob {
+    const newMob = this.clone();
+    newMob._movementState = null;
+    return newMob;
+  }
+
   private clone(): Mob {
     const cloned = Object.create(Object.getPrototypeOf(this));
     Object.assign(cloned, this);
+    // Deep clone the movement state if it exists
+    if (this._movementState) {
+      cloned._movementState = { ...this._movementState };
+    }
     return cloned;
   }
 }

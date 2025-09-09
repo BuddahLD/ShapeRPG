@@ -28,7 +28,7 @@ export default defineConfig({
   assetsInclude: ["**/*.gltf", "**/*.glb", "**/*.mp3", "**/*.ogg", "**/*.wav"],
   // Ensure proper development server configuration
   server: {
-    port: 5173,
+    port: 3000,
     host: true,
   },
   // Ensure proper module resolution

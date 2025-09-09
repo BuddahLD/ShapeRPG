@@ -34,7 +34,13 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
       const spawnEvents = mobManager.updateMobSpawning(playerPosition, currentZone);
       const allMobs = mobManager.getAllMobs();
       console.log('MobRenderer: Spawn events:', spawnEvents.length, spawnEvents.map(e => e.type));
-      console.log('MobRenderer: All mobs after spawn check:', allMobs.length, allMobs.map(e => ({ id: e.id, type: e.type, position: e.position })));
+      console.log('MobRenderer: All mobs after spawn check:', allMobs.length, allMobs.map(e => ({ 
+        id: e.id, 
+        type: e.type, 
+        position: e.position,
+        hasMovement: e.hasMovementBehavior(),
+        isDummy: e.isDummy()
+      })));
       setMobs(allMobs);
       lastSpawnCheck.current = { x: playerPosition.x, y: playerPosition.y, zone: currentZone };
     } else {
@@ -47,6 +53,36 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
   const mobManagerRef = useRef(mobManager);
   const playerPositionRef = useRef(playerPosition);
   const currentZoneRef = useRef(currentZone);
+
+  // Handle dummy movement updates from game loop
+  useEffect(() => {
+    const handleDummyMovementUpdate = (event: CustomEvent) => {
+      const { deltaTime } = event.detail;
+      
+      // Update dummy movement through mob manager
+      const updateResult = mobManagerRef.current.updateDummyMovement(deltaTime);
+      
+      // Debug: Log update results (reduced frequency)
+      if (Math.random() < 0.01) { // Log 1% of updates
+        console.log('MobRenderer: Dummy movement update result:', {
+          success: updateResult.mobs.length > 0,
+          mobCount: updateResult.mobs.length,
+          dummyMobs: updateResult.mobs.filter(mob => mob.isDummy()).length
+        });
+      }
+      
+      // Update local state with new mob positions
+      if (updateResult.mobs.length > 0) {
+        setMobs(updateResult.mobs);
+      }
+    };
+
+    window.addEventListener('updateDummyMovement', handleDummyMovementUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('updateDummyMovement', handleDummyMovementUpdate as EventListener);
+    };
+  }, []);
   
   // Update refs when values change (no re-render trigger)
   mobManagerRef.current = mobManager;

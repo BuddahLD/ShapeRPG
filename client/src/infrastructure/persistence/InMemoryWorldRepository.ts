@@ -6,6 +6,7 @@
 import { WorldArea, LocationId } from '../../domain/valueObjects/WorldArea';
 import { Mob } from '../../domain/entities/Mob';
 import { IWorldRepository } from '../../domain/interfaces/repositories/IWorldRepository';
+import { ZoneConfigurationService } from '../../domain/services/ZoneConfigurationService';
 
 export class InMemoryWorldRepository implements IWorldRepository {
   private areas: WorldArea[] = [];
@@ -65,54 +66,18 @@ export class InMemoryWorldRepository implements IWorldRepository {
   }
 
   private initializeDefaultAreas(): void {
-    // Hub Area
-    const hubArea = new WorldArea(
-      'LOC_HUB_FIGUREIUM' as LocationId,
-      'Hub',
-      { minX: -200, maxX: 200, minY: -150, maxY: 150 },
-      'hub',
-      {
-        primary: '#a78bfa',
-        secondary: '#c4b5fd', 
-        accent: '#ddd6fe',
-        background: '#faf5ff'
-      },
-      false, // No mob spawning
-      '#8b5cf6'
-    );
-
-    // Peaceful Fields
-    const fieldsArea = new WorldArea(
-      'LOC_PEACEFUL_FIELDS' as LocationId,
-      'Fields', 
-      { minX: 200, maxX: 600, minY: -150, maxY: 150 },
-      'exploration',
-      {
-        primary: '#34d399',
-        secondary: '#6ee7b7',
-        accent: '#a7f3d0',
-        background: '#f0fdf4'
-      },
-      false, // No mob spawning in peaceful fields
-      '#10b981'
-    );
-
-    // Shards Area  
-    const shardsArea = new WorldArea(
-      'LOC_SHARDS' as LocationId,
-      'Shards',
-      { minX: 600, maxX: 1100, minY: -450, maxY: 450 }, // width/4 (500), height*3 (900)
-      'exploration',
-      {
-        primary: '#fb7185',
-        secondary: '#fda4af',
-        accent: '#fecdd3',
-        background: '#fff1f2'
-      },
-      true, // Mob spawning allowed (neutral mobs)
-      '#dc2626'
-    );
-
-    this.areas = [hubArea, fieldsArea, shardsArea];
+    // Get zone configurations from single source of truth
+    const zoneConfigs = ZoneConfigurationService.getAllZones();
+    
+    // Create WorldArea instances from configurations
+    this.areas = zoneConfigs.map(config => new WorldArea(
+      config.id,
+      config.name,
+      config.bounds,
+      config.gamePhase,
+      config.visualTheme,
+      config.allowsMobSpawning,
+      config.backgroundGradient
+    ));
   }
 }

@@ -4,6 +4,8 @@
  */
 
 import { Mob, MobType, MobBehavior, MobStats, MobPosition } from '../entities/Mob';
+import { DummyMovementService } from '../services/DummyMovementService';
+import { ZoneConfigurationService } from '../services/ZoneConfigurationService';
 
 export class MobFactory {
   /**
@@ -25,6 +27,38 @@ export class MobFactory {
       mobConfig.stats,
       mobConfig.attackCooldown,
       mobConfig.attackWindowDuration
+    );
+  }
+
+  /**
+   * Create dummy mob with movement behavior
+   * Follows documented movement patterns for training dummies
+   */
+  static createDummyWithMovement(
+    id: string,
+    position: MobPosition,
+    level: number = 1,
+    movementSpeed?: number,
+    movementRange?: number
+  ): Mob {
+    const mobConfig = this.getMobConfig('DUMMY', level);
+    
+    // Create initial movement state
+    const movementState = DummyMovementService.createInitialState(
+      position.y, // Use Y position as center
+      movementSpeed,
+      movementRange
+    );
+    
+    return new Mob(
+      id,
+      'DUMMY',
+      mobConfig.behavior,
+      position,
+      mobConfig.stats,
+      mobConfig.attackCooldown,
+      mobConfig.attackWindowDuration,
+      movementState
     );
   }
 
@@ -105,7 +139,7 @@ export class MobFactory {
   static createZoneMobs(zoneId: string): Mob[] {
     const spawnConfigs = {
       'LOC_HUB_FIGUREIUM': [
-        { type: 'DUMMY' as MobType, position: { x: -150, y: 120 }, level: 1 }
+        { type: 'DUMMY' as MobType, position: { x: -150, y: 120 }, level: 1, hasMovement: true }
       ],
       'LOC_PEACEFUL_FIELDS': [
         { type: 'HEX_PEACEFUL' as MobType, position: { x: 300, y: 50 }, level: 1 },
@@ -126,14 +160,32 @@ export class MobFactory {
     const config = spawnConfigs[zoneId as keyof typeof spawnConfigs];
     if (!config) return [];
 
-    return config.map((mobConfig, index) => 
-      this.createMob(
-        `${zoneId}_mob_${index}`,
+    return config.map((mobConfig, index) => {
+      const mobId = `${zoneId}_mob_${index}`;
+      
+      // Use movement-enabled factory for dummies with movement
+      if (mobConfig.type === 'DUMMY' && (mobConfig as any).hasMovement) {
+        // Get safe movement range from single source of truth
+        const hubSafeRange = ZoneConfigurationService.getHubSafeMovementRange();
+        const movementRange = (hubSafeRange.maxY - hubSafeRange.minY) / 2; // 80 units from center
+        
+        return this.createDummyWithMovement(
+          mobId,
+          mobConfig.position,
+          mobConfig.level,
+          0.1, // movement speed (divided by 5)
+          movementRange // 80 units from center (total range 160)
+        );
+      }
+      
+      // Use regular factory for other mobs
+      return this.createMob(
+        mobId,
         mobConfig.type,
         mobConfig.position,
         mobConfig.level
-      )
-    );
+      );
+    });
   }
 
   /**

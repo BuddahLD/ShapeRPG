@@ -5,6 +5,7 @@ import { usePlayer } from "../presentation/hooks/usePlayerManager";
 import { DesignSystem } from "../lib/services/DesignSystem";
 import { VisualEffects } from "../lib/services/VisualEffects";
 import { MobRenderer } from "./MobRenderer";
+import { ZoneConfigurationService } from "../domain/services/ZoneConfigurationService";
 // WorldAreaManager removed - using clean architecture game state instead
 
 interface GameCanvasProps {
@@ -122,6 +123,9 @@ class GameEngine {
         // Dispatch position update for minimap and other systems
         this.dispatchPositionUpdate();
       }
+
+      // Update dummy movement (up-down movement for training dummies)
+      this.updateDummyMovement(deltaTime);
 
       // Clear canvas using display dimensions
       this.ctx.clearRect(0, 0, this.displayWidth, this.displayHeight);
@@ -417,21 +421,9 @@ class GameEngine {
     const centerX = this.displayWidth / 2;
     const centerY = this.displayHeight / 2;
     
-    // Zone colors (matching minimap)
-    const zoneColors = {
-      hub: '#8b5cf6',      // violet
-      fields: '#10b981',   // green
-      shards: '#dc2626',   // red
-      nowhere: '#6b7280'   // gray
-    };
-    
-    // Zone boundaries
-    const zoneBounds = {
-      hub: { minX: -200, maxX: 200, minY: -150, maxY: 150 },
-      fields: { minX: 200, maxX: 600, minY: -150, maxY: 150 },
-      shards: { minX: 600, maxX: 1100, minY: -450, maxY: 450 },
-      nowhere: { minX: -Infinity, maxX: Infinity, minY: -Infinity, maxY: Infinity }
-    };
+    // Get zone data from single source of truth
+    const zoneColors = ZoneConfigurationService.getZoneColors();
+    const zoneBounds = ZoneConfigurationService.getZoneBounds();
     
     // Render zone boundary boxes
     Object.entries(zoneBounds).forEach(([zoneName, bounds]) => {
@@ -573,6 +565,24 @@ class GameEngine {
 
 
   // Dispatch position update for minimap and other systems
+  private updateDummyMovement(deltaTime: number) {
+    // Update dummy movement through the mob manager
+    // This will be handled by the MobRenderer component which has access to MobManager
+    // We dispatch an event to trigger the update
+    try {
+      // Debug: Log dummy movement updates (reduced frequency)
+      if (Math.random() < 0.001) { // Log 0.1% of updates to avoid spam
+        console.log('GameEngine: Dispatching dummy movement update, deltaTime:', deltaTime);
+      }
+      
+      window.dispatchEvent(new CustomEvent('updateDummyMovement', {
+        detail: { deltaTime }
+      }));
+    } catch (error) {
+      console.warn('GameEngine: Dummy movement update dispatch failed', error);
+    }
+  }
+
   private dispatchPositionUpdate() {
     try {
       window.dispatchEvent(new CustomEvent('playerPositionUpdate', {
