@@ -136,22 +136,22 @@ describe('DummyMovementService', () => {
 
   describe('getMovementProgress', () => {
     it('should return 0.5 when at center', () => {
-      const state = DummyMovementService.createInitialState(0, 0.1, 80);
+      const state = DummyMovementService.createInitialState(0, 0.1, 115);
       const position = { x: 0, y: 0 }; // At center
 
       expect(DummyMovementService.getMovementProgress(position, state)).toBe(0.5);
     });
 
     it('should return 0 when at bottom', () => {
-      const state = DummyMovementService.createInitialState(0, 0.1, 80);
-      const position = { x: 0, y: -80 }; // At bottom (center - range)
+      const state = DummyMovementService.createInitialState(0, 0.1, 115);
+      const position = { x: 0, y: -115 }; // At bottom (center - range)
 
       expect(DummyMovementService.getMovementProgress(position, state)).toBe(0);
     });
 
     it('should return 1 when at top', () => {
-      const state = DummyMovementService.createInitialState(0, 0.1, 80);
-      const position = { x: 0, y: 80 }; // At top (center + range)
+      const state = DummyMovementService.createInitialState(0, 0.1, 115);
+      const position = { x: 0, y: 115 }; // At top (center + range)
 
       expect(DummyMovementService.getMovementProgress(position, state)).toBe(1);
     });
@@ -159,39 +159,39 @@ describe('DummyMovementService', () => {
 
   describe('getCyclePhase', () => {
     it('should return 0 when starting to move up from bottom', () => {
-      const state = DummyMovementService.createInitialState(0, 0.1, 80);
-      const position = { x: 0, y: -80 }; // At bottom, moving up
+      const state = DummyMovementService.createInitialState(0, 0.1, 115);
+      const position = { x: 0, y: -115 }; // At bottom, moving up
 
       expect(DummyMovementService.getCyclePhase(position, state)).toBe(0);
     });
 
     it('should return 1 when at top while moving up', () => {
-      const state = DummyMovementService.createInitialState(0, 0.1, 80);
-      const position = { x: 0, y: 80 }; // At top, moving up
+      const state = DummyMovementService.createInitialState(0, 0.1, 115);
+      const position = { x: 0, y: 115 }; // At top, moving up
 
       expect(DummyMovementService.getCyclePhase(position, state)).toBe(1);
     });
 
     it('should return 1 when starting to move down from top', () => {
       const downState = {
-        ...DummyMovementService.createInitialState(0, 0.1, 80),
+        ...DummyMovementService.createInitialState(0, 0.1, 115),
         currentDirection: 'down' as const,
         isMovingUp: false,
         isMovingDown: true
       };
-      const position = { x: 0, y: 80 }; // At top, moving down
+      const position = { x: 0, y: 115 }; // At top, moving down
 
       expect(DummyMovementService.getCyclePhase(position, downState)).toBe(1);
     });
 
     it('should return 0 when at bottom while moving down', () => {
       const downState = {
-        ...DummyMovementService.createInitialState(0, 0.1, 80),
+        ...DummyMovementService.createInitialState(0, 0.1, 115),
         currentDirection: 'down' as const,
         isMovingUp: false,
         isMovingDown: true
       };
-      const position = { x: 0, y: -80 }; // At bottom, moving down
+      const position = { x: 0, y: -115 }; // At bottom, moving down
 
       expect(DummyMovementService.getCyclePhase(position, downState)).toBe(0);
     });
@@ -199,14 +199,14 @@ describe('DummyMovementService', () => {
 
   describe('getCycleDirection', () => {
     it('should return 1 when moving up', () => {
-      const state = DummyMovementService.createInitialState(0, 0.1, 80);
+      const state = DummyMovementService.createInitialState(0, 0.1, 115);
 
       expect(DummyMovementService.getCycleDirection(state)).toBe(1);
     });
 
     it('should return -1 when moving down', () => {
       const downState = {
-        ...DummyMovementService.createInitialState(0, 0.1, 80),
+        ...DummyMovementService.createInitialState(0, 0.1, 115),
         currentDirection: 'down' as const,
         isMovingUp: false,
         isMovingDown: true
@@ -218,7 +218,7 @@ describe('DummyMovementService', () => {
 
   describe('cycling behavior', () => {
     it('should complete a full up-down cycle', () => {
-      const state = DummyMovementService.createInitialState(0, 0.1, 80); // Center at 0, range 80
+      const state = DummyMovementService.createInitialState(0, 0.1, 115); // Center at 0, range 115
       let currentPosition = { x: 0, y: 0 }; // Start at center
       let currentState = state;
       let directionChanges = 0;
@@ -238,8 +238,8 @@ describe('DummyMovementService', () => {
       expect(directionChanges).toBeGreaterThan(0);
       
       // Position should be within the movement range (center ± range)
-      expect(currentPosition.y).toBeGreaterThanOrEqual(-80); // center - range
-      expect(currentPosition.y).toBeLessThanOrEqual(80); // center + range
+      expect(currentPosition.y).toBeGreaterThanOrEqual(-115); // center - range
+      expect(currentPosition.y).toBeLessThanOrEqual(115); // center + range
     });
   });
 });

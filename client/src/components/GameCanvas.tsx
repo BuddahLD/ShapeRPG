@@ -293,11 +293,12 @@ class GameEngine {
     const centerX = this.displayWidth / 2;
     const centerY = this.displayHeight / 2;
 
-    // Define NPCs with their world coordinates
+    // Define NPCs with their world coordinates - positioned at the top of hub with proper padding
+    const hubTopPadding = 20; // Adequate padding from hub boundary to be fully inside
     const npcs = [
-      { id: "weapon_shop", x: -80, y: -50, color: '#8b5cf6', label: "⚔️" },
-      { id: "armor_shop", x: 80, y: -50, color: '#10b981', label: "🛡️" },
-      { id: "trainer", x: 0, y: -80, color: '#f59e0b', label: "📚" },
+      { id: "weapon_shop", x: -20, y: -150 + hubTopPadding + 6, color: '#8b5cf6', label: "⚔️" },
+      { id: "armor_shop", x: 40, y: -150 + hubTopPadding + 6, color: '#10b981', label: "🛡️" },
+      { id: "trainer", x: 100, y: -150 + hubTopPadding + 6, color: '#f59e0b', label: "📚" },
     ];
 
     npcs.forEach(npc => {
@@ -308,8 +309,8 @@ class GameEngine {
       if (screenX > -30 && screenX < this.displayWidth + 30 && 
           screenY > -30 && screenY < this.displayHeight + 30) {
         
-        // Draw NPC with modern styling
-        this.renderNPC(screenX, screenY, npc.color, npc.label, 22);
+        // Draw NPC with modern styling (reduced diameter by 0.7)
+        this.renderNPC(screenX, screenY, npc.color, npc.label, 22 * 0.7);
 
         // Draw label below
         this.ctx!.save();

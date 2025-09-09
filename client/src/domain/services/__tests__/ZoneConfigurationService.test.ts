@@ -145,8 +145,8 @@ describe('ZoneConfigurationService', () => {
     it('should return safe movement range within hub', () => {
       const range = ZoneConfigurationService.getHubSafeMovementRange();
       
-      expect(range.minY).toBe(-80);  // -150 + 70 padding
-      expect(range.maxY).toBe(80);   // 150 - 70 padding
+      expect(range.minY).toBe(-115);  // -150 + 35 padding
+      expect(range.maxY).toBe(115);   // 150 - 35 padding
       expect(range.centerY).toBe(0); // (150 + -150) / 2
     });
 
@@ -154,7 +154,7 @@ describe('ZoneConfigurationService', () => {
       const range = ZoneConfigurationService.getHubSafeMovementRange();
       const totalRange = range.maxY - range.minY;
       
-      expect(totalRange).toBe(160); // 80 - (-80) = 160
+      expect(totalRange).toBe(230); // 115 - (-115) = 230
     });
   });
 

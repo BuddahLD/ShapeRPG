@@ -160,11 +160,11 @@ export class ZoneConfigurationService {
    */
   static getHubSafeMovementRange(): { minY: number; maxY: number; centerY: number } {
     const hub = this.getHubZone();
-    const padding = 70; // 70 units padding from hub boundaries
+    const padding = 35; // 35 units padding from hub boundaries (reduced by half)
     
     return {
-      minY: hub.bounds.minY + padding,  // -150 + 70 = -80
-      maxY: hub.bounds.maxY - padding,  // 150 - 70 = 80
+      minY: hub.bounds.minY + padding,  // -150 + 35 = -115
+      maxY: hub.bounds.maxY - padding,  // 150 - 35 = 115
       centerY: (hub.bounds.minY + hub.bounds.maxY) / 2  // 0
     };
   }
