@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useGameState } from "../presentation/hooks/useGameStateManager";
 import { usePlayer } from "../presentation/hooks/usePlayerManager";
-// ShapeMatching removed - using clean architecture instead
+import { ShapeMatchingService } from "../domain/services/ShapeMatchingService";
 
 interface Point {
   x: number;
@@ -15,6 +15,7 @@ const RuneDrawing: React.FC = () => {
   const [hasStartedDrawing, setHasStartedDrawing] = useState(false);
   const { setDrawingRune, castSpell } = useGameState();
   const { player } = usePlayer();
+  const shapeMatchingService = new ShapeMatchingService();
 
   const drawPath = useCallback((ctx: CanvasRenderingContext2D, points: Point[]) => {
     if (points.length < 2) return;
@@ -122,8 +123,8 @@ const RuneDrawing: React.FC = () => {
     // Only cast spell if we have enough points
     if (points.length >= 3) {
       // Analyze the drawn shape
-      const shapeMatching = new ShapeMatching();
-      const matchResult = shapeMatching.matchShape(points, player?.spells || []);
+      const knownSpellIds = player?.knownSpells ? Array.from(player.knownSpells) as string[] : [];
+      const matchResult = shapeMatchingService.matchShape(points, knownSpellIds);
       
       // Cast spell or apply debuff based on match
       castSpell(matchResult);
@@ -133,7 +134,7 @@ const RuneDrawing: React.FC = () => {
     setDrawingRune(false);
     setPoints([]);
     setHasStartedDrawing(false);
-  }, [isDrawing, hasStartedDrawing, points, castSpell, setDrawingRune, player]);
+  }, [isDrawing, hasStartedDrawing, points, castSpell, setDrawingRune, player, shapeMatchingService]);
 
   // Touch events (these are now handled by global events, but keeping for fallback)
   const handleTouchStart = (e: React.TouchEvent) => {

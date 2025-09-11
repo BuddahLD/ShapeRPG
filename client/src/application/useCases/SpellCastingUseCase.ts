@@ -7,6 +7,7 @@ import { Player } from '../../domain/entities/Player';
 import { Mob } from '../../domain/entities/Mob';
 import { Spell } from '../../domain/valueObjects/Spell';
 import { IPlayerRepository } from '../../domain/interfaces/repositories/IPlayerRepository';
+import { ISpellRepository } from '../../domain/interfaces/repositories/ISpellRepository';
 import { ICombatService, SpellCastResult } from '../../domain/interfaces/services/ICombatService';
 
 export interface CastSpellRequest {
@@ -178,9 +179,7 @@ export class SpellCastingUseCase {
   }
 
   private async getSpellById(spellId: string): Promise<Spell | null> {
-    // This would be implemented with a proper spell repository
-    // For now, return null to indicate incomplete implementation
-    return null;
+    return await this.spellRepository.findById(spellId);
   }
 
   private async getTarget(targetId: string | undefined, playerId: string): Promise<Player | Mob | null> {
@@ -190,11 +189,4 @@ export class SpellCastingUseCase {
     // For now, return null to indicate incomplete implementation
     return null;
   }
-}
-
-// This interface would need to be defined in the domain layer
-interface ISpellRepository {
-  findById(id: string): Promise<Spell | null>;
-  findAll(): Promise<Spell[]>;
-  findByPattern(pattern: string): Promise<Spell[]>;
 }

@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { usePlayer } from "../presentation/hooks/usePlayerManager";
+import { useSpellManager } from "../presentation/hooks/useSpellManager";
+import SpellPreview from "./SpellPreview";
+import { Zap } from "lucide-react";
 
 interface StatsInventoryModalProps {
   isOpen: boolean;
@@ -14,6 +17,9 @@ const StatsInventoryModal: React.FC<StatsInventoryModalProps> = ({ isOpen, onClo
   console.log('StatsInventoryModal: Component rendered with props:', { isOpen, activeTab });
   
   const { player } = usePlayer();
+  const { getSpellPattern, getSpellName, getSpellDescription, getSpellStats } = useSpellManager();
+  const [previewSpellId, setPreviewSpellId] = useState<string | null>(null);
+  
   console.log('StatsInventoryModal: usePlayer returned:', player);
 
   if (!isOpen) {
@@ -150,16 +156,64 @@ const StatsInventoryModal: React.FC<StatsInventoryModalProps> = ({ isOpen, onClo
     <div className="space-y-2">
       {player.knownSpells.length > 0 ? (
         player.knownSpells.map((spellId, index) => (
-          <div key={index} className="bg-white/10 rounded-lg p-3 flex items-center">
-            <div className="w-6 h-6 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center mr-3">
-              <span className="text-white text-xs">✨</span>
-            </div>
-            <div className="flex-1">
-              <div className="text-stone-100 text-sm font-medium capitalize">
-                {spellId.replace(/_/g, ' ')}
+          <div key={index}>
+            {/* Spell Item */}
+            <div 
+              className="bg-white/10 rounded-lg p-3 flex items-center cursor-pointer hover:bg-white/20 transition-colors"
+              onClick={() => setPreviewSpellId(previewSpellId === spellId ? null : spellId)}
+            >
+              <div className="w-6 h-6 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center mr-3">
+                <Zap className="text-white text-xs" size={12} />
               </div>
-              <div className="text-stone-300 text-xs">Active Spell</div>
+              <div className="flex-1">
+                <div className="text-stone-100 text-sm font-medium">
+                  {getSpellName(spellId)}
+                </div>
+                <div className="text-stone-300 text-xs">
+                  {previewSpellId === spellId ? 'Hide pattern' : 'Click to preview pattern'}
+                </div>
+              </div>
+              <div className="text-stone-400 text-xs">
+                {previewSpellId === spellId ? '▲' : '▼'}
+              </div>
             </div>
+
+            {/* Inline Preview */}
+            {previewSpellId === spellId && (
+              <div className="mt-2 bg-white/5 rounded-lg p-4 border border-white/10">
+                {/* Pattern Preview */}
+                <div className="flex justify-center mb-3">
+                  <div className="bg-black/30 rounded-lg p-3 border border-cyan-500/30">
+                    <SpellPreview 
+                      pattern={getSpellPattern(spellId) || 'unknown'} 
+                      size={80}
+                      className="mx-auto"
+                    />
+                  </div>
+                </div>
+
+                {/* Spell Stats */}
+                <div className="grid grid-cols-3 gap-2 text-center mb-3">
+                  <div className="bg-white/10 rounded p-2">
+                    <div className="text-cyan-400 text-xs font-medium">Mana</div>
+                    <div className="text-stone-100 text-sm">{getSpellStats(spellId).mana}</div>
+                  </div>
+                  <div className="bg-white/10 rounded p-2">
+                    <div className="text-cyan-400 text-xs font-medium">Cast</div>
+                    <div className="text-stone-100 text-sm">{getSpellStats(spellId).castTime}s</div>
+                  </div>
+                  <div className="bg-white/10 rounded p-2">
+                    <div className="text-cyan-400 text-xs font-medium">Damage</div>
+                    <div className="text-stone-100 text-sm">{getSpellStats(spellId).damage || '-'}</div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="text-stone-200 text-xs text-center">
+                  {getSpellDescription(spellId)}
+                </div>
+              </div>
+            )}
           </div>
         ))
       ) : (
@@ -240,6 +294,7 @@ const StatsInventoryModal: React.FC<StatsInventoryModalProps> = ({ isOpen, onClo
           {activeTab === 'inventory' && renderInventoryTab()}
         </div>
       </div>
+
     </div>
   );
 };

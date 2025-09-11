@@ -29,6 +29,7 @@ export function useGameState() {
       initializeGame: async () => {},
       updateGameState: async () => {},
       setDrawingRune: () => {},
+      castSpell: async () => {},
       movePlayer: async () => {},
       clearError: () => {},
       currentLocation: 'LOC_HUB_FIGUREIUM',

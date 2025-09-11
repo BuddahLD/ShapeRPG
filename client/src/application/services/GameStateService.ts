@@ -8,9 +8,12 @@ import { Mob } from '../../domain/entities/Mob';
 import { WorldArea } from '../../domain/valueObjects/WorldArea';
 import { IPlayerRepository } from '../../domain/interfaces/repositories/IPlayerRepository';
 import { IWorldRepository } from '../../domain/interfaces/repositories/IWorldRepository';
+import { ISpellRepository } from '../../domain/interfaces/repositories/ISpellRepository';
 import { PlayerMovementUseCase } from '../useCases/PlayerMovementUseCase';
 import { WorldExplorationUseCase } from '../useCases/WorldExplorationUseCase';
+import { SpellCastingUseCase } from '../useCases/SpellCastingUseCase';
 import { ZoneDetectionService } from './ZoneDetectionService';
+import { ShapeMatchingService, ShapeMatchResult } from '../../domain/services/ShapeMatchingService';
 
 export interface GameState {
   readonly player: Player | null;
@@ -57,8 +60,10 @@ export class GameStateService {
   constructor(
     private readonly playerRepository: IPlayerRepository,
     private readonly worldRepository: IWorldRepository,
+    private readonly spellRepository: ISpellRepository,
     private readonly playerMovementUseCase: PlayerMovementUseCase,
-    private readonly worldExplorationUseCase: WorldExplorationUseCase
+    private readonly worldExplorationUseCase: WorldExplorationUseCase,
+    private readonly spellCastingUseCase: SpellCastingUseCase
   ) {
     this.zoneDetectionService = new ZoneDetectionService(worldRepository);
   }
@@ -197,7 +202,7 @@ export class GameStateService {
       1, // level
       0, // experience
       100, // starting gold
-      ['fire-bolt', 'ice-shard', 'shield-aura'] // starting spells
+      ['SPL01'] // starting spells - Fire Bolt (triangle)
     );
   }
 
@@ -302,7 +307,7 @@ export class GameStateService {
    */
   async clearEnemiesInCurrentArea(): Promise<void> {
     if (this.currentGameState.currentArea) {
-      await this.worldRepository.clearEnemiesInArea(this.currentGameState.currentArea.id);
+      await this.worldRepository.clearMobsInArea(this.currentGameState.currentArea.id);
       
       // Update game state
       this.currentGameState = {
@@ -335,6 +340,79 @@ export class GameStateService {
     this.currentGameState = {
       ...this.currentGameState,
       gamePhase: phase
+    };
+  }
+
+  /**
+   * Cast a spell based on shape matching result
+   */
+  async castSpell(matchResult: ShapeMatchResult): Promise<void> {
+    if (!this.currentGameState.player) {
+      console.warn('Cannot cast spell: No player found');
+      return;
+    }
+
+    const player = this.currentGameState.player;
+
+    if (matchResult.spellId && matchResult.isKnownPattern) {
+      // Cast known spell
+      try {
+        const result = await this.spellCastingUseCase.castSpell({
+          playerId: player.id,
+          spellId: matchResult.spellId,
+          accuracy: matchResult.accuracy
+        });
+
+        if (result.success && result.updatedPlayer) {
+          // Update player state
+          this.currentGameState = {
+            ...this.currentGameState,
+            player: result.updatedPlayer
+          };
+          console.log(`Successfully cast ${matchResult.spellId} with ${Math.round(matchResult.accuracy * 100)}% accuracy`);
+        } else {
+          console.warn('Spell casting failed:', result.errorMessage);
+        }
+      } catch (error) {
+        console.error('Error casting spell:', error);
+      }
+    } else {
+      // Apply debuff for failed pattern matching
+      this.applyDebuff(matchResult.debuffType || 'self_damage');
+    }
+  }
+
+  /**
+   * Apply debuff to player
+   */
+  private applyDebuff(debuffType: 'self_damage' | 'slow_player' | 'screen_blackout' | 'weakness'): void {
+    if (!this.currentGameState.player) return;
+
+    const player = this.currentGameState.player;
+    let updatedPlayer = player;
+
+    switch (debuffType) {
+      case 'self_damage':
+        updatedPlayer = player.takeDamage(5);
+        console.log('Applied self damage debuff: -5 HP');
+        break;
+      case 'slow_player':
+        // TODO: Implement speed debuff
+        console.log('Applied slow player debuff');
+        break;
+      case 'screen_blackout':
+        // TODO: Implement screen blackout
+        console.log('Applied screen blackout debuff');
+        break;
+      case 'weakness':
+        // TODO: Implement weakness debuff
+        console.log('Applied weakness debuff');
+        break;
+    }
+
+    this.currentGameState = {
+      ...this.currentGameState,
+      player: updatedPlayer
     };
   }
 }

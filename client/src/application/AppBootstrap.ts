@@ -5,10 +5,12 @@
 
 import { RepositoryFactory } from '../infrastructure/factories/RepositoryFactory';
 import { CombatServiceImpl } from '../infrastructure/services/CombatServiceImpl';
+import { InMemorySpellRepository } from '../infrastructure/persistence/InMemorySpellRepository';
 // ZustandStateAdapter removed - using GameStateManager directly
 import { PlayerMovementUseCase } from './useCases/PlayerMovementUseCase';
 import { WorldExplorationUseCase } from './useCases/WorldExplorationUseCase';
 import { CombatUseCase } from './useCases/CombatUseCase';
+import { SpellCastingUseCase } from './useCases/SpellCastingUseCase';
 import { GameStateService } from './services/GameStateService';
 import { AnimationService } from './services/AnimationService';
 import { MinimapService } from './services/MinimapService';
@@ -63,6 +65,9 @@ export class AppBootstrap {
       ? RepositoryFactory.createDevelopmentRepositories()
       : RepositoryFactory.createProductionRepositories();
 
+    // Create spell repository
+    const spellRepository = new InMemorySpellRepository();
+
     // Create services (Infrastructure layer)
     const combatService = new CombatServiceImpl();
 
@@ -82,12 +87,20 @@ export class AppBootstrap {
       combatService
     );
 
+    const spellCastingUseCase = new SpellCastingUseCase(
+      repositories.playerRepository,
+      combatService,
+      spellRepository
+    );
+
     // Create application services (Application layer)
     this.gameStateService = new GameStateService(
       repositories.playerRepository,
       repositories.worldRepository,
+      spellRepository,
       playerMovementUseCase,
-      worldExplorationUseCase
+      worldExplorationUseCase,
+      spellCastingUseCase
     );
 
     this.animationService = new AnimationService();

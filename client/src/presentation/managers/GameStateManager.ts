@@ -61,6 +61,7 @@ interface GameStateStore {
   initializeGame: (playerId?: string) => Promise<void>;
   updateGameState: (deltaTime: number) => Promise<void>;
   setDrawingRune: (isDrawing: boolean) => void;
+  castSpell: (matchResult: any) => Promise<void>;
   movePlayer: (deltaX: number, deltaY: number) => Promise<void>;
   detectZoneChange: (playerPosition: { x: number; y: number }) => Promise<boolean>;
   clearEnemies: () => Promise<void>;
@@ -187,6 +188,25 @@ export class GameStateManager {
                       state.gameState.isInCombat ? 'combat' : 'exploring'
           }
         }));
+      },
+
+      castSpell: async (matchResult: any) => {
+        try {
+          await this.gameStateService.castSpell(matchResult);
+          
+          // Update the UI state with the latest game state
+          const gameState = this.gameStateService.getCurrentGameState();
+          set(state => ({
+            gameState: {
+              ...state.gameState,
+              player: gameState.player ? this.adaptPlayerToUI(gameState.player) : null,
+              isDrawingRune: false,
+              gamePhase: gameState.isInCombat ? 'combat' : 'exploring'
+            }
+          }));
+        } catch (error) {
+          console.error('Error casting spell:', error);
+        }
       },
 
       movePlayer: async (deltaX: number, deltaY: number) => {
