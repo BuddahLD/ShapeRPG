@@ -24,7 +24,13 @@ export class ShapeMatchingService {
    * Now any spell can be cast, but accuracy affects effectiveness
    */
   matchShape(drawnPoints: Point[], availableSpellIds: string[]): ShapeMatchResult {
+    console.log('🔍 ShapeMatching: Starting shape analysis', { 
+      pointsCount: drawnPoints.length, 
+      minRequired: this.MIN_POINTS_FOR_TRIANGLE 
+    });
+
     if (drawnPoints.length < this.MIN_POINTS_FOR_TRIANGLE) {
+      console.log('🔍 ShapeMatching: Not enough points for analysis');
       return {
         spellId: null,
         accuracy: 0,
@@ -33,32 +39,15 @@ export class ShapeMatchingService {
       };
     }
 
-    // Check for triangle pattern
-    const triangleAccuracy = this.calculateTriangleSimilarity(drawnPoints);
+    // TEMPORARY: Matching system disabled - always return triangle for any shape
+    console.log('🔍 ShapeMatching: MATCHING OFF - Always returning triangle');
+    console.log('🔍 ShapeMatching: Returning SPL01 (Fire Bolt)');
     
-    if (triangleAccuracy >= this.TRIANGLE_THRESHOLD) {
-      // Triangle pattern matches Fire Bolt
-      return {
-        spellId: 'SPL01',
-        accuracy: triangleAccuracy,
-        isKnownPattern: true
-      };
-    }
-
-    // TODO: Add other pattern checks (zigzag, circle, wave)
-    // For now, only triangle is implemented
-
-    // No pattern match - random debuff
-    const debuffTypes: Array<'self_damage' | 'slow_player' | 'screen_blackout' | 'weakness'> = [
-      'self_damage', 'slow_player', 'screen_blackout', 'weakness'
-    ];
-    const randomDebuff = debuffTypes[Math.floor(Math.random() * debuffTypes.length)];
-
+    // Always return triangle match when matching is off
     return {
-      spellId: null,
-      accuracy: 0,
-      isKnownPattern: false,
-      debuffType: randomDebuff
+      spellId: 'SPL01',
+      accuracy: 0.9,
+      isKnownPattern: true
     };
   }
 
@@ -66,20 +55,38 @@ export class ShapeMatchingService {
    * Calculates how similar the drawn points are to a triangle
    */
   private calculateTriangleSimilarity(points: Point[]): number {
-    if (points.length < 3) return 0;
+    console.log('🔍 TriangleSimilarity: Starting calculation with', points.length, 'points');
+    
+    if (points.length < 3) {
+      console.log('🔍 TriangleSimilarity: Not enough points');
+      return 0;
+    }
 
     // Normalize points to a standard size (40px triangle)
     const normalizedPoints = this.normalizePoints(points, 40);
+    console.log('🔍 TriangleSimilarity: Normalized points:', normalizedPoints);
     
     // Check if the shape forms a triangle
     const isTriangle = this.isTriangleShape(normalizedPoints);
+    console.log('🔍 TriangleSimilarity: Is triangle shape?', isTriangle);
     
-    if (!isTriangle) return 0;
+    if (!isTriangle) {
+      console.log('🔍 TriangleSimilarity: Not a triangle shape');
+      return 0;
+    }
 
-    // Calculate accuracy based on how close to equilateral triangle
-    const equilateralScore = this.calculateEquilateralScore(normalizedPoints);
+    // Find triangle vertices for equilateral calculation
+    const vertices = this.findTriangleVertices(normalizedPoints);
+    console.log('🔍 TriangleSimilarity: Found vertices:', vertices);
     
-    return Math.min(equilateralScore, 1.0);
+    // Calculate accuracy based on how close to equilateral triangle
+    const equilateralScore = this.calculateEquilateralScore(vertices);
+    console.log('🔍 TriangleSimilarity: Equilateral score:', equilateralScore);
+    
+    const finalScore = Math.min(equilateralScore, 1.0);
+    console.log('🔍 TriangleSimilarity: Final similarity score:', finalScore);
+    
+    return finalScore;
   }
 
   /**

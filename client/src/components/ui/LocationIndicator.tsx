@@ -113,12 +113,6 @@ export const LocationIndicator: React.FC<LocationIndicatorProps> = ({
         ...styles,
         ...animationStyles,
       }}
-      ref={(el) => {
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          console.log('LocationIndicator position:', { top: rect.top, left: rect.left, width: rect.width, height: rect.height });
-        }
-      }}
       {...props}
     >
       <UIContainer variant={variant} className="px-2 py-1">

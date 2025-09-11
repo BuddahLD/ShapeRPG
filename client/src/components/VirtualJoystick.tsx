@@ -142,7 +142,7 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
   };
 
   useEffect(() => {
-    if (isDragging) {
+    if (isDragging && !isDrawingRune) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
       window.addEventListener('touchmove', handleTouchMove, { passive: false });
@@ -155,7 +155,7 @@ const VirtualJoystick: React.FC<VirtualJoystickProps> = ({ isModalOpen = false }
         window.removeEventListener('touchend', handleTouchEnd);
       };
     }
-  }, [isDragging]);
+  }, [isDragging, isDrawingRune]);
 
   if (isDrawingRune || isModalOpen) {
     return null; // Hide joystick during rune drawing or when modal is open

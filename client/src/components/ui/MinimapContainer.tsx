@@ -47,13 +47,6 @@ export const MinimapContainer: React.FC<MinimapContainerProps> = ({
         width: styles.width || 'fit-content',
         height: styles.height || 'fit-content'
       }}
-      ref={(el) => {
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          console.log('MinimapContainer rendered width:', rect.width);
-          console.log('MinimapContainer rendered height:', rect.height);
-        }
-      }}
       {...props}
     >
       {/* Base minimap component */}

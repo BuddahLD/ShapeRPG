@@ -30,13 +30,28 @@ const CastAnimation: React.FC<CastAnimationProps> = ({
   const [particles, setParticles] = useState<Particle[]>([]);
   const [direction, setDirection] = useState<{ x: number; y: number } | null>(null);
 
+  // Set up canvas dimensions
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log('🎬 CastAnimation: useEffect triggered', { isActive, castTime });
+    
     if (isActive) {
+      console.log('🎬 CastAnimation: Starting cast animation');
+      console.log('🎬 CastAnimation: Cast time:', castTime, 'seconds');
       startTimeRef.current = Date.now();
       setDirection(null);
       setParticles([]);
+      console.log('🎬 CastAnimation: Calling startAnimation()');
       startAnimation();
     } else {
+      console.log('🎬 CastAnimation: Stopping cast animation');
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -51,20 +66,30 @@ const CastAnimation: React.FC<CastAnimationProps> = ({
   }, [isActive, castTime]);
 
   const startAnimation = () => {
+    console.log('🎬 CastAnimation: startAnimation called');
     const animate = (currentTime: number) => {
       const canvas = canvasRef.current;
-      if (!canvas) return;
+      if (!canvas) {
+        console.log('🎬 CastAnimation: No canvas ref');
+        return;
+      }
 
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      if (!ctx) {
+        console.log('🎬 CastAnimation: No canvas context');
+        return;
+      }
 
       const elapsed = (currentTime - startTimeRef.current) / 1000;
       const progress = Math.min(elapsed / castTime, 1);
+      
+      console.log('🎬 CastAnimation: Animation frame - elapsed:', elapsed, 'progress:', progress);
 
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Draw cast circle
+      console.log('🎬 CastAnimation: Drawing cast circle');
       drawCastCircle(ctx, canvas.width, canvas.height, progress);
 
       // Update and draw particles
@@ -84,9 +109,10 @@ const CastAnimation: React.FC<CastAnimationProps> = ({
   };
 
   const drawCastCircle = (ctx: CanvasRenderingContext2D, width: number, height: number, progress: number) => {
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const radius = Math.min(width, height) / 2 - 10;
+    // Position the circle at the rune button location (top-right area)
+    const centerX = width - 60; // 60px from right edge
+    const centerY = 60; // 60px from top edge
+    const radius = 30; // Fixed radius for the rune button
 
     // Draw outer circle (background)
     ctx.strokeStyle = 'rgba(0, 255, 255, 0.2)';

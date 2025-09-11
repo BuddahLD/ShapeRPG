@@ -47,7 +47,8 @@ export const ActionBar: React.FC<ActionBarProps> = ({
   };
 
   const handleRuneButtonRelease = () => {
-    setDrawingRune(false);
+    // Don't close the drawing interface here - let RuneDrawing component handle it
+    // setDrawingRune(false);
   };
 
   const defaultActions = [{ icon: '☯', onClick: handleRuneButtonPress, label: 'Cast Rune' }];
