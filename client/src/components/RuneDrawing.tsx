@@ -1,7 +1,9 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useGameState } from "../presentation/hooks/useGameStateManager";
 import { usePlayer } from "../presentation/hooks/usePlayerManager";
+import { useSpellManager } from "../presentation/hooks/useSpellManager";
 import { ShapeMatchingService } from "../domain/services/ShapeMatchingService";
+import CastAnimation from "./CastAnimation";
 
 interface Point {
   x: number;
@@ -13,8 +15,12 @@ const RuneDrawing: React.FC = () => {
   const [isDrawing, setIsDrawing] = useState(true); // Start drawing immediately
   const [points, setPoints] = useState<Point[]>([]);
   const [hasStartedDrawing, setHasStartedDrawing] = useState(false);
+  const [isCasting, setIsCasting] = useState(false);
+  const [castSpellId, setCastSpellId] = useState<string | null>(null);
+  const [castDirection, setCastDirection] = useState<{ x: number; y: number } | null>(null);
   const { setDrawingRune, castSpell } = useGameState();
   const { player } = usePlayer();
+  const { getSpellStats } = useSpellManager();
   const shapeMatchingService = new ShapeMatchingService();
 
   const drawPath = useCallback((ctx: CanvasRenderingContext2D, points: Point[]) => {
@@ -122,19 +128,57 @@ const RuneDrawing: React.FC = () => {
 
     // Only cast spell if we have enough points
     if (points.length >= 3) {
-      // Analyze the drawn shape
-      const knownSpellIds = player?.knownSpells ? Array.from(player.knownSpells) as string[] : [];
-      const matchResult = shapeMatchingService.matchShape(points, knownSpellIds);
+      // Analyze the drawn shape - now any spell can be cast, not just known ones
+      const allSpellIds = ['SPL01', 'SPL02', 'SPL03', 'SPL04']; // All available spells
+      const matchResult = shapeMatchingService.matchShape(points, allSpellIds);
       
-      // Cast spell or apply debuff based on match
+      if (matchResult.spellId && matchResult.isKnownPattern) {
+        // Start cast animation immediately
+        setCastSpellId(matchResult.spellId);
+        setIsCasting(true);
+        setCastDirection(null);
+      } else {
+        // Apply debuff for failed pattern matching
+        castSpell(matchResult);
+        setDrawingRune(false);
+        setPoints([]);
+        setHasStartedDrawing(false);
+      }
+    } else {
+      // Not enough points - just close
+      setDrawingRune(false);
+      setPoints([]);
+      setHasStartedDrawing(false);
+    }
+  }, [isDrawing, hasStartedDrawing, points, castSpell, setDrawingRune, shapeMatchingService]);
+
+  // Cast animation handlers
+  const handleCastComplete = useCallback(() => {
+    if (castSpellId) {
+      // Create match result for the completed cast
+      const matchResult = {
+        spellId: castSpellId,
+        accuracy: 0.8, // Default accuracy for now
+        isKnownPattern: true,
+        debuffType: undefined as any
+      };
+      
+      // Cast the spell with direction
       castSpell(matchResult);
     }
     
-    // Clear drawing immediately
+    // Reset cast state
+    setIsCasting(false);
+    setCastSpellId(null);
+    setCastDirection(null);
     setDrawingRune(false);
     setPoints([]);
     setHasStartedDrawing(false);
-  }, [isDrawing, hasStartedDrawing, points, castSpell, setDrawingRune, player, shapeMatchingService]);
+  }, [castSpellId, castSpell]);
+
+  const handleDirectionSet = useCallback((direction: { x: number; y: number }) => {
+    setCastDirection(direction);
+  }, []);
 
   // Touch events (these are now handled by global events, but keeping for fallback)
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -327,6 +371,16 @@ const RuneDrawing: React.FC = () => {
         onTouchEnd={handleTouchEnd}
         onMouseDown={handleMouseDown}
       />
+      
+      {/* Cast Animation */}
+      {isCasting && castSpellId && (
+        <CastAnimation
+          isActive={isCasting}
+          castTime={getSpellStats(castSpellId).castTime}
+          onComplete={handleCastComplete}
+          onDirectionSet={handleDirectionSet}
+        />
+      )}
     </div>
   );
 };

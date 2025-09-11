@@ -63,7 +63,7 @@ export function useSpellManager() {
 
   const getSpellStats = (spellId: string): { mana: number; castTime: number; damage: number } => {
     const stats: Record<string, { mana: number; castTime: number; damage: number }> = {
-      'SPL01': { mana: 5, castTime: 1.0, damage: 10 },
+      'SPL01': { mana: 5, castTime: 3.0, damage: 10 },
       'SPL02': { mana: 8, castTime: 1.2, damage: 8 },
       'SPL03': { mana: 12, castTime: 1.5, damage: 0 }, // Shield spell
       'SPL04': { mana: 15, castTime: 2.0, damage: 0 }  // Special effect spell

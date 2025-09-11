@@ -20,9 +20,10 @@ export class ShapeMatchingService {
   private readonly MIN_POINTS_FOR_TRIANGLE = 3;
 
   /**
-   * Matches drawn points against known spell patterns
+   * Matches drawn points against spell patterns
+   * Now any spell can be cast, but accuracy affects effectiveness
    */
-  matchShape(drawnPoints: Point[], knownSpellIds: string[]): ShapeMatchResult {
+  matchShape(drawnPoints: Point[], availableSpellIds: string[]): ShapeMatchResult {
     if (drawnPoints.length < this.MIN_POINTS_FOR_TRIANGLE) {
       return {
         spellId: null,
@@ -36,23 +37,16 @@ export class ShapeMatchingService {
     const triangleAccuracy = this.calculateTriangleSimilarity(drawnPoints);
     
     if (triangleAccuracy >= this.TRIANGLE_THRESHOLD) {
-      // Check if player knows Fire Bolt (triangle spell)
-      if (knownSpellIds.includes('SPL01')) {
-        return {
-          spellId: 'SPL01',
-          accuracy: triangleAccuracy,
-          isKnownPattern: true
-        };
-      } else {
-        // Similar pattern but unknown - apply debuff
-        return {
-          spellId: null,
-          accuracy: triangleAccuracy,
-          isKnownPattern: false,
-          debuffType: 'self_damage'
-        };
-      }
+      // Triangle pattern matches Fire Bolt
+      return {
+        spellId: 'SPL01',
+        accuracy: triangleAccuracy,
+        isKnownPattern: true
+      };
     }
+
+    // TODO: Add other pattern checks (zigzag, circle, wave)
+    // For now, only triangle is implemented
 
     // No pattern match - random debuff
     const debuffTypes: Array<'self_damage' | 'slow_player' | 'screen_blackout' | 'weakness'> = [

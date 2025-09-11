@@ -465,12 +465,6 @@ export class MobManager {
         if (movementResult.success) {
           this.mobs.set(mobId, movementResult.updatedMob);
           updatedMobs.push(movementResult.updatedMob);
-
-          // Log direction changes and cycle information for debugging
-          if (movementResult.hasChangedDirection) {
-            console.log(`Dummy ${mobId} changed direction at position:`, movementResult.updatedMob.position);
-            console.log(`Cycle phase: ${movementResult.cyclePhase.toFixed(2)}, Direction: ${movementResult.cycleDirection > 0 ? 'UP' : 'DOWN'}`);
-          }
         }
       }
     });

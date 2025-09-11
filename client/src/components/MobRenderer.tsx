@@ -25,22 +25,11 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
 
   // Initial spawn check and zone change detection
   useEffect(() => {
-    console.log('MobRenderer: Spawn check triggered for zone:', currentZone, 'player pos:', playerPosition);
-    console.log('MobRenderer: Player position type:', typeof playerPosition, 'keys:', Object.keys(playerPosition));
     
     // Only proceed if player position is valid
     if (playerPosition && typeof playerPosition.x === 'number' && typeof playerPosition.y === 'number') {
-      console.log('MobRenderer: Calling updateMobSpawning with position:', playerPosition, 'zone:', currentZone);
       const spawnEvents = mobManager.updateMobSpawning(playerPosition, currentZone);
       const allMobs = mobManager.getAllMobs();
-      console.log('MobRenderer: Spawn events:', spawnEvents.length, spawnEvents.map(e => e.type));
-      console.log('MobRenderer: All mobs after spawn check:', allMobs.length, allMobs.map(e => ({ 
-        id: e.id, 
-        type: e.type, 
-        position: e.position,
-        hasMovement: e.hasMovementBehavior(),
-        isDummy: e.isDummy()
-      })));
       setMobs(allMobs);
       lastSpawnCheck.current = { x: playerPosition.x, y: playerPosition.y, zone: currentZone };
     } else {
@@ -61,15 +50,6 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
       
       // Update dummy movement through mob manager
       const updateResult = mobManagerRef.current.updateDummyMovement(deltaTime);
-      
-      // Debug: Log update results (reduced frequency)
-      if (Math.random() < 0.01) { // Log 1% of updates
-        console.log('MobRenderer: Dummy movement update result:', {
-          success: updateResult.mobs.length > 0,
-          mobCount: updateResult.mobs.length,
-          dummyMobs: updateResult.mobs.filter(mob => mob.isDummy()).length
-        });
-      }
       
       // Update local state with new mob positions
       if (updateResult.mobs.length > 0) {
@@ -104,9 +84,6 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    console.log('MobRenderer: Rendering', mobs.length, 'mobs on canvas');
-    console.log('MobRenderer: Player position:', playerPosition);
-
     // Render mobs on canvas
     mobs.forEach(mob => {
       if (!mob.isAlive()) return;
@@ -119,8 +96,6 @@ export const MobRenderer: React.FC<MobRendererProps> = ({
       const centerY = canvas.height / 2;
       const screenX = centerX + (x - playerPosition.x);
       const screenY = centerY + (y - playerPosition.y);
-
-      console.log(`MobRenderer: Mob ${mob.id} at world(${x}, ${y}) -> screen(${screenX}, ${screenY})`);
 
       // Only render if on screen
       if (screenX > -50 && screenX < canvas.width + 50 && 
