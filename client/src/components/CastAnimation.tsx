@@ -40,20 +40,13 @@ const CastAnimation: React.FC<CastAnimationProps> = ({
   }, []);
 
   useEffect(() => {
-    console.log('🎬 CastAnimation: useEffect triggered', { isActive, castTime });
-    
     if (isActive) {
-      console.log('🎬 CastAnimation: Starting cast animation');
-      console.log('🎬 CastAnimation: Cast time:', castTime, 'seconds');
       const now = performance.now();
       startTimeRef.current = now;
-      console.log('🎬 CastAnimation: Start time set to:', now);
       setDirection(null);
       setParticles([]);
-      console.log('🎬 CastAnimation: Calling startAnimation()');
       startAnimation();
     } else {
-      console.log('🎬 CastAnimation: Stopping cast animation');
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -68,30 +61,20 @@ const CastAnimation: React.FC<CastAnimationProps> = ({
   }, [isActive, castTime]);
 
   const startAnimation = () => {
-    console.log('🎬 CastAnimation: startAnimation called');
     const animate = (currentTime: number) => {
       const canvas = canvasRef.current;
-      if (!canvas) {
-        console.log('🎬 CastAnimation: No canvas ref');
-        return;
-      }
+      if (!canvas) return;
 
       const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        console.log('🎬 CastAnimation: No canvas context');
-        return;
-      }
+      if (!ctx) return;
 
       const elapsed = (currentTime - startTimeRef.current) / 1000;
       const progress = Math.min(elapsed / castTime, 1);
-      
-      console.log('🎬 CastAnimation: Animation frame - currentTime:', currentTime, 'startTime:', startTimeRef.current, 'elapsed:', elapsed, 'progress:', progress);
 
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Draw cast circle
-      console.log('🎬 CastAnimation: Drawing cast circle');
       drawCastCircle(ctx, canvas.width, canvas.height, progress);
 
       // Update and draw particles
@@ -239,11 +222,6 @@ const CastAnimation: React.FC<CastAnimationProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 pointer-events-auto">
-      {/* Test: Show CastAnimation is active */}
-      <div className="absolute top-4 right-4 bg-blue-500/80 text-white p-2 rounded-lg">
-        CastAnimation Active! Time: {castTime}s
-      </div>
-      
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full"
