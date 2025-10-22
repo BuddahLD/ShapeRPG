@@ -3,6 +3,8 @@
 ## Overview
 Shapes RPG: Figureium is built as a full-stack web application with a custom 2D game engine, following clean architecture principles and modern development practices.
 
+> **📋 Migration Strategy:** See [MigrationPlan.md](./MigrationPlan.md) for the strategic path from current HTML5 Canvas → Phaser.js → Native Desktop deployment.
+
 ## Frontend Architecture
 
 ### Core Framework

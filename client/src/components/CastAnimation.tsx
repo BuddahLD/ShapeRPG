@@ -45,7 +45,9 @@ const CastAnimation: React.FC<CastAnimationProps> = ({
     if (isActive) {
       console.log('🎬 CastAnimation: Starting cast animation');
       console.log('🎬 CastAnimation: Cast time:', castTime, 'seconds');
-      startTimeRef.current = Date.now();
+      const now = performance.now();
+      startTimeRef.current = now;
+      console.log('🎬 CastAnimation: Start time set to:', now);
       setDirection(null);
       setParticles([]);
       console.log('🎬 CastAnimation: Calling startAnimation()');
@@ -83,7 +85,7 @@ const CastAnimation: React.FC<CastAnimationProps> = ({
       const elapsed = (currentTime - startTimeRef.current) / 1000;
       const progress = Math.min(elapsed / castTime, 1);
       
-      console.log('🎬 CastAnimation: Animation frame - elapsed:', elapsed, 'progress:', progress);
+      console.log('🎬 CastAnimation: Animation frame - currentTime:', currentTime, 'startTime:', startTimeRef.current, 'elapsed:', elapsed, 'progress:', progress);
 
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -236,7 +238,12 @@ const CastAnimation: React.FC<CastAnimationProps> = ({
   if (!isActive) return null;
 
   return (
-    <div className="fixed inset-0 z-40 pointer-events-auto">
+    <div className="fixed inset-0 z-50 pointer-events-auto">
+      {/* Test: Show CastAnimation is active */}
+      <div className="absolute top-4 right-4 bg-blue-500/80 text-white p-2 rounded-lg">
+        CastAnimation Active! Time: {castTime}s
+      </div>
+      
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full"

@@ -133,6 +133,7 @@ Comprehensive documentation is available in the `docs/` folder:
 - **[Architecture](./docs/Architecture.md)** - Technical implementation details
 - **[Development Guidelines](./docs/DevelopmentGuidelines.md)** - Coding standards
 - **[Dependencies](./docs/Dependencies.md)** - Technical stack information
+- **[Migration Plan](./docs/MigrationPlan.md)** - Strategic path: Canvas → Phaser.js → Native Desktop
 - **[Container Modifier System](./docs/ContainerModifierSystem.md)** - UI component system
 
 ## 🎨 UI Component System

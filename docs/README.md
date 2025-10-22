@@ -43,6 +43,14 @@ This folder contains comprehensive documentation for the Shapes RPG: Figureium p
 - Mobile and touch optimization
 - Security and best practices
 
+### 🚀 [MigrationPlan.md](./MigrationPlan.md)
+**Technology Migration Strategy** - Strategic migration path including:
+- Current HTML5 Canvas architecture
+- Phaser.js migration plan and benefits
+- Native desktop deployment options (Electron, Tauri, NW.js)
+- Migration timeline and risk assessment
+- Success metrics and decision points
+
 ## Additional Files
 
 ### 📖 [.cursorrules](../.cursorrules)

@@ -210,8 +210,8 @@ const RuneDrawing: React.FC = () => {
         console.log('🎯 RuneDrawing: setCastDirection(null)');
         setCastDirection(null);
         
-        console.log('🎯 RuneDrawing: setDrawingRune(false) - hiding drawing interface');
-        setDrawingRune(false); // Hide the drawing interface
+        // Don't hide the drawing interface yet - let the cast animation show first
+        // setDrawingRune(false); // Hide the drawing interface
         
         console.log('🎯 RuneDrawing: setPoints([]) - clearing points');
         setPoints([]); // Clear the points
@@ -240,6 +240,8 @@ const RuneDrawing: React.FC = () => {
 
   // Cast animation handlers
   const handleCastComplete = useCallback(() => {
+    console.log('🎯 RuneDrawing: handleCastComplete called');
+    
     if (castSpellId) {
       // Create match result for the completed cast
       const matchResult = {
@@ -249,15 +251,17 @@ const RuneDrawing: React.FC = () => {
         debuffType: undefined as any
       };
       
+      console.log('🎯 RuneDrawing: Casting spell with match result:', matchResult);
       // Cast the spell with direction
       castSpell(matchResult);
     }
     
+    console.log('🎯 RuneDrawing: Resetting cast state and hiding drawing interface');
     // Reset cast state
     setIsCasting(false);
     setCastSpellId(null);
     setCastDirection(null);
-    setDrawingRune(false);
+    setDrawingRune(false); // Now hide the drawing interface
     setPoints([]);
     setHasStartedDrawing(false);
   }, [castSpellId, castSpell]);
@@ -487,12 +491,26 @@ const RuneDrawing: React.FC = () => {
             </div>
           </div>
           
+          {/* Test: Show CastAnimation status */}
+          <div className="fixed top-20 left-4 bg-green-500/80 text-white p-4 rounded-lg z-50">
+            <div>CastAnimation should be active!</div>
+            <div>isActive: {isCasting ? 'true' : 'false'}</div>
+            <div>castTime: {getSpellStats(castSpellId).castTime}s</div>
+          </div>
+          
+          {console.log('🎨 RuneDrawing: About to render CastAnimation with props:', {
+            isActive: isCasting,
+            castTime: getSpellStats(castSpellId).castTime,
+            onComplete: handleCastComplete,
+            onDirectionSet: handleDirectionSet
+          })}
           <CastAnimation
             isActive={isCasting}
             castTime={getSpellStats(castSpellId).castTime}
             onComplete={handleCastComplete}
             onDirectionSet={handleDirectionSet}
           />
+          {console.log('🎨 RuneDrawing: CastAnimation rendered')}
         </>
       )}
       
