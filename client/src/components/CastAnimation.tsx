@@ -95,32 +95,33 @@ const CastAnimation: React.FC<CastAnimationProps> = ({
 
   const drawCastCircle = (ctx: CanvasRenderingContext2D, width: number, height: number, progress: number) => {
     // Position the circle at the rune button location (top-right area)
-    const centerX = width - 60; // 60px from right edge
-    const centerY = 60; // 60px from top edge
-    const radius = 30; // Fixed radius for the rune button
+    // ActionBar is positioned at top: 140px, right: 2rem (32px), button size: 40px
+    const centerX = width - 32 - 20; // 32px (2rem) + 20px (half button width)
+    const centerY = 140 + 20; // 140px + 20px (half button height)
+    const outerRadius = 20; // Button radius (40px / 2)
+    const innerRadius = 16; // Inner circle radius (slightly smaller for the border effect)
+    
+    // The animation should be a thin ring between inner and outer radius
+    const animationRadius = (outerRadius + innerRadius) / 2; // Middle of the two circles
+    const ringWidth = 2; // Thin ring
 
-    // Draw outer circle (background)
-    ctx.strokeStyle = 'rgba(0, 255, 255, 0.2)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    ctx.stroke();
-
-    // Draw progress circle (burning down counter-clockwise)
+    // Draw the inner border animation (thin cyan ring)
     const startAngle = Math.PI / 2; // Start from top
     const endAngle = startAngle - (2 * Math.PI * progress);
-    
-    ctx.strokeStyle = '#00ffff';
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-    ctx.stroke();
 
-    // Add glow effect
+    // Set up the ring drawing
+    ctx.strokeStyle = '#00ffff';
+    ctx.lineWidth = ringWidth;
+    ctx.lineCap = 'round';
     ctx.shadowColor = '#00ffff';
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = 8;
+    
+    // Draw the progress ring
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, animationRadius, startAngle, endAngle);
     ctx.stroke();
+    
+    // Reset shadow
     ctx.shadowBlur = 0;
   };
 
@@ -137,27 +138,28 @@ const CastAnimation: React.FC<CastAnimationProps> = ({
         }))
         .filter(particle => particle.life > 0);
 
-      // Add new particles occasionally
+      // Add new particles occasionally around the rune button
       if (Math.random() < 0.3) {
         const canvas = canvasRef.current;
         if (canvas) {
-          const centerX = canvas.width / 2;
-          const centerY = canvas.height / 2;
-          const radius = Math.min(canvas.width, canvas.height) / 2 - 10;
-          
+          // Position particles around the rune button
+          const centerX = canvas.width - 32 - 20; // Same as rune button center
+          const centerY = 140 + 20;
+          const radius = 25; // Slightly larger than button for particle spread
+
           const angle = Math.random() * 2 * Math.PI;
           const particleX = centerX + Math.cos(angle) * radius;
           const particleY = centerY + Math.sin(angle) * radius;
-          
+
           newParticles.push({
             id: currentTime,
             x: particleX,
             y: particleY,
-            vx: (Math.random() - 0.5) * 2,
-            vy: (Math.random() - 0.5) * 2,
+            vx: (Math.random() - 0.5) * 1,
+            vy: (Math.random() - 0.5) * 1,
             life: 0.5 + Math.random() * 0.5,
             maxLife: 1,
-            size: 1 + Math.random() * 2,
+            size: 1 + Math.random() * 1.5,
           });
         }
       }
@@ -186,11 +188,11 @@ const CastAnimation: React.FC<CastAnimationProps> = ({
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // Convert to normalized direction vector
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const dirX = (x - centerX) / centerX;
-    const dirY = (y - centerY) / centerY;
+    // Convert to normalized direction vector relative to rune button
+    const centerX = canvas.width - 32 - 20; // Rune button center X
+    const centerY = 140 + 20; // Rune button center Y
+    const dirX = (x - centerX) / 20; // Normalize by button radius
+    const dirY = (y - centerY) / 20;
 
     setDirection({ x: dirX, y: dirY });
     onDirectionSet({ x: dirX, y: dirY });
@@ -208,11 +210,11 @@ const CastAnimation: React.FC<CastAnimationProps> = ({
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
 
-    // Convert to normalized direction vector
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const dirX = (x - centerX) / centerX;
-    const dirY = (y - centerY) / centerY;
+    // Convert to normalized direction vector relative to rune button
+    const centerX = canvas.width - 32 - 20; // Rune button center X
+    const centerY = 140 + 20; // Rune button center Y
+    const dirX = (x - centerX) / 20; // Normalize by button radius
+    const dirY = (y - centerY) / 20;
 
     setDirection({ x: dirX, y: dirY });
     onDirectionSet({ x: dirX, y: dirY });
@@ -235,8 +237,8 @@ const CastAnimation: React.FC<CastAnimationProps> = ({
         <div 
           className="absolute w-4 h-4 bg-cyan-400 rounded-full border-2 border-white shadow-lg"
           style={{
-            left: `calc(50% + ${direction.x * 100}px)`,
-            top: `calc(50% + ${direction.y * 100}px)`,
+            left: `${window.innerWidth - 32 - 20 + direction.x * 20}px`,
+            top: `${140 + 20 + direction.y * 20}px`,
             transform: 'translate(-50%, -50%)',
           }}
         />

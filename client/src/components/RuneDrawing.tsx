@@ -3,7 +3,6 @@ import { useGameState } from "../presentation/hooks/useGameStateManager";
 import { usePlayer } from "../presentation/hooks/usePlayerManager";
 import { useSpellManager } from "../presentation/hooks/useSpellManager";
 import { ShapeMatchingService } from "../domain/services/ShapeMatchingService";
-import CastAnimation from "./CastAnimation";
 
 interface Point {
   x: number;
@@ -15,9 +14,6 @@ const RuneDrawing: React.FC = () => {
   const [isDrawing, setIsDrawing] = useState(true); // Start drawing immediately
   const [points, setPoints] = useState<Point[]>([]);
   const [hasStartedDrawing, setHasStartedDrawing] = useState(false);
-  const [isCasting, setIsCasting] = useState(false);
-  const [castSpellId, setCastSpellId] = useState<string | null>(null);
-  const [castDirection, setCastDirection] = useState<{ x: number; y: number } | null>(null);
   const { setDrawingRune, castSpell } = useGameState();
   const { player } = usePlayer();
   const { getSpellStats } = useSpellManager();
@@ -143,18 +139,18 @@ const RuneDrawing: React.FC = () => {
       // Analyze the drawn shape - now any spell can be cast, not just known ones
       const allSpellIds = ['SPL01', 'SPL02', 'SPL03', 'SPL04']; // All available spells
       const matchResult = shapeMatchingService.matchShape(points, allSpellIds);
-      
+
       if (matchResult.spellId && matchResult.isKnownPattern) {
-        // Start cast animation immediately and hide drawing interface
-        setCastSpellId(matchResult.spellId);
-        setIsCasting(true);
-        setCastDirection(null);
-        
-        // Don't hide the drawing interface yet - let the cast animation show first
-        // setDrawingRune(false); // Hide the drawing interface
-        
-        setPoints([]); // Clear the points
-        setHasStartedDrawing(false); // Reset drawing state
+        // Dispatch spell cast event to ActionBar
+        const customEvent = new CustomEvent('spellCast', {
+          detail: { spellId: matchResult.spellId }
+        });
+        window.dispatchEvent(customEvent);
+
+        // Hide drawing interface immediately
+        setDrawingRune(false);
+        setPoints([]);
+        setHasStartedDrawing(false);
       } else {
         // Apply debuff for failed pattern matching
         castSpell(matchResult);
@@ -170,33 +166,6 @@ const RuneDrawing: React.FC = () => {
     }
   }, [isDrawing, hasStartedDrawing, points, castSpell, setDrawingRune, shapeMatchingService]);
 
-  // Cast animation handlers
-  const handleCastComplete = useCallback(() => {
-    if (castSpellId) {
-      // Create match result for the completed cast
-      const matchResult = {
-        spellId: castSpellId,
-        accuracy: 0.8, // Default accuracy for now
-        isKnownPattern: true,
-        debuffType: undefined as any
-      };
-      
-      // Cast the spell with direction
-      castSpell(matchResult);
-    }
-    
-    // Reset cast state
-    setIsCasting(false);
-    setCastSpellId(null);
-    setCastDirection(null);
-    setDrawingRune(false); // Now hide the drawing interface
-    setPoints([]);
-    setHasStartedDrawing(false);
-  }, [castSpellId, castSpell]);
-
-  const handleDirectionSet = useCallback((direction: { x: number; y: number }) => {
-    setCastDirection(direction);
-  }, []);
 
   // Touch events (these are now handled by global events, but keeping for fallback)
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -397,17 +366,6 @@ const RuneDrawing: React.FC = () => {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       />
-      
-      {/* Cast Animation */}
-      {isCasting && castSpellId && (
-        <CastAnimation
-          isActive={isCasting}
-          castTime={getSpellStats(castSpellId).castTime}
-          onComplete={handleCastComplete}
-          onDirectionSet={handleDirectionSet}
-        />
-      )}
-      
     </div>
   );
 };
