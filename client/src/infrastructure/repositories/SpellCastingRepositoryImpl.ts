@@ -29,6 +29,7 @@ export class SpellCastingRepositoryImpl implements SpellCastingRepository {
   }
 
   async castSpell(spellId: string, direction?: { x: number; y: number } | null): Promise<void> {
+    console.log('🎬 SpellCastingRepositoryImpl: castSpell called with spellId:', spellId);
     // Create match result for the completed cast
     const matchResult = {
       spellId: spellId,
@@ -37,6 +38,7 @@ export class SpellCastingRepositoryImpl implements SpellCastingRepository {
       debuffType: undefined as any
     };
 
+    console.log('🎬 SpellCastingRepositoryImpl: Calling dependencies.castSpell');
     // Cast the spell through the game state
     this.dependencies.castSpell(matchResult);
   }

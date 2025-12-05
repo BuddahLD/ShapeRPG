@@ -67,12 +67,17 @@ export function useCastingService() {
 
   // Start casting
   const startCasting = useCallback(async (spellId: string) => {
+    console.log('🎬 useCastingService: startCasting called with spellId:', spellId);
     if (castingServiceRef.current) {
       try {
+        console.log('🎬 useCastingService: Calling castingService.startCasting');
         await castingServiceRef.current.startCasting(spellId);
+        console.log('🎬 useCastingService: startCasting completed');
       } catch (error) {
         console.error('Failed to start casting:', error);
       }
+    } else {
+      console.error('🎬 useCastingService: castingServiceRef.current is null');
     }
   }, []);
 

@@ -70,11 +70,14 @@ export class CastingService {
     };
 
     // Start animation (CSS-based, so we just need to set a timeout)
+    console.log('🎬 CastingService: Setting timeout for', spell.castTime, 'seconds');
     this.castingTimeout = setTimeout(() => {
+      console.log('🎬 CastingService: Timeout reached, calling handleCastingComplete');
       this.handleCastingComplete();
     }, spell.castTime * 1000);
 
     // Notify callbacks
+    console.log('🎬 CastingService: Calling onCastingStart callback');
     this.callbacks?.onCastingStart(spellId);
   }
 
@@ -82,11 +85,14 @@ export class CastingService {
    * Complete the casting process
    */
   private async handleCastingComplete(): Promise<void> {
+    console.log('🎬 CastingService: handleCastingComplete called');
     if (!this.state.isCasting || !this.state.castSpellId) {
+      console.log('🎬 CastingService: Not casting or no spell ID, returning');
       return;
     }
 
     const spellId = this.state.castSpellId;
+    console.log('🎬 CastingService: Casting spell:', spellId);
     
     // Execute the spell
     await this.spellCastingRepository.castSpell(spellId, this.state.castDirection);
@@ -98,6 +104,7 @@ export class CastingService {
       castDirection: null
     };
 
+    console.log('🎬 CastingService: Calling onCastingComplete callback');
     // Notify callbacks
     this.callbacks?.onCastingComplete(spellId);
   }

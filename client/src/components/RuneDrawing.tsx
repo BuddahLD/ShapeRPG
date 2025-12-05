@@ -141,16 +141,20 @@ const RuneDrawing: React.FC = () => {
       const matchResult = shapeMatchingService.matchShape(points, allSpellIds);
 
       if (matchResult.spellId && matchResult.isKnownPattern) {
-        // Dispatch spell cast event to ActionBar
-        const customEvent = new CustomEvent('spellCast', {
-          detail: { spellId: matchResult.spellId }
-        });
-        window.dispatchEvent(customEvent);
-
         // Hide drawing interface immediately
+        console.log('🎬 RuneDrawing: Hiding overlay immediately');
         setDrawingRune(false);
         setPoints([]);
         setHasStartedDrawing(false);
+
+        // Dispatch spell cast event to ActionBar after overlay is hidden
+        setTimeout(() => {
+          console.log('🎬 RuneDrawing: Dispatching spellCast event after 50ms delay');
+          const customEvent = new CustomEvent('spellCast', {
+            detail: { spellId: matchResult.spellId }
+          });
+          window.dispatchEvent(customEvent);
+        }, 50); // Small delay to ensure overlay is gone
       } else {
         // Apply debuff for failed pattern matching
         castSpell(matchResult);

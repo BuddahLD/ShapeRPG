@@ -28,6 +28,13 @@ export const ActionBar: React.FC<ActionBarProps> = ({
   const { styles } = useElementLayout('actionButtons');
   const { castingState, startCasting } = useCastingService();
   const [castingProgress, setCastingProgress] = useState(0);
+  
+  // Log when castingProgress changes (only key milestones)
+  useEffect(() => {
+    if (castingProgress > 0 && (castingProgress % 25 < 1 || castingProgress > 99)) {
+      console.log('🎬 ActionBar: castingProgress updated to:', Math.round(castingProgress) + '%');
+    }
+  }, [castingProgress]);
   const animationRef = useRef<number | null>(null);
 
   const handleRuneButtonPress = (e: React.TouchEvent | React.MouseEvent) => {
@@ -58,8 +65,10 @@ export const ActionBar: React.FC<ActionBarProps> = ({
   // Listen for spell casting events from RuneDrawing
   useEffect(() => {
     const handleSpellCast = (e: CustomEvent) => {
+      console.log('🎬 ActionBar: Received spellCast event:', e.detail);
       const { spellId } = e.detail;
       if (spellId) {
+        console.log('🎬 ActionBar: Calling startCasting with spellId:', spellId);
         startCasting(spellId);
       }
     };
@@ -73,6 +82,8 @@ export const ActionBar: React.FC<ActionBarProps> = ({
   // Handle casting progress animation
   useEffect(() => {
     if (castingState.isCasting) {
+      console.log('🎬 ActionBar: Animation starting - castingState.isCasting = true');
+      // Start animation immediately when casting begins
       setCastingProgress(0);
       
       const startTime = performance.now();
@@ -84,13 +95,23 @@ export const ActionBar: React.FC<ActionBarProps> = ({
         
         setCastingProgress(progress * 100);
         
+        // Log first frame to confirm animation started
+        if (elapsed < 20) {
+          console.log('🎬 ActionBar: Animation started - elapsed:', Math.round(elapsed) + 'ms, progress:', Math.round(progress * 100) + '%');
+        }
+        
         if (progress < 1) {
           animationRef.current = requestAnimationFrame(animate);
+        } else {
+          console.log('🎬 ActionBar: Animation completed');
         }
       };
       
+      // Start animation immediately, no delay
+      console.log('🎬 ActionBar: Starting animation loop');
       animationRef.current = requestAnimationFrame(animate);
     } else {
+      console.log('🎬 ActionBar: Animation stopped - castingState.isCasting = false');
       setCastingProgress(0);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
@@ -187,8 +208,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
                         strokeDashoffset={`${2 * Math.PI * (50 - 2) * (castingProgress / 100)}`}
                         strokeLinecap="round"
                         style={{
-                          filter: 'drop-shadow(0 0 4px #00ffff)',
-                          boxShadow: '0 0 8px #00ffff'
+                          filter: 'drop-shadow(0 0 2px #00ffff)'
                         }}
                       />
                     </svg>
