@@ -8,7 +8,7 @@ const Hub: React.FC = () => {
 
   // For now, just render a simple hub indicator
   // TODO: Implement full hub functionality with new architecture
-  console.log('Hub component: currentLocation =', currentLocation, 'player =', player);
+  // console.log('Hub component: currentLocation =', currentLocation, 'player =', player);
 
   return (
     <div className="absolute inset-0 z-5 pointer-events-none">

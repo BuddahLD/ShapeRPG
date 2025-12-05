@@ -24,7 +24,7 @@ const RuneDrawing: React.FC = () => {
 
     // Save the current context state
     ctx.save();
-    
+
     // Set drawing properties
     ctx.strokeStyle = "#00ffff";
     ctx.lineWidth = 4;
@@ -35,13 +35,13 @@ const RuneDrawing: React.FC = () => {
 
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
-    
+
     for (let i = 1; i < points.length; i++) {
       ctx.lineTo(points[i].x, points[i].y);
     }
-    
+
     ctx.stroke();
-    
+
     // Restore the context state to prevent affecting other drawings
     ctx.restore();
   }, []);
@@ -50,7 +50,7 @@ const RuneDrawing: React.FC = () => {
     if (!hasStartedDrawing) {
       setHasStartedDrawing(true);
       setPoints([{ x, y }]);
-      
+
       // Redraw canvas with initial point
       if (canvasRef.current) {
         const ctx = canvasRef.current.getContext("2d");
@@ -59,22 +59,22 @@ const RuneDrawing: React.FC = () => {
           // Redraw background
           ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
           ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-          
-                 // Redraw instruction text
-                 ctx.fillStyle = "#ffffff";
-                 ctx.font = "24px Inter";
-                 ctx.textAlign = "center";
-                 ctx.fillText("Draw a rune to cast a spell", canvasRef.current.width / 2, 50);
 
-                 // TEMPORARY: Show matching is disabled
-                 ctx.fillStyle = "#ff0000"; // Red color
-                 ctx.font = "bold 18px Inter";
-                 ctx.fillText("MATCHING OFF", canvasRef.current.width / 2, 75);
+          // Redraw instruction text
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "24px Inter";
+          ctx.textAlign = "center";
+          ctx.fillText("Draw a rune to cast a spell", canvasRef.current.width / 2, 50);
 
-                 ctx.fillStyle = "#ffffff"; // Reset to white
-                 ctx.font = "16px Inter";
-                 ctx.fillText("Release button to cast", canvasRef.current.width / 2, 100);
-          
+          // TEMPORARY: Show matching is disabled
+          ctx.fillStyle = "#ff0000"; // Red color
+          ctx.font = "bold 18px Inter";
+          ctx.fillText("MATCHING OFF", canvasRef.current.width / 2, 75);
+
+          ctx.fillStyle = "#ffffff"; // Reset to white
+          ctx.font = "16px Inter";
+          ctx.fillText("Release button to cast", canvasRef.current.width / 2, 100);
+
           // Draw initial point
           ctx.fillStyle = "#00ffff";
           ctx.beginPath();
@@ -87,41 +87,41 @@ const RuneDrawing: React.FC = () => {
 
   const handleMove = useCallback((x: number, y: number) => {
     if (!isDrawing || !hasStartedDrawing) return;
-    
+
     setPoints(prev => {
       const newPoints = [...prev, { x, y }];
-      
+
       // Redraw canvas with new points
       if (canvasRef.current) {
         const ctx = canvasRef.current.getContext("2d");
         if (ctx) {
           ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-          
+
           // Redraw background
           ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
           ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-          
+
           // Redraw instruction text
           ctx.fillStyle = "#ffffff";
           ctx.font = "24px Inter";
           ctx.textAlign = "center";
           ctx.fillText("Draw a rune to cast a spell", canvasRef.current.width / 2, 50);
-          
+
           // TEMPORARY: Show matching is disabled
           ctx.fillStyle = "#ff0000"; // Red color
           ctx.font = "bold 18px Inter";
           ctx.fillText("MATCHING OFF", canvasRef.current.width / 2, 75);
-          
+
           ctx.fillStyle = "#ffffff"; // Reset to white
           ctx.font = "16px Inter";
           ctx.fillText("Touch anywhere to start drawing", canvasRef.current.width / 2, 100);
           ctx.fillText("Release button to cast", canvasRef.current.width / 2, 120);
-          
+
           // Draw the path
           drawPath(ctx, newPoints);
         }
       }
-      
+
       return newPoints;
     });
   }, [isDrawing, hasStartedDrawing, drawPath]);
@@ -141,20 +141,18 @@ const RuneDrawing: React.FC = () => {
       const matchResult = shapeMatchingService.matchShape(points, allSpellIds);
 
       if (matchResult.spellId && matchResult.isKnownPattern) {
-        // Hide drawing interface immediately
-        console.log('🎬 RuneDrawing: Hiding overlay immediately');
+        // Dispatch spell cast event immediately
+        console.log('🎬 RuneDrawing: Dispatching spellCast event immediately at', performance.now());
+        const customEvent = new CustomEvent('spellCast', {
+          detail: { spellId: matchResult.spellId, timestamp: performance.now() }
+        });
+        window.dispatchEvent(customEvent);
+
+        // Hide drawing interface
+        console.log('🎬 RuneDrawing: Hiding overlay');
         setDrawingRune(false);
         setPoints([]);
         setHasStartedDrawing(false);
-
-        // Dispatch spell cast event to ActionBar after overlay is hidden
-        setTimeout(() => {
-          console.log('🎬 RuneDrawing: Dispatching spellCast event after 50ms delay');
-          const customEvent = new CustomEvent('spellCast', {
-            detail: { spellId: matchResult.spellId }
-          });
-          window.dispatchEvent(customEvent);
-        }, 50); // Small delay to ensure overlay is gone
       } else {
         // Apply debuff for failed pattern matching
         castSpell(matchResult);
@@ -247,7 +245,7 @@ const RuneDrawing: React.FC = () => {
       window.addEventListener('mousedown', handleGlobalMouseDown);
       window.addEventListener('mousemove', handleGlobalMouseMove);
       window.addEventListener('mouseup', handleGlobalMouseUp);
-      
+
       return () => {
         window.removeEventListener('mousedown', handleGlobalMouseDown);
         window.removeEventListener('mousemove', handleGlobalMouseMove);
@@ -268,22 +266,22 @@ const RuneDrawing: React.FC = () => {
       // Clear canvas with semi-transparent background
       ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
+
       // Add instruction text
       ctx.fillStyle = "#ffffff";
       ctx.font = "24px Inter";
       ctx.textAlign = "center";
       ctx.fillText("Draw a rune to cast a spell", canvas.width / 2, 50);
-      
+
       // TEMPORARY: Show matching is disabled
       ctx.fillStyle = "#ff0000"; // Red color
       ctx.font = "bold 18px Inter";
       ctx.fillText("MATCHING OFF", canvas.width / 2, 75);
-      
+
       ctx.fillStyle = "#ffffff"; // Reset to white
       ctx.font = "16px Inter";
       ctx.fillText("Touch anywhere to start drawing", canvas.width / 2, 100);
-      
+
       if (hasStartedDrawing) {
         ctx.fillText("Release button to cast", canvas.width / 2, 120);
       }
@@ -298,7 +296,7 @@ const RuneDrawing: React.FC = () => {
     };
 
     window.addEventListener('runeButtonPress', handleRuneButtonPress as EventListener);
-    
+
     return () => {
       window.removeEventListener('runeButtonPress', handleRuneButtonPress as EventListener);
     };
@@ -339,7 +337,7 @@ const RuneDrawing: React.FC = () => {
       window.addEventListener('touchstart', handleGlobalTouchStart, { passive: true });
       window.addEventListener('touchmove', handleGlobalTouchMove, { passive: true });
       window.addEventListener('touchend', handleGlobalTouchEnd, { passive: true });
-      
+
       return () => {
         window.removeEventListener('touchstart', handleGlobalTouchStart);
         window.removeEventListener('touchmove', handleGlobalTouchMove);

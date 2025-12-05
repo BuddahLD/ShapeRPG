@@ -19,7 +19,7 @@ const Game: React.FC = () => {
   const [showCharInfo, setShowCharInfo] = useState(false);
   const [activeTab, setActiveTab] = useState<'stats' | 'spells' | 'inventory'>('inventory');
   const [isInitialized, setIsInitialized] = useState(false);
-  
+
 
   // Debug logging for modal state
   useEffect(() => {
@@ -27,38 +27,39 @@ const Game: React.FC = () => {
     console.log('Game component: activeTab changed to:', activeTab);
   }, [showCharInfo, activeTab]);
 
-  // Watch for location changes and reset player to hub spawn when returning
+  // Watch for location changes
   useEffect(() => {
+    // Only log location changes, do not force reset position here as it causes strict mode double-invocations
+    // and re-renders during gameplay
     if (currentLocation === "LOC_HUB_FIGUREIUM") {
-      console.log('Game component: Player returned to hub, resetting to spawn position');
-      resetToHubSpawn();
+      console.log('Game component: Location is hub');
     }
-  }, [currentLocation, resetToHubSpawn]);
+  }, [currentLocation]);
 
   useEffect(() => {
     const initializeApp = async () => {
       console.log('Game component: Initializing with AppBootstrap...');
-      
+
       try {
         // Initialize AppBootstrap singleton
         const bootstrap = AppBootstrapService.getInstance();
-        
+
         console.log('Game component: AppBootstrap initialized');
-        
+
         // Initialize game (this will also initialize the player)
         await initializeGame();
         console.log('Game component: Game initialized successfully');
-        
+
         // Mark as initialized
         setIsInitialized(true);
-        
+
       } catch (error) {
         console.error('Game component: Failed to initialize:', error);
       }
     };
-    
+
     initializeApp();
-    
+
     return () => {
       console.log('Game component: Cleanup completed');
     };
@@ -88,39 +89,39 @@ const Game: React.FC = () => {
     <div className="relative w-full h-full">
       {/* Game Canvas */}
       <GameCanvas />
-      
+
       {/* Location-specific content */}
       {renderLocationContent()}
-      
+
       {/* Game HUD */}
-      <GameHUD 
+      <GameHUD
         showCharInfo={showCharInfo}
         setShowCharInfo={setShowCharInfo}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
-      
+
       {/* Virtual Joystick */}
       <VirtualJoystick isModalOpen={showCharInfo} />
-      
+
       {/* Minimap */}
-      <MinimapContainer 
+      <MinimapContainer
         wrapContent={true}
         maxWidth="200px"
         showLegend={false}
         showControls={false}
         className="border-white/20"
       />
-      
+
       {/* Location Indicator */}
-      <LocationIndicator 
+      <LocationIndicator
         variant="minimal"
         showAnimation={true}
       />
-      
+
       {/* Rune Drawing Overlay */}
       {isDrawingRune && <RuneDrawing />}
-      
+
     </div>
   );
 };

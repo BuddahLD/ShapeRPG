@@ -56,29 +56,49 @@ export class CastingService {
       throw new Error('Already casting a spell');
     }
 
-    // Validate spell exists
-    const spell = await this.spellCastingRepository.getSpell(spellId);
-    if (!spell) {
-      throw new Error(`Spell ${spellId} not found`);
-    }
+    // Optimistic update: Start animation immediately
+    console.log('🎬 CastingService: Optimistically starting casting for', spellId);
 
-    // Update state
+    // Update state immediately
     this.state = {
       isCasting: true,
       castSpellId: spellId,
       castDirection: null
     };
 
-    // Start animation (CSS-based, so we just need to set a timeout)
-    console.log('🎬 CastingService: Setting timeout for', spell.castTime, 'seconds');
-    this.castingTimeout = setTimeout(() => {
-      console.log('🎬 CastingService: Timeout reached, calling handleCastingComplete');
-      this.handleCastingComplete();
-    }, spell.castTime * 1000);
-
-    // Notify callbacks
-    console.log('🎬 CastingService: Calling onCastingStart callback');
+    // Notify callbacks immediately so UI updates synchronously
     this.callbacks?.onCastingStart(spellId);
+
+    try {
+      // Validate spell exists (async operation)
+      const spell = await this.spellCastingRepository.getSpell(spellId);
+
+      if (!spell) {
+        // Revert if spell not found
+        console.error(`Spell ${spellId} not found, cancelling cast`);
+        this.cancelCasting();
+        throw new Error(`Spell ${spellId} not found`);
+      }
+
+      // Check if we were cancelled while waiting
+      if (!this.state.isCasting || this.state.castSpellId !== spellId) {
+        return;
+      }
+
+      // Start animation timeout using the authoritative cast time
+      console.log('🎬 CastingService: Setting timeout for', spell.castTime, 'seconds');
+      this.castingTimeout = setTimeout(() => {
+        console.log('🎬 CastingService: Timeout reached, calling handleCastingComplete');
+        this.handleCastingComplete();
+      }, spell.castTime * 1000);
+
+    } catch (error) {
+      // Handle any errors during fetch
+      console.error('Error starting cast:', error);
+      this.cancelCasting();
+      // We don't rethrow here to prevent unhandled promise rejections in the UI
+      // since we already handled the UI state by cancelling
+    }
   }
 
   /**
@@ -93,7 +113,7 @@ export class CastingService {
 
     const spellId = this.state.castSpellId;
     console.log('🎬 CastingService: Casting spell:', spellId);
-    
+
     // Execute the spell
     await this.spellCastingRepository.castSpell(spellId, this.state.castDirection);
 
@@ -129,7 +149,7 @@ export class CastingService {
       clearTimeout(this.castingTimeout);
       this.castingTimeout = null;
     }
-    
+
     this.state = {
       isCasting: false,
       castSpellId: null,
