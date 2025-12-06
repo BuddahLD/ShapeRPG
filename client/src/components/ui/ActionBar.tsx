@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useGameState } from "../../presentation/hooks/useGameStateManager";
 import { useElementLayout } from "../../presentation/hooks/useUILayout";
 import { useCastingService } from "../../presentation/hooks/useCastingService";
+import { SparkleParticles } from "./SparkleParticles";
 
 /**
  * ActionBar - Single Responsibility: Provide game action buttons
@@ -223,6 +224,7 @@ export const ActionBar: React.FC<ActionBarProps> = ({
                         }}
                       />
                     </svg>
+                    <SparkleParticles progress={castingProgress} size={40} />
                   </div>
                 )}
               </button>
